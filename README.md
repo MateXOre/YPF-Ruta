@@ -39,7 +39,53 @@ Las estaciones estan divididas regionalmente, en cada region hay una estacion qu
 
 ```code
 Cliente --(arribar_a_estacion)-> Estacion --(recibir_cliente)-> Surtidor --(pedir_datos_de_cobro)-> Cliente --(devolver_datos_de_cobro)-> Surtidor --(cobrar_a_cliente)-> Estacion-- 
---(solicitud_venta)-> EstacionLider --(validar_ventas)-> YPFRUTA --(transacciones_por_estacion)-> EstacionLider --(confirmar_transacciones)-> Estacion --(venta_validada)-> Surtidor --(resultado_carga)-> Cliente
+--(solicitud_venta)-> EstacionLider --(validar_ventas)-> YPF RUTA --(transacciones_por_estacion)-> EstacionLider --(confirmar_transacciones)-> Estacion --(venta_validada)-> Surtidor --(resultado_carga)-> Cliente
+```
+
+```mermaid
+---
+config:
+  theme: dark
+---
+sequenceDiagram
+    Note over Cliente,YPF_RUTA: Flujo de venta con conexion activa
+    Cliente->>Estacion: arribar_a_estacion
+    activate Estacion
+    Estacion->>Surtidor: recibir_cliente
+    activate Surtidor
+    Surtidor->>Cliente: pedir_datos_de_cobro
+    Cliente->>Surtidor: devolver_datos_de_cobro
+    Note over Cliente,Surtidor: Cliente proporciona id_tarjeta y monto
+    Surtidor->>Estacion: cobrar_a_cliente
+    deactivate Surtidor
+    alt Es lider
+        Estacion->>Estacion: acumular en buffer de ventas
+        Note over Estacion: Espera X segundos o N ventas
+        Estacion->>YPF_RUTA: validar_ventas
+        activate YPF_RUTA
+        YPF_RUTA->>YPF_RUTA: validar limites y actualizar repositorio
+        YPF_RUTA->>Estacion: transacciones_por_estacion
+        deactivate YPF_RUTA
+        Estacion->>Surtidor: venta_validada
+    else No es lider
+        Estacion->>Estacion_Lider: solicitud_venta
+        activate Estacion_Lider
+        Estacion_Lider->>Estacion_Lider: acumular en buffer de ventas
+        Note over Estacion_Lider: Espera X segundos o N ventas
+        Estacion_Lider->>YPF_RUTA: validar_ventas
+        activate YPF_RUTA
+        YPF_RUTA->>YPF_RUTA: validar limites y actualizar repositorio
+        YPF_RUTA->>Estacion_Lider: transacciones_por_estacion
+        deactivate YPF_RUTA
+        Estacion_Lider->>Estacion: confirmar_transacciones
+        deactivate Estacion_Lider
+        Estacion->>Surtidor: venta_validada
+    end
+    activate Surtidor
+    Surtidor->>Cliente: resultado_carga
+    deactivate Surtidor
+    deactivate Estacion
+
 ```
 
 * Poner un buffer en EstacionLider para que acumule los ventas a validar en YPFRUTA y mandarlos luego de 1 segundo de recibidos para mandar un mensaje con varias ventas a validar (reducimos mensajes)

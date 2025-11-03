@@ -121,3 +121,28 @@ main.rs
                     acumular respuesta
                 enviar respuestas               || transacciones_por_estacion || YPFRUTA -> Estacion(Lider)
 
+
+
+
+Consideraciones:
+
+- Se necesita aplicar dos modelos de concurrencia distribuida. 
+(Ejemplo: Two-Phase Commit para validar ventas entre estaciones al confirmar hacia YPF RUTA)
+
+- Conviene que `ventas_sin_informar` en vez de un `HashMap<idTarjeta, Monto>` sea un `HashMap<idVenta, Venta>` o `HashMap<idTarjeta, Vec<Monto>>` para 
+cubrir el caso en el que hayan multiples ventas con la misma tarjeta.
+
+- Aclarar la detección de caida de una estación lider (puede ser con `solicitud_venta`)
+
+- Conviene sincronizar el estado en YPF RUTA para validar ventas en orden en caso de reconexiones. Puede ser con timestamps para ordenar y desduplicar ventas.
+
+- Otras preguntas:
+    - ¿Qué pasa si una estación se cae mientras envía informar_ventas_offline por el anillo?
+    - ¿Cómo se evita procesar la misma venta offline dos veces?
+    - ¿Qué pasa si el líder cae justo después de recibir validaciones de YPF RUTA pero antes de distribuirlas?
+
+- Diagramas para hacer?:
+    - Diagrama de secuencia de la aplicacion (normal y offline)
+    - Diagrama de procesos y comunicacion general y entre procesos
+    - Diagrama de procesos e hilos por entidad
+    - Diagrama del Ring Algorithm

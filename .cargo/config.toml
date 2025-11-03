@@ -1,0 +1,9 @@
+# Archivo usado unicamente para configurar los alias de los comandos de Cargo
+
+[alias]
+
+# Comandos de Cargo
+linter = "clippy --verbose --all-targets --all-features"
+compile = "build --release"
+testall = "test --workspace --verbose --all-features"
+quicktest = "test --no-fail-fast --verbose --all-features"

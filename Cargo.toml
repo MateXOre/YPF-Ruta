@@ -1,0 +1,9 @@
+[package]
+name = "YPF_Ruta"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Agregar dependencias
+
+# Tambien agregar binarios para ejecutar, o en el config.toml agregar comandos completos con parametros

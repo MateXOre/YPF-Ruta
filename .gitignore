@@ -1,0 +1,14 @@
+# Output de Cargo build
+/target
+
+# Archivos Cargo
+Cargo.lock
+
+# Directorios y archivos del editor
+/.idea
+/.vscode/
+*.swp
+*~
+
+# Archivos temporales
+/tmp

@@ -137,8 +137,6 @@ Estacion {
 
 * `eleccion(id)`: Se detectó una caida del lider actual entonces agrega su id y reenvia el mensaje al siguiente nodo del anillo.
 * `coordinador(id_lider)`: Cambia el lider actual al id recibido.
-* `consultar_estacion_lider`: Devuelve la respuesta a la consulta con el id del lider.
-* `notificar_estacion_lider`: Recibe el id del lider que haya en el momento.
 
 **Mensajes que envía**
 
@@ -154,8 +152,6 @@ Estacion {
 <!-- ENVIO COMO NO LIDER -->
 * `finalizar_venta` -> `Surtidor`
 * `informar_venta` -> `Estacion`
-* `consultar_estacion_lider` -> `Estacion`
-* `notificar_estacion_lider` -> `Estacion`
 
 **Protocolo de transporte**
 
@@ -343,6 +339,7 @@ Cada cierto periodo de tiempo, el líder envía este mensaje a través del anill
 
 ```rust
 struct InformarVentasOffline {
+    id_lider: i32
     ventas_offline: List<Venta>
 }
 ```
@@ -384,16 +381,6 @@ La estación envía este mensaje al líder para notificarle de una nueva venta a
 ```rust
 struct InformarVenta {
     venta: Venta,
-}
-```
-
-* `notificar_estacion_lider`
-
-Respuesta a `consultar_estacion_lider`. La estación notifica cual es el nuevo lider a una estacion previamente desconectada.
-
-```rust
-struct NotificarEstacionLider{
-    id_lider: i32
 }
 ```
 
@@ -538,7 +525,7 @@ Diagrama en caso funcional de una estacion sin ser lider
 
 ![Diagrama en caso de desconexion de estacion lider](./res/diagrama_de_desconexion.png)
 
-En caso de que una estacion pierda conexion, la misma intentará comunicarse con la estación lider pero notará que no lo puede hacer dado que perdió la conexion, entonces guardará las ventas realizadas como offline. Cuando eventualmente recupere la conexion y reciba el mensaje `informar_ventas_offline`, consultará si hay una nueva Estacion Lider mandando `consultar_estacion_lider` hacia alguna estación vecina.
+En caso de que una estacion pierda conexion, la misma intentará comunicarse con la estación lider pero notará que no lo puede hacer dado que perdió la conexion, entonces guardará las ventas realizadas como offline. Cuando eventualmente recupere la conexion y reciba el mensaje `informar_ventas_offline`, actualizara su lider a partir del id recibido en el mismo y agregara las ventas pendientes de informar.
 
 ### Casos bordes
 

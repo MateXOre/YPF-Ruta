@@ -16,6 +16,10 @@ Segundo Cuatrimestre 2025
 - [YPF Ruta](#ypf-ruta)
   - [Tabla de Contenidos](#tabla-de-contenidos)
   - [Detalles de la Implementacion](#detalles-de-la-implementacion)
+    - [División regional](#división-regional)
+    - [Agrupación de ventas](#agrupación-de-ventas)
+    - [Validación de ventas offline](#validación-de-ventas-offline)
+    - [Validación de ventas online](#validación-de-ventas-online)
   - [Entidades Principales](#entidades-principales)
     - [Estación](#estación)
     - [Surtidor](#surtidor)
@@ -33,64 +37,41 @@ Segundo Cuatrimestre 2025
 
 ---
 
-## Detalles de la Implementacion
+## Detalles de la implementacion
 
-Las estaciones estan divididas regionalmente, en cada region hay una estacion que se usa como lider para comunicarse con **YPF RUTA**. Se utiliza el algoritmo `Ring Algorithm` para eleccion de lider.
+### División regional
 
-```code
-Cliente --(arribar_a_estacion)-> Estacion --(recibir_cliente)-> Surtidor --(pedir_datos_de_cobro)-> Cliente --(devolver_datos_de_cobro)-> Surtidor --(cobrar_a_cliente)-> Estacion-- 
---(solicitud_venta)-> EstacionLider --(validar_ventas)-> YPF RUTA --(transacciones_por_estacion)-> EstacionLider --(confirmar_transacciones)-> Estacion --(venta_validada)-> Surtidor --(resultado_carga)-> Cliente
-```
+Las estaciones se encuantran divididas por región, cada una con su respectivo lider. Este se encarga de centralizar la comunicación con  **YPF RUTA** y se elige mediante el algoritmo `Ring Algorithm`.
 
-```mermaid
----
-config:
-  theme: dark
----
-sequenceDiagram
-    Note over Cliente,YPF_RUTA: Flujo de venta con conexion activa
-    Cliente->>Estacion: arribar_a_estacion
-    activate Estacion
-    Estacion->>Surtidor: recibir_cliente
-    activate Surtidor
-    Surtidor->>Cliente: pedir_datos_de_cobro
-    Cliente->>Surtidor: devolver_datos_de_cobro
-    Note over Cliente,Surtidor: Cliente proporciona id_tarjeta y monto
-    Surtidor->>Estacion: cobrar_a_cliente
-    deactivate Surtidor
-    alt Es lider
-        Estacion->>Estacion: acumular en buffer de ventas
-        Note over Estacion: Espera X segundos o N ventas
-        Estacion->>YPF_RUTA: validar_ventas
-        activate YPF_RUTA
-        YPF_RUTA->>YPF_RUTA: validar limites y actualizar repositorio
-        YPF_RUTA->>Estacion: transacciones_por_estacion
-        deactivate YPF_RUTA
-        Estacion->>Surtidor: venta_validada
-    else No es lider
-        Estacion->>Estacion_Lider: solicitud_venta
-        activate Estacion_Lider
-        Estacion_Lider->>Estacion_Lider: acumular en buffer de ventas
-        Note over Estacion_Lider: Espera X segundos o N ventas
-        Estacion_Lider->>YPF_RUTA: validar_ventas
-        activate YPF_RUTA
-        YPF_RUTA->>YPF_RUTA: validar limites y actualizar repositorio
-        YPF_RUTA->>Estacion_Lider: transacciones_por_estacion
-        deactivate YPF_RUTA
-        Estacion_Lider->>Estacion: confirmar_transacciones
-        deactivate Estacion_Lider
-        Estacion->>Surtidor: venta_validada
-    end
-    activate Surtidor
-    Surtidor->>Cliente: resultado_carga
-    deactivate Surtidor
-    deactivate Estacion
+El propósito de esto es el de minimizar los mensajes enviados a YPF RUTA por medio de la agrupación de mensajes de venta.
 
-```
+### Agrupación de ventas
 
-* Poner un buffer en EstacionLider para que acumule los ventas a validar en YPFRUTA y mandarlos luego de 1 segundo de recibidos para mandar un mensaje con varias ventas a validar (reducimos mensajes)
-* informar_ventas_offline se usa en modo anillo, cada X tiempo. Todos los demas mensajes son 1 a 1
-* Los surtidores son tasks (actix) de cada **Estacion**.
+Una vez elegido el lider, cada una de las estaciones de la región le enviaran las ventas por confirmar. Estas se acumularan durante un período de tiempo razonable (de tres a cinco segundos) para su posterior envio a YPF RUTA en un único mensaje.
+
+### Validación de ventas offline
+
+En el caso de que una estación se encuentre totalmente incomunicada, se aprobaran de forma temporal todas las ventas realizadas sin validar con YPF RUTA (estas estarán marcadas como que fueron realizadas sin conexión), priorizando que la estación continue funcionando. Una vez recuperada la conexión, se notificaran todas las ventas realizadas a YPF RUTA.
+
+La notificacion de ventas offline se realizara por medio de un "anillo" iniciado periódicamente por el lider (30 segundos o más) donde se pasara un mensaje entre estaciónes levantando todas las ventas realizadas de forma offline que se encuentren pendientes de informar. Una vez vuelve al lider, este las agrega a la lista de ventas a validar, y se notificaran cuando se envie dicho mensaje.
+
+De esta forma YPF asume el riesgo de validar una venta por fuera del limite de una empresa perdiento el monto de dicha transacción.
+
+### Validación de ventas online
+
+Cuando una estacion recibe una venta para validar, se la envia al lider y la guarda hasta recibir el rechazo o confirmación de la misma. Esto con el propósito de evitar perdidas de información en el caso de que la estación lider sufra una desconexión.
+
+### Surtidores como tasks (actix) de cada Estación
+
+Los surtidores se implementaran como tasks de cada estacion debido a que su única función es simular el tiempo requerido para la carga de combustible.
+
+## Suposiciones
+
+* La desconexión de una estación implica únicamente la perdida de comunicacion con la región y no la propia caida de su sistema.
+
+* En el caso de la aprobación de una venta por fuera del limite de la empresa o de (por falta de conexión), YPF asumirá la perdida.
+
+* YPF RUTA no puede perder la conexión.
 
 ---
 
@@ -125,11 +106,13 @@ Estacion crea tarea -> tarea simula hacer algo -> tarea le responde a estacion -
 * `cobrar_a_cliente`: enviarle al lider la solicitud de validación de venta o guardar la venta en modo offline si no hay conexión. Si sos lider lo acumulas con el resto de ventas pendientes.
 * `confirmar_transacciones(List<Transaccion>)`: le informa a cada estación el resultado de sus transacciones
 
-* `solicitud_venta`: Encola los pedidos y eventualmente informa a `YPFRUTA` que tiene que cobrarle a un cliente.
-* `informar_ventas_offline`: Levanta todos los pedidos realizados en modo offline y los envia al anillo para que sean informados a `YPFRUTA`.
+* `informar_venta`: Encola los pedidos y eventualmente informa a `YPF RUTA` que tiene que cobrarle a un cliente.
+* `informar_ventas_offline`: Levanta todos los pedidos realizados en modo offline y los envia al anillo para que sean informados a `YPF RUTA`.
 
 * `eleccion(id)`: Se detectó una caida del lider actual entonces agrega su id y reenvia el mensaje al siguiente nodo del anillo.
 * `coordinador(id_lider)`: Cambia el lider actual al id recibido.
+* `consultar_estacion_lider`: Devuelve la respuesta a la consulta con el id del lider.
+* `notificar_estacion_lider`: Recibe el id del lider que haya en el momento.
 
 **Mensajes que envía**
 
@@ -139,31 +122,21 @@ Estacion crea tarea -> tarea simula hacer algo -> tarea le responde a estacion -
 * `informar_ventas_offline` -> `Estacion`
 
 <!-- ENVIO COMO LIDER -->
-* `validar_ventas` -> `YPFRuta`
+* `solicitar_confirmaciones_pendientes` -> `YPF Ruta`
+* `validar_ventas` -> `YPF Ruta`
 * `confirmar_transacciones` -> `Estacion`
 
 <!-- ENVIO COMO NO LIDER -->
 * `finalizar_venta` -> `Surtidor`
-* `solicitud_venta` -> `Estacion`  
+* `informar_venta` -> `Estacion`
+* `consultar_estacion_lider` -> `Estacion`
+* `notificar_estacion_lider` -> `Estacion`
 
 **Protocolo de transporte**
 
 * Comunicación TCP entre la estación y YPF RUTA.
 * Comunicación TCP entre estación y estación.
 * Comunicación local con los surtidores mediante canales. *(TODO: ACLARAR COMO LO IMPLEMENTAMOS)*
-
-**Protocolo de aplicación**
-
-TODO: *(VER QUE PROTOCOLO USAMOS PARA LA APP EN GENERAL)*
-
-<!-- 
-**Casos de interés positivos**
-
-**Casos de interés negativos (caídas)**
-
-* Desconexión temporal del servidor central.
-* Saturación de surtidores (clientes en cola). 
--->
 
 ---
 
@@ -184,7 +157,7 @@ Surtidor {
 **Mensajes que recibe**
 
 * `finalizar_venta`: finaliza la conexión con el cliente y queda disponible para el siguiente.
-* `devolver_datos_de_cobro()`: recibe los datos del cliente para poder cobrarle.
+* `devolver_datos_de_cobro`: recibe los datos del cliente para poder cobrarle.
 
 **Mensajes que envía**
 
@@ -194,13 +167,6 @@ Surtidor {
 
 **Protocolo de transporte**
 Canal interno hacia la estación correspondiente.
-
-<!-- 
-**Casos de interés**
-
-* Cliente cancela o abandona durante la carga.
-* Comunicación interrumpida con la estación. 
--->
 
 ---
 
@@ -229,12 +195,6 @@ Cliente {
 **Protocolo de transporte**
 TCP hacia la estación.
 
-<!-- 
-**Casos de interés**
-
-* Reintento de venta por falta de conexión o validación fallida. 
--->
-
 ---
 
 ### YPF RUTA
@@ -257,7 +217,8 @@ YPFRuta {
 * `gastos_empresa`: recibe la solicitud de gastos de una empresa y responde con la lista de gastos asociados a sus vehículos.
 * `configurar_limite`: recibe la solicitud de configuración de límite para una tarjeta específica y actualiza el estado interno. Envía confirmación a la empresa.
 * `configurar_limite_general`: recibe la solicitud de configuración de límite general para una empresa y actualiza el estado interno. Envía confirmación a la empresa.
-* `validar_ventas`: por cada venta recibido valida si puede ser aprobado según los límites establecidos y actualiza el repositorio de ventas. Además, envía el resultado de las validaciones a la estación correspondiente sólo para el caso de ventas online.
+* `validar_ventas`: por cada venta recibida valida si puede ser aprobado según los límites establecidos y actualiza el repositorio de ventas. Además, envía el resultado de las validaciones a la estación correspondiente sólo para el caso de ventas online.
+* `solicitar_confirmaciones_pendientes`: si YPFRUTA tiene confirmaciones pendientes que no pudo responder porque la estacion lider estaba caida, entonces le manda las respuestas a la nueva estacion lider que hizo esta consulta.
 
 **Mensajes que envía**
 
@@ -268,13 +229,6 @@ YPFRuta {
 
 **Protocolo de transporte**
 TCP contra estaciones y empresas.
-
-<!-- 
-**Casos de interés**
-
-* Sincronización de ventas entre estaciones desconectadas.
-* Manejo de límites de tarjetas y empresas. 
--->
 
 ---
 
@@ -301,19 +255,12 @@ Empresa {
 
 **Mensajes que envía**
 
-* `configurar_limite` -> `YPFRuta`
-* `gastos_empresa` -> `YPFRuta`
-* `configurar_limite_general` -> `YPFRuta`
+* `configurar_limite` -> `YPF Ruta`
+* `gastos_empresa` -> `YPF Ruta`
+* `configurar_limite_general` -> `YPF Ruta`
 
 **Protocolo de transporte**
 TCP entre YPF Ruta y cada empresa.
-
-<!-- 
-**Casos de interés**
-
-* Excedente del límite individual o general.
-* Configuración dinámica de límites. 
--->
 
 ---
 
@@ -376,7 +323,7 @@ struct InformarVentasOffline {
 
 * `validar_ventas`
 
-La estación líder de cada región envía periódicamente este mensaje a `YPFRUTA` con la lista de ventas a validar.
+La estación líder de cada región envía periódicamente este mensaje a `YPF RUTA` con la lista de ventas a validar.
 
 ```rust
 struct ValidarVentas {
@@ -394,23 +341,33 @@ struct ConfirmarTransacciones {
 }
 ```
 
-* `venta_validada`
+* `finalizar_venta`
 
 Cuando la estación recibe la respuesta del líder le envía este mensaje al surtidor para que le informe al cliente el resultado de la carga.
 
 ```rust
-struct VentaValidada {
+struct FinalizarVenta {
     venta: Venta,
 }
 ```
 
-* `solicitud_venta`
+* `informar_venta`
 
 La estación envía este mensaje al líder para notificarle de una nueva venta a validar.
 
 ```rust
-struct SolicitudVenta {
+struct InformarVenta {
     venta: Venta,
+}
+```
+
+* `notificar_estacion_lider`
+
+Respuesta a `consultar_estacion_lider`. La estación notifica cual es el nuevo lider a una estacion previamente desconectada.
+
+```rust
+struct NotificarEstacionLider{
+    id_lider: i32
 }
 ```
 
@@ -463,7 +420,7 @@ struct devolver_datos_de_cobro {
 
 * `gastos_empresa_respuesta`
 
-YPFruta envía este mensaje a una empresa con la lista de gastos asociados a sus vehículos.
+YPF Ruta envía este mensaje a una empresa con la lista de gastos asociados a sus vehículos.
 
 ```rust
 struct GastosEmpresaRespuesta {
@@ -473,7 +430,7 @@ struct GastosEmpresaRespuesta {
 
 * `confirmacion_limite`
 
-YPFruta envía este mensaje a una empresa con el resultado de la actualización del límite para un vehículo en particular.
+YPF Ruta envía este mensaje a una empresa con el resultado de la actualización del límite para un vehículo en particular.
 
 ```rust
 struct ConfirmacionLimite {
@@ -484,7 +441,7 @@ struct ConfirmacionLimite {
 
 * `confirmacion_limite_general`
 
-YPFruta envía este mensaje a una empresa con el resultado de la actualización del límite general.
+YPF Ruta envía este mensaje a una empresa con el resultado de la actualización del límite general.
 
 ```rust
 struct ConfirmacionLimiteGeneral {
@@ -494,7 +451,7 @@ struct ConfirmacionLimiteGeneral {
 
 * `transacciones_por_estacion`
 
-YPFruta envía este mensaje a una estación lider como respuesta a confirmar transacciones, conteniendo el estado actualizado de las ventas.
+YPF Ruta envía este mensaje a una estación lider como respuesta a confirmar transacciones, conteniendo el estado actualizado de las ventas.
 
 ```rust
 struct TransaccionesPorEstacion {
@@ -506,7 +463,7 @@ struct TransaccionesPorEstacion {
 
 * `configurar_limite`
 
-La empresa envia este mensaje a YPFruta para actualizar el límite de un vehiculo en particular
+La empresa envia este mensaje a YPF Ruta para actualizar el límite de un vehiculo en particular
 
 ```rust
 struct ConfigurarLimite {
@@ -518,7 +475,7 @@ struct ConfigurarLimite {
 
 * `configurar_limite_general`
 
-La empresa envia este mensaje a YPFruta para actualizar su limite general mensual
+La empresa envia este mensaje a YPF Ruta para actualizar su limite general mensual
 
 ```rust
 struct ConfigurarLimiteGeneral {
@@ -529,7 +486,7 @@ struct ConfigurarLimiteGeneral {
 
 * `gastos_empresa`
 
-La empresa envia este mensaje a YPFruta para obtener todos sus gastos
+La empresa envia este mensaje a YPF Ruta para obtener todos sus gastos
 
 ```rust
 struct GastosEmpresa {
@@ -539,12 +496,36 @@ struct GastosEmpresa {
 
 ---
 
-## Protocolo de Transporte
+## Casos de interes positivos
 
-TODO
+![Diagrama en caso funcional de estacion siendo lider](./res/diagrama_siendo_lider.png)
+Diagrama en caso funcional de una estacion siendo lider
+
+![Diagrama en caso funcional de estacion sin ser lider](./res/diagrama_sin_ser_lider.png)
+Diagrama en caso funcional de una estacion sin ser lider
 
 ---
 
-## Casos de Interés
+## Casos de interes negativos
 
-TODO
+### Desconexion de estacion lider
+
+![Diagrama en caso de desconexion de estacion lider](./res/diagrama_de_desconexion.png)
+
+En caso de que una estacion pierda conexion: la misma intentara comunicarse con la estacion lider pero notara que no lo puede hacer dado que perdio la conexion, entonces guardara las ventas realizadas como offline. Cuando eventualmente recupere la conexion y reciba el mensaje `informar_ventas_offline` consultara si hay una nueva Estacion Lider mandando `consultar_estacion_lider` a alguna estacion vecina.
+
+### Otros casos de interes
+
+- Estacion lider pierde conexion luego de recibir la respuesta de YPF RUTA (transacciones_por_estacion). ❌ 
+    Como hacemos para que cada estacion eventualmente sepa que sus ventas fueron validadas, ya que habra un nuevo lider y este no tendra la respuesta
+    de YPF RUTA
+
+- Estacion lider pierde conexion antes de mandar las ventas a YPF RUTA (validar_ventas) teniendo ventas a informar. ❌
+
+- Estacion pierde conexion y aun tiene clientes encolados. los atiende? si ✅
+
+- Se cae la Estacion lider, se elige un nuevo lider y eventualmente el ex lider va a recibir el mensaje `informar_ventas_offline` para luego preguntar quien es el lider. Pero luego de despertar y antes de recibir el mensaje hay una ventana en la cual este ex lider puede intentar enviar el mensaje `informar_ventas_offline`, ya que aun no sabe que hay un nuevo lider. Esto no es problematico, ya que a lo sumo el lider de verdad recibiria una ronda de ventas offline, y no cambiaria en nada el comportamiento normal de las estaciones. ✅
+
+- Estacion lider pierde la conexion antes de recibir la respuesta de YPF RUTA, entonces ninguna estacion de la region recibe la respuesta de las ventas realizdas. Entonces cuando se elija un nuevo lider, este se encargara de solicitar las confirmaciones con el mensaje `solicitar_confirmaciones_pendientes`. ✅
+
+- Una Estacion pierde la conexion luego de mandar el mensaje `informar_venta` a la Estacion Lider, eventualmente la Estacion Lider intentara confirmarle las ventas, pero no podra. Mientras esto ocurra las ventas activas (aun en proceso de aceptarse) de esta estacion pasan a offline y los clientes podran retirarse. Eventualmente la Estacion lider tendra que confirmarle a cada estacion otras ventas realizadas, en ese momento revisara si tiene que confirmarle alguna venta a una estacion desconectada. ✅

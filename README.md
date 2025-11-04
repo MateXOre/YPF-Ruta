@@ -79,7 +79,7 @@ Los surtidores se implementarán como tasks de cada estación cuya función es s
 
 ### Estación
 
-**Finalidad**
+**Finalidad** \
 Representa una estación de YPF que recibe a los clientes y los distribuye entre los surtidores disponibles. Además, se encarga de informar a **YPF RUTA** sobre las ventas realizadas. En caso de que se caiga la conexión con el servidor central, puede almacenar temporalmente las ventas para reenviarlas una vez restablecida la comunicación.
 
 **Estado interno**
@@ -136,13 +136,14 @@ Estacion {
 
 * Comunicación TCP entre la estación y YPF RUTA.
 * Comunicación TCP entre estación y estación.
-* Comunicación local con los surtidores mediante canales. *(TODO: ACLARAR COMO LO IMPLEMENTAMOS)*
+* Comunicación local con los surtidores mediante canales. 
+<!-- *(#TODO: ACLARAR COMO LO IMPLEMENTAMOS)* -->
 
 ---
 
 ### Surtidor
 
-**Finalidad**
+**Finalidad** \
 Simula una unidad de carga de combustible que atiende a un cliente por vez. Envía a la estación las solicitudes de venta cuando finaliza la carga.
 
 **Estado interno**
@@ -165,14 +166,14 @@ Surtidor {
 * `resultado_carga` -> `Cliente`
 * `pedir_datos_de_cobro` -> `Cliente`
 
-**Protocolo de transporte**
+**Protocolo de transporte** \
 Canal interno hacia la estación correspondiente.
 
 ---
 
 ### Cliente
 
-**Finalidad**
+**Finalidad** \
 Representa a un conductor que llega a la estación para realizar una carga de combustible. Cada cliente tiene asociada una tarjeta identificadora para el venta.
 
 **Estado interno**
@@ -192,14 +193,14 @@ Cliente {
 
 * `devolver_datos_de_cobro` -> Surtidor
 
-**Protocolo de transporte**
+**Protocolo de transporte** \
 TCP hacia la estación.
 
 ---
 
 ### YPF RUTA
 
-**Finalidad**
+**Finalidad** \
 Actúa como servidor central del sistema. Administra la comunicación entre estaciones y empresas, y mantiene el registro global de ventas y límites de tarjetas.
 
 **Estado interno**
@@ -227,14 +228,14 @@ YPFRuta {
 * `confirmacion_limite_general`-> Empresa
 * `transacciones_por_estacion` -> Estación
 
-**Protocolo de transporte**
+**Protocolo de transporte** \
 TCP contra estaciones y empresas.
 
 ---
 
 ### Empresa
 
-**Finalidad**
+**Finalidad** \
 Representa una empresa asociada a tarjetas YPF Ruta. Se encarga de validar ventas y administrar límites de gasto de sus vehículos.
 
 **Estado interno**
@@ -259,7 +260,7 @@ Empresa {
 * `gastos_empresa` -> `YPF Ruta`
 * `configurar_limite_general` -> `YPF Ruta`
 
-**Protocolo de transporte**
+**Protocolo de transporte** \
 TCP entre YPF Ruta y cada empresa.
 
 ---

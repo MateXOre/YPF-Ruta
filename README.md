@@ -295,6 +295,7 @@ TCP entre YPF Ruta y cada empresa.
 
 ```rust
 struct Venta {
+    id_venta: i32,
     id_tarjeta: i32,
     monto: f32,
     id_estacion: i32,

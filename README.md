@@ -17,6 +17,7 @@ Segundo Cuatrimestre 2025
   - [Tabla de Contenidos](#tabla-de-contenidos)
   - [Detalles de la Implementacion](#detalles-de-la-implementacion)
     - [División regional](#división-regional)
+    - [Elección de líder](#elección-de-líder)
     - [Agrupación de ventas](#agrupación-de-ventas)
     - [Validación de ventas offline](#validación-de-ventas-offline)
     - [Validación de ventas online](#validación-de-ventas-online)
@@ -44,6 +45,30 @@ Segundo Cuatrimestre 2025
 Las estaciones se encuentran divididas por región, cada una con su respectivo líder. Este se encarga de centralizar la comunicación con  **YPF RUTA** y se elige mediante el algoritmo `Ring Algorithm`.
 
 El propósito de esto es el de minimizar los mensajes enviados a YPF RUTA por medio de la agrupación de mensajes de venta de todas las estaciones de una misma región.
+
+### Elección de líder
+
+Para la elección de líder se utilizará el algoritmo de anillo (Ring Algorithm). Cada estación conoce las demás estaciones de su región y sus respectivos IDs. Cuando una estación detecta que el líder no responde, inicia el proceso de elección enviando un mensaje a través del anillo. Cada estación que recibe el mensaje agrega su ID y lo reenvía al siguiente nodo del anillo. Cuando el mensaje vuelve al nodo que lo inició, este determina el nuevo líder (el ID más alto) y le envía el mensaje de coordinación al ganador, quien lo reenvía a través del anillo para notificar a todas las estaciones de la región.
+
+<figure>
+  <img src="./res/eleccion_1.png" alt="Una estación intenta notificar una venta pero descubre que el lider no responde.">
+  <figcaption>Una estación intenta notificar una venta pero descubre que el lider no responde.</figcaption>
+</figure>
+
+<figure>
+  <img src="./res/eleccion_2.png" alt="La estación inicia una elección enviando un mensaje a través del anillo. Cada estación agrega su id y reenvía el mensaje.">
+  <figcaption>La estación inicia una elección enviando un mensaje a través del anillo. Cada estación agrega su id y reenvía el mensaje.</figcaption>
+</figure>
+
+<figure>
+  <img src="./res/eleccion_3.png" alt="El mensaje vuelve al nodo que lo inició, este determina el nuevo lider y envía el mensaje de coordinación al ganador.">
+  <figcaption>El mensaje vuelve al nodo que lo inició, este determina el nuevo lider y envía el mensaje de coordinación al ganador.</figcaption>
+</figure>
+
+<figure>
+  <img src="./res/eleccion_4.png" alt="El nuevo lider reenvía el mensaje de coordinación a través del anillo para notificar a todas las estaciones de la región.">
+  <figcaption>El nuevo lider reenvía el mensaje de coordinación a través del anillo para notificar a todas las estaciones de la región.</figcaption>
+</figure>
 
 ### Agrupación de ventas
 
@@ -86,6 +111,7 @@ Representa una estación de YPF que recibe a los clientes y los distribuye entre
 
 ```rust
 Estacion {
+    id_estacion: i32,
     surtidores_estado_sender: List<channel>,
     ventas_sin_informar: List<Venta>,
     ypf_socket: socket,
@@ -122,7 +148,6 @@ Estacion {
 * `informar_ventas_offline` -> `Estacion`
 
 <!-- ENVIO COMO LIDER -->
-* `solicitar_confirmaciones_pendientes` -> `YPF Ruta`
 * `validar_ventas` -> `YPF Ruta`
 * `confirmar_transacciones` -> `Estacion`
 
@@ -219,7 +244,6 @@ YPFRuta {
 * `configurar_limite`: recibe la solicitud de configuración de límite para una tarjeta específica y actualiza el estado interno. Envía confirmación a la empresa.
 * `configurar_limite_general`: recibe la solicitud de configuración de límite general para una empresa y actualiza el estado interno. Envía confirmación a la empresa.
 * `validar_ventas`: por cada venta recibida valida si puede ser aprobado según los límites establecidos y actualiza el repositorio de ventas. Además, envía el resultado de las validaciones a la estación correspondiente sólo para el caso de ventas online.
-* `solicitar_confirmaciones_pendientes`: si YPFRUTA tiene confirmaciones pendientes que no pudo responder porque la estacion lider estaba caida, entonces le manda las respuestas a la nueva estacion lider que hizo esta consulta.
 
 **Mensajes que envía**
 
@@ -304,10 +328,10 @@ struct Eleccion {
 
 * `coordinacion`
 
-Una vez que el mensaje de eleccion vuelve al nodo que lo inició, este determina el nuevo lider (el id mas alto) y envía el mensaje de coordinacion a través del anillo para notificar a todos las estaciones de la región.
+Una vez que el mensaje de eleccion vuelve al nodo que lo inició, este determina el nuevo lider (el id mas alto) y le envía el mensaje de coordinacion al ganador de la elección y este lo reenvía a través del anillo para notificar a todos las estaciones de la región.
 
 ```rust
-struct Cordinador {
+struct Coordinador {
     id_lider: i32,
 }
 ```
@@ -497,7 +521,7 @@ struct GastosEmpresa {
 
 ---
 
-## Casos de interes positivos
+## Casos de interés positivos
 
 ![Diagrama en caso funcional de estacion siendo lider](./res/diagrama_siendo_lider.png)
 Diagrama en caso funcional de una estacion siendo lider
@@ -507,26 +531,27 @@ Diagrama en caso funcional de una estacion sin ser lider
 
 ---
 
-## Casos de interes negativos
+## Casos de interés negativos
 
 ### Desconexion de estacion lider
 
 ![Diagrama en caso de desconexion de estacion lider](./res/diagrama_de_desconexion.png)
 
-En caso de que una estacion pierda conexion: la misma intentara comunicarse con la estacion lider pero notara que no lo puede hacer dado que perdio la conexion, entonces guardara las ventas realizadas como offline. Cuando eventualmente recupere la conexion y reciba el mensaje `informar_ventas_offline` consultara si hay una nueva Estacion Lider mandando `consultar_estacion_lider` a alguna estacion vecina.
+En caso de que una estacion pierda conexion, la misma intentará comunicarse con la estación lider pero notará que no lo puede hacer dado que perdió la conexion, entonces guardará las ventas realizadas como offline. Cuando eventualmente recupere la conexion y reciba el mensaje `informar_ventas_offline`, consultará si hay una nueva Estacion Lider mandando `consultar_estacion_lider` hacia alguna estación vecina.
 
-### Otros casos de interes
+### Casos bordes
 
-- Estacion lider pierde conexion luego de recibir la respuesta de YPF RUTA (transacciones_por_estacion). ❌ 
-    Como hacemos para que cada estacion eventualmente sepa que sus ventas fueron validadas, ya que habra un nuevo lider y este no tendra la respuesta
-    de YPF RUTA
+- **Estacion líder pierde conexión luego de recibir la respuesta de YPF RUTA**. \
+    Cuando un líder pierde la conexión, eventualmente se elegirá un nuevo líder y puede suceder que alguna estación estuviese esperando la confirmación de una venta por parte de aquel líder caído. Al no recibirla, intentará reenviar la venta al nuevo líder. Si el líder anterior se desconectó luego de enviar las ventas a *YPF RUTA* puede ocurrir que al servidor le llegue una venta duplicada, pero esto no afectará el comportamiento del sistema ya que *YPF RUTA* se encarga de validar las ventas y, en caso de encontrar algún id de venta duplicado, simplemente enviará el estado (confimado/rechazado) que ya validó previamente.
 
-- Estacion lider pierde conexion antes de mandar las ventas a YPF RUTA (validar_ventas) teniendo ventas a informar. ❌
+- **Estacion lider pierde conexion antes de mandar las ventas a YPF RUTA (validar_ventas) teniendo ventas a informar**. \
+    La estación líder almacena las ventas a informar recibida por parte de otras estaciones junto a las propias y las envía periódicamente a YPF RUTA. Si la estación líder pierde la conexión antes de enviar las ventas a YPF RUTA, entonces deberá descartar todas las ventas online almacenadas (excepto las propias) dado que cada estación se encargará de reenviar las ventas pendientes al nuevo líder una vez que sea elegido.
 
-- Estacion pierde conexion y aun tiene clientes encolados. los atiende? si ✅
+- **Estacion pierde conexion con clientes encolados**. \ 
+    Si una estación pierde la conexion y aún tiene clientes encolados, estos serán atendidos normalmente. La estación continuará funcionando y procesando las ventas de forma offline hasta que recupere la conexion. 
 
-- Se cae la Estacion lider, se elige un nuevo lider y eventualmente el ex lider va a recibir el mensaje `informar_ventas_offline` para luego preguntar quien es el lider. Pero luego de despertar y antes de recibir el mensaje hay una ventana en la cual este ex lider puede intentar enviar el mensaje `informar_ventas_offline`, ya que aun no sabe que hay un nuevo lider. Esto no es problematico, ya que a lo sumo el lider de verdad recibiria una ronda de ventas offline, y no cambiaria en nada el comportamiento normal de las estaciones. ✅
+- **Ex lider puede intentar mandar mensaje de informar ventas offline**. \
+    Si una estación lider pierde la conexion, este mismo se quita el estado de lider de modo que para cuando vuelva a reconectarse esta estación no intentará crear una ronda de informar ventas offline como si fuese un lider, solo simplemente asumirá que hay un nuevo lider.
 
-- Estacion lider pierde la conexion antes de recibir la respuesta de YPF RUTA, entonces ninguna estacion de la region recibe la respuesta de las ventas realizdas. Entonces cuando se elija un nuevo lider, este se encargara de solicitar las confirmaciones con el mensaje `solicitar_confirmaciones_pendientes`. ✅
-
-- Una Estacion pierde la conexion luego de mandar el mensaje `informar_venta` a la Estacion Lider, eventualmente la Estacion Lider intentara confirmarle las ventas, pero no podra. Mientras esto ocurra las ventas activas (aun en proceso de aceptarse) de esta estacion pasan a offline y los clientes podran retirarse. Eventualmente la Estacion lider tendra que confirmarle a cada estacion otras ventas realizadas, en ese momento revisara si tiene que confirmarle alguna venta a una estacion desconectada. ✅
+- **Estacion pierde conexion luego de informar venta al lider**. \
+    Si una estación pierde la conexion luego de mandar el mensaje `informar_venta` a la Estacion Lider, eventualmente esta última intentará confirmarle las ventas, pero no lo logrará. Mientras esto ocurra, las ventas activas (aún en proceso de aceptarse) de esta estación pasarán a offline y los clientes podrán retirarse. Eventualmente la Estacion lider tendrá que confirmarle a cada estación otras ventas realizadas, y en ese momento revisará si tiene que confirmarle alguna venta a una estacion desconectada.

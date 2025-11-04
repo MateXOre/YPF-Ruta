@@ -41,35 +41,35 @@ Segundo Cuatrimestre 2025
 
 ### División regional
 
-Las estaciones se encuantran divididas por región, cada una con su respectivo lider. Este se encarga de centralizar la comunicación con  **YPF RUTA** y se elige mediante el algoritmo `Ring Algorithm`.
+Las estaciones se encuentran divididas por región, cada una con su respectivo líder. Este se encarga de centralizar la comunicación con  **YPF RUTA** y se elige mediante el algoritmo `Ring Algorithm`.
 
-El propósito de esto es el de minimizar los mensajes enviados a YPF RUTA por medio de la agrupación de mensajes de venta.
+El propósito de esto es el de minimizar los mensajes enviados a YPF RUTA por medio de la agrupación de mensajes de venta de todas las estaciones de una misma región.
 
 ### Agrupación de ventas
 
-Una vez elegido el lider, cada una de las estaciones de la región le enviaran las ventas por confirmar. Estas se acumularan durante un período de tiempo razonable (de tres a cinco segundos) para su posterior envio a YPF RUTA en un único mensaje.
+Una vez elegido el líder, cada una de las estaciones de la región le enviarán las ventas por confirmar. Estas se acumulan durante un período de tiempo razonable (de tres a cinco segundos) para su posterior envío a YPF RUTA en un único mensaje.
 
 ### Validación de ventas offline
 
-En el caso de que una estación se encuentre totalmente incomunicada, se aprobaran de forma temporal todas las ventas realizadas sin validar con YPF RUTA (estas estarán marcadas como que fueron realizadas sin conexión), priorizando que la estación continue funcionando. Una vez recuperada la conexión, se notificaran todas las ventas realizadas a YPF RUTA.
+En el caso de que una estación se encuentre totalmente incomunicada, se aprobarán de forma temporal todas las ventas realizadas sin validar con YPF RUTA (las cuales serán marcadas como que fueron realizadas sin conexión), priorizando que la estación continue funcionando. Una vez recupere la conexión, se notificarán todas las ventas realizadas a YPF RUTA.
 
-La notificacion de ventas offline se realizara por medio de un "anillo" iniciado periódicamente por el lider (30 segundos o más) donde se pasara un mensaje entre estaciónes levantando todas las ventas realizadas de forma offline que se encuentren pendientes de informar. Una vez vuelve al lider, este las agrega a la lista de ventas a validar, y se notificaran cuando se envie dicho mensaje.
+La notificación de ventas offline se realizará por medio de un "anillo" iniciado periódicamente por el líder (30 segundos o más) donde se pasará un mensaje entre estaciónes levantando todas las ventas realizadas de forma offline que se encuentren pendientes de informar. Una vez que el líder recibe nuevamente el mensaje, las agrega a la lista de ventas a validar, y se notificarán cuando se envíe dicho mensaje.
 
-De esta forma YPF asume el riesgo de validar una venta por fuera del limite de una empresa perdiento el monto de dicha transacción.
+De esta forma YPF asume el riesgo de validar una venta por fuera del límite de una empresa perdiendo el monto de dicha transacción.
 
 ### Validación de ventas online
 
-Cuando una estacion recibe una venta para validar, se la envia al lider y la guarda hasta recibir el rechazo o confirmación de la misma. Esto con el propósito de evitar perdidas de información en el caso de que la estación lider sufra una desconexión.
+Cuando una estación recibe una venta para validar, se la envía al líder y la guarda hasta recibir el rechazo o confirmación de la misma. Esto con el propósito de evitar pérdidas de información en el caso de que la estación lider sufra una desconexión.
 
 ### Surtidores como tasks (actix) de cada Estación
 
-Los surtidores se implementaran como tasks de cada estacion debido a que su única función es simular el tiempo requerido para la carga de combustible.
+Los surtidores se implementarán como tasks de cada estación cuya función es simular el tiempo requerido para la carga de combustible y manejar la comunicación con el cliente. Cuando la estación recibe un cliente, lanza una task surtidor que se encargará de pedirle los datos de cobro y enviar por medio de un canal interno el mensaje a la estación para que esta gestione la venta quedando a la espera de la respuesta para enviar el resultado al cliente y finalizar la task junto a la conexión del cliente.
 
 ## Suposiciones
 
-* La desconexión de una estación implica únicamente la perdida de comunicacion con la región y no la propia caida de su sistema.
+* La desconexión de una estación implica únicamente la pérdida de comunicación con la región y no la propia caída de su sistema.
 
-* En el caso de la aprobación de una venta por fuera del limite de la empresa o de (por falta de conexión), YPF asumirá la perdida.
+* En el caso de la aprobación de una venta por fuera del límite de la empresa o de (por falta de conexión), YPF asumirá la pérdida.
 
 * YPF RUTA no puede perder la conexión.
 
@@ -80,22 +80,22 @@ Los surtidores se implementaran como tasks de cada estacion debido a que su úni
 ### Estación
 
 **Finalidad**
-Representa una estación de YPF que recibe a los clientes y los distribuye entre los surtidores disponibles. Además, se encarga de informar a **YPF RUTA** sobre los ventas realizados. En caso de que se caiga la conexión con el servidor central, puede almacenar temporalmente las ventas para reenviarlas una vez restablecida la comunicación.
+Representa una estación de YPF que recibe a los clientes y los distribuye entre los surtidores disponibles. Además, se encarga de informar a **YPF RUTA** sobre las ventas realizadas. En caso de que se caiga la conexión con el servidor central, puede almacenar temporalmente las ventas para reenviarlas una vez restablecida la comunicación.
 
 **Estado interno**
 
 ```rust
 Estacion {
     surtidores_estado_sender: List<channel>,
-    ventas_sin_informar: HashMap<idTarjeta, Monto>,
+    ventas_sin_informar: List<Venta>,
     ypf_socket: socket,
-    estaciones_regionales : List<i32>
-    id_lider : i32
+    estaciones_regionales : List<i32>,
+    id_lider : i32,
     clientes_en_cola: Queue<client_sender>
 }
 ```
 
-Estacion crea tarea -> tarea simula hacer algo -> tarea le responde a estacion -> estacion hace las cosas y eventualmente le dice a tarea que termine
+<!-- Estacion crea tarea -> tarea simula hacer algo -> tarea le responde a estacion -> estacion hace las cosas y eventualmente le dice a tarea que termine -->
 
 **Mensajes que recibe**
 

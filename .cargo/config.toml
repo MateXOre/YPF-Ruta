@@ -7,3 +7,5 @@ linter = "clippy --verbose --all-targets --all-features"
 compile = "build --release"
 testall = "test --workspace --verbose --all-features"
 quicktest = "test --no-fail-fast --verbose --all-features"
+
+# Se pueden agregar comandos personalizados

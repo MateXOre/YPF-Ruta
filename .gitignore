@@ -1,5 +1,6 @@
 # Output de Cargo build
 /target
+*/target
 
 # Archivos Cargo
 Cargo.lock
@@ -12,3 +13,4 @@ Cargo.lock
 
 # Archivos temporales
 /tmp
+borrador.txt

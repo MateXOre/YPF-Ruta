@@ -7,7 +7,7 @@ use tokio_util::codec::{FramedRead, LinesCodec};
 use std::net::SocketAddr;
 use tokio::net::TcpStream;
 use std::io::Write;
-
+use std::time::Duration;
 use crate::actores::estacion_cercana::EstacionCercana;
 
 // Estructura para guardar información de una conexión
@@ -65,32 +65,33 @@ impl Estacion {
         actor_addr: Addr<Estacion>,
         id: usize,
     ) {
-        Estacion::intentar_conectar(target, actor_addr, id);
+        let _ = Estacion::intentar_conectar(target, actor_addr, id).await;
     }
 
     /// Intenta conectar a una estación (no bloquea, ejecuta en background)
-    fn intentar_conectar(
+    async fn intentar_conectar(
         target: SocketAddr,
         actor_addr: Addr<Estacion>,
         id: usize,
-    ) {
-        actix_rt::spawn(async move {
-            match TcpStream::connect(target).await {
-                Ok(stream) => {
-                    println!("[{}] conectado a {}", id, target);
-                    // Manejar la conexión en un task separado (no bloquea)
-                    let addr_clone = actor_addr.clone();
-                    actix_rt::spawn(async move {
-                        if let Err(e) = handle_stream_outgoing(stream, id, addr_clone).await {
-                            eprintln!("[{}] error al manejar conexión con {}: {:?}", id, target, e);
-                        }
-                    });
-                }
-                Err(e) => {
-                    eprintln!("[{}] no pudo conectar a {}: {}", id, target, e);
-                }
+    ) -> Result<(), std::io::Error> {
+        match TcpStream::connect(target).await {
+            Ok(stream) => {
+                println!("[{}] ✅ conectado a {}", id, target);
+
+                let addr_clone = actor_addr.clone();
+                actix_rt::spawn(async move {
+                    if let Err(e) = handle_stream_outgoing(stream, id, addr_clone).await {
+                        eprintln!("[{}] error al manejar conexión con {}: {:?}", id, target, e);
+                    }
+                });
+
+                Ok(())
             }
-        });
+            Err(e) => {
+                eprintln!("[{}] ❌ no pudo conectar a {}: {}", id, target, e);
+                Err(e)
+            }
+        }
     }
 }
 
@@ -125,6 +126,7 @@ impl Actor for Estacion {
                 }
             }
         });
+
 
         // Conectar con la siguiente estación después de crear el hilo
         if let Some(siguiente) = self.siguiente_estacion {
@@ -179,19 +181,19 @@ impl Handler<AgregarEstacion> for Estacion {
 impl Handler<Eleccion> for Estacion {
     type Result = ();
 
+
     fn handle(&mut self, msg: Eleccion, ctx: &mut Context<Self>) {
         println!("[{}] recibió mensaje del anillo: {:?}", self.id, msg.aspirantes_ids);
-        
 
         if msg.aspirantes_ids.contains(&self.id) {
             println!("[{}] Detecte que mi id esta en la lista, entonces les aviso a todos quien es el nuevo lider.", self.id);
             return;
         }
-        
+
         let mut nuevos_aspirantes = msg.aspirantes_ids.clone();
         nuevos_aspirantes.push(self.id);
         println!("[{}] agregue mi id. Nuevos aspirantes: {:?}", self.id, nuevos_aspirantes);
-        
+
         if let Some(siguiente) = &self.siguiente_estacion {
             if let Some(conexion) = self.estaciones_cercanas.iter().find(|c| {
                 c.peer_addr == *siguiente
@@ -201,23 +203,38 @@ impl Handler<Eleccion> for Estacion {
                 conexion.actor.do_send(crate::actores::estacion_cercana::ConectarEstacion(mensaje_serializado));
                 println!("[{}] reenviando mensaje a siguiente estación en {}", self.id, siguiente);
             } else {
+                // 🚧 No hay conexión → intento reconectar asincrónicamente
                 println!("[{}] intentando reconectar con estación {}", self.id, siguiente);
+
                 let siguiente_clone = *siguiente;
                 let addr_self = ctx.address();
-                let mensaje_para_reenviar = Eleccion {
-                    aspirantes_ids: nuevos_aspirantes,
-                };
-                Estacion::intentar_conectar(
-                    siguiente_clone,
-                    addr_self.clone(),
-                    self.id,
+                let self_id = self.id;
+                let nuevos_aspirantes_clone = msg.aspirantes_ids.clone();
+
+                ctx.spawn(
+                    actix::fut::wrap_future(async move {
+                        // 🔁 Reintento de conexión
+                        match Estacion::intentar_conectar(siguiente_clone, addr_self.clone(), self_id).await {
+                            Ok(_) => {
+                                println!("[{}] reconexión exitosa con {}", self_id, siguiente_clone);
+                                Some(Eleccion { aspirantes_ids: nuevos_aspirantes_clone })
+                            }
+                            Err(_) => {
+                                println!("[{}] reconexión fallida con {}", self_id, siguiente_clone);
+                                None
+                            }
+                        }
+                    })
+                        .map(|maybe_msg, _act: &mut Estacion, ctx: &mut Context<Estacion>| {
+                            if let Some(msg) = maybe_msg {
+                                ctx.address().do_send(msg);
+                            }
+                        }),
                 );
-                addr_self.do_send(mensaje_para_reenviar);
             }
         }
     }
 }
-
 async fn handle_stream_incoming(
     stream: TcpStream,
     id: usize,

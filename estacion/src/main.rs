@@ -11,13 +11,16 @@ async fn main() {
     let index_estacion: usize = args.get(1).and_then(|s| s.parse().ok()).unwrap_or(0);
 
     let estaciones: Vec<SocketAddr> = vec![
+        "127.0.0.1:9000".parse().unwrap(),
         "127.0.0.1:9001".parse().unwrap(),
         "127.0.0.1:9002".parse().unwrap(),
-        "127.0.0.1:9003".parse().unwrap(),
     ];
 
-    let estacion = Estacion::new(index_estacion, estaciones).await;
+    let estacion = Estacion::new(index_estacion, estaciones).start();
 
-    println!("Hello, world!");
-   
+    tokio::signal::ctrl_c()
+        .await
+        .expect("Error esperando señal de terminación");
+    
+    println!("Se apaga la estacion {}", index_estacion);
 }

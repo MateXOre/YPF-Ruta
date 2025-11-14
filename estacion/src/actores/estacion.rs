@@ -6,8 +6,6 @@ use tokio::net::TcpListener;
 use tokio_util::codec::{FramedRead, LinesCodec};
 use std::net::SocketAddr;
 use tokio::net::TcpStream;
-use std::io::Write;
-use std::time::Duration;
 use crate::actores::estacion_cercana::EstacionCercana;
 
 // Estructura para guardar información de una conexión
@@ -152,7 +150,7 @@ impl Actor for Estacion {
 impl Handler<AgregarEstacion> for Estacion {
     type Result = ();
 
-    fn handle(&mut self, msg: AgregarEstacion, ctx: &mut Context<Self>) {
+    fn handle(&mut self, msg: AgregarEstacion, _ctx: &mut Context<Self>) {
         println!("[{}] agregando estación conectada desde {}", self.id, msg.peer_addr);
         self.estaciones_cercanas.push(ConexionEstacion {
             peer_addr: msg.peer_addr,
@@ -399,7 +397,7 @@ impl Handler<NotificarLider> for Estacion {
     type Result = ();
 
     fn handle(&mut self, msg: NotificarLider, ctx: &mut Context<Self>) {
-        if (self.id == msg.id_iniciador && self.lider_actual == Some(msg.id_lider)){
+        if self.id == msg.id_iniciador && self.lider_actual == Some(msg.id_lider){
             println!(
                 "[{}] 🔁 Mensaje de líder {} completó el ciclo, fin de propagación.",
                 self.id, msg.id_lider

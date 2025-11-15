@@ -22,7 +22,10 @@ pub struct AgregarEstacion {
     pub peer_addr: SocketAddr,
 }
 
-
+// Mensaje interno para reenviar una línea cuando la conexión ya esté registrada
+#[derive(Message, Clone)]
+#[rtype(result = "()")]
+pub struct Reenviar(pub String);
 
 // Mensaje para pasar por el anillo
 #[derive(Message, Clone)]
@@ -102,6 +105,40 @@ impl Estacion {
             }
         }
     }
+
+    fn enviar_a_siguiente(&self, ctx: &mut Context<Self>, mensaje: String) {
+        if let Some(siguiente) = &self.siguiente_estacion {
+            if let Some(conexion) = self.estaciones_cercanas.iter().find(|c| c.peer_addr == *siguiente) {
+                conexion.actor.do_send(crate::actores::estacion_cercana::ConectarEstacion(mensaje.clone()));
+                println!("[{}] 🔁 reenviando mensaje a {}", self.id, siguiente);
+            } else {
+                println!("[{}] ❌ sin conexión a {}, intentando reconectar...", self.id, siguiente);
+
+                let siguiente_clone = *siguiente;
+                let addr_self = ctx.address();
+                let self_id = self.id;
+                let mensaje_clone = mensaje.clone();
+
+                // Intentar reconectar en background; si tiene éxito, pedir reenvío (Reenviar)
+                ctx.spawn(
+                    actix::fut::wrap_future(async move {
+                        if Estacion::intentar_conectar(siguiente_clone, addr_self.clone(), self_id).await.is_ok() {
+                            Some(mensaje_clone)
+                        } else {
+                            None
+                        }
+                    })
+                        .map(|maybe_msg, _act: &mut Estacion, ctx: &mut Context<Estacion>| {
+                            if let Some(mensaje) = maybe_msg {
+                                // cuando la reconexión haya registrado la conexión (AgregarEstacion),
+                                // recibiremos Reenviar y volveremos a intentar enviar.
+                                ctx.address().do_send(Reenviar(mensaje));
+                            }
+                        }),
+                );
+            }
+        }
+    }
 }
 
 impl Actor for Estacion {
@@ -150,7 +187,7 @@ impl Actor for Estacion {
 impl Handler<AgregarEstacion> for Estacion {
     type Result = ();
 
-    fn handle(&mut self, msg: AgregarEstacion, _ctx: &mut Context<Self>) {
+    fn handle(&mut self, msg: AgregarEstacion, ctx: &mut Context<Self>) {
         println!("[{}] agregando estación conectada desde {}", self.id, msg.peer_addr);
         self.estaciones_cercanas.push(ConexionEstacion {
             peer_addr: msg.peer_addr,
@@ -164,33 +201,34 @@ impl Handler<AgregarEstacion> for Estacion {
             self.primer_anillo_realizado = true;
             println!("[{}] Soy la última estación, iniciando ronda de mensajes", self.id);
             let siguiente_estacion = self.siguiente_estacion;
-            let estaciones_cercanas_clone = self.estaciones_cercanas.clone();
             let id_estacion = self.id;
+            let addr_self = ctx.address();
             actix_rt::spawn(async move {
                 tokio::time::sleep(tokio::time::Duration::from_millis(1000)).await;
                 let mensaje = Eleccion {
                     aspirantes_ids: vec![id_estacion],
                 };        
                 if let Some(siguiente) = siguiente_estacion {
-                    if let Some(conexion) = estaciones_cercanas_clone.iter().find(|c| {
-                        c.peer_addr == siguiente
-                    }) {
-                        let ids_str: Vec<String> = mensaje.aspirantes_ids.iter().map(|id| id.to_string()).collect();
-                        let mensaje_serializado = format!("ANILLO:{}", ids_str.join(","));
-                        conexion.actor.do_send(crate::actores::estacion_cercana::ConectarEstacion(mensaje_serializado));
-                        println!("[{}] enviando mensaje inicial a siguiente estación en {}", id_estacion, siguiente);
-                    } else {
-                        println!("[{}] no encontró conexión a la siguiente estación {}", id_estacion, siguiente);
-                    }
+                    let ids_str: Vec<String> = mensaje.aspirantes_ids.iter().map(|id| id.to_string()).collect();
+                    let mensaje_serializado = format!("ANILLO:{}", ids_str.join(","));
+                    addr_self.do_send(Reenviar(mensaje_serializado));
+                    println!("[{}] enviando mensaje inicial (via Reenviar) a siguiente estación en {}", id_estacion, siguiente);
                 }
             });
         }
     }
 }
 
-impl Handler<Eleccion> for Estacion {
+impl Handler<Reenviar> for Estacion {
     type Result = ();
 
+    fn handle(&mut self, msg: Reenviar, ctx: &mut Context<Self>) {
+        self.enviar_a_siguiente(ctx, msg.0);
+    }
+}
+
+impl Handler<Eleccion> for Estacion {
+    type Result = ();
 
     fn handle(&mut self, msg: Eleccion, ctx: &mut Context<Self>) {
         println!("[{}] recibió mensaje del anillo: {:?}", self.id, msg.aspirantes_ids);
@@ -203,7 +241,7 @@ impl Handler<Eleccion> for Estacion {
                     self.id, nuevo_lider
                 );
 
-                // 📩 Enviamos el mensaje solo si encontramos líder
+                // Enviamos el mensaje solo si encontramos líder
                 ctx.address().do_send(NotificarLider { id_lider: nuevo_lider, id_iniciador: self.id });
             }
             return;
@@ -213,47 +251,12 @@ impl Handler<Eleccion> for Estacion {
         nuevos_aspirantes.push(self.id);
         println!("[{}] agregue mi id. Nuevos aspirantes: {:?}", self.id, nuevos_aspirantes);
 
-        if let Some(siguiente) = &self.siguiente_estacion {
-            if let Some(conexion) = self.estaciones_cercanas.iter().find(|c| {
-                c.peer_addr == *siguiente
-            }) {
-                let ids_str: Vec<String> = nuevos_aspirantes.iter().map(|id| id.to_string()).collect();
-                let mensaje_serializado = format!("ANILLO:{}", ids_str.join(","));
-                conexion.actor.do_send(crate::actores::estacion_cercana::ConectarEstacion(mensaje_serializado));
-                println!("[{}] reenviando mensaje a siguiente estación en {}", self.id, siguiente);
-            } else {
-                // 🚧 No hay conexión → intento reconectar asincrónicamente
-                println!("[{}] intentando reconectar con estación {}", self.id, siguiente);
-
-                let siguiente_clone = *siguiente;
-                let addr_self = ctx.address();
-                let self_id = self.id;
-                let nuevos_aspirantes_clone = msg.aspirantes_ids.clone();
-
-                ctx.spawn(
-                    actix::fut::wrap_future(async move {
-                        // 🔁 Reintento de conexión
-                        match Estacion::intentar_conectar(siguiente_clone, addr_self.clone(), self_id).await {
-                            Ok(_) => {
-                                println!("[{}] reconexión exitosa con {}", self_id, siguiente_clone);
-                                Some(Eleccion { aspirantes_ids: nuevos_aspirantes_clone })
-                            }
-                            Err(_) => {
-                                println!("[{}] reconexión fallida con {}", self_id, siguiente_clone);
-                                None
-                            }
-                        }
-                    })
-                        .map(|maybe_msg, _act: &mut Estacion, ctx: &mut Context<Estacion>| {
-                            if let Some(msg) = maybe_msg {
-                                ctx.address().do_send(msg);
-                            }
-                        }),
-                );
-            }
-        }
+        let ids_str: Vec<String> = nuevos_aspirantes.iter().map(|id| id.to_string()).collect();
+        let mensaje_serializado = format!("ANILLO:{}", ids_str.join(","));
+        self.enviar_a_siguiente(ctx, mensaje_serializado);
     }
 }
+
 async fn handle_stream_incoming(
     stream: TcpStream,
     id: usize,
@@ -444,45 +447,7 @@ impl Handler<NotificarLider> for Estacion {
         }
 
         // Reenviamos el mensaje al siguiente en el anillo
-        if let Some(siguiente) = &self.siguiente_estacion {
-            if let Some(conexion) = self.estaciones_cercanas.iter().find(|c| c.peer_addr == *siguiente) {
-                let mensaje_serializado = format!("LIDER:{},{}", msg.id_lider, msg.id_iniciador);
-                conexion
-                    .actor
-                    .do_send(crate::actores::estacion_cercana::ConectarEstacion(mensaje_serializado));
-                println!(
-                    "[{}] 🔁 reenviando notificación de líder a siguiente estación en {}",
-                    self.id, siguiente
-                );
-            } else {
-                // No hay conexión con la siguiente → intentamos reconectar
-                println!("[{}] intentando reconectar con estación {}", self.id, siguiente);
-
-                let siguiente_clone = *siguiente;
-                let addr_self = ctx.address();
-                let self_id = self.id;
-                let id_lider_clone = msg.id_lider;
-
-                ctx.spawn(
-                    actix::fut::wrap_future(async move {
-                        match Estacion::intentar_conectar(siguiente_clone, addr_self.clone(), self_id).await {
-                            Ok(_) => {
-                                println!("[{}] reconexión exitosa con {}", self_id, siguiente_clone);
-                                Some(NotificarLider { id_lider: id_lider_clone, id_iniciador: self_id})
-                            }
-                            Err(_) => {
-                                println!("[{}] reconexión fallida con {}", self_id, siguiente_clone);
-                                None
-                            }
-                        }
-                    })
-                        .map(|maybe_msg, _act: &mut Estacion, ctx: &mut Context<Estacion>| {
-                            if let Some(msg) = maybe_msg {
-                                ctx.address().do_send(msg);
-                            }
-                        }),
-                );
-            }
-        }
+        let mensaje_serializado = format!("LIDER:{},{}", msg.id_lider, msg.id_iniciador);
+        self.enviar_a_siguiente(ctx, mensaje_serializado);
     }
 }

@@ -1,12 +1,13 @@
-use actix::{Actor, Context, Addr, Handler};
+use actix::{Actor, Context, Addr};
+use std::collections::HashMap;
 use std::net::SocketAddr;
+use std::ops::Add;
 use tokio::net::{TcpStream, TcpListener};
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use actix::prelude::*;
-
-use crate::actores::estacion::messages::*;
+use crate::actores::estacion::{self, messages::*};
 use crate::actores::estacion_cercana::EstacionCercana;
 use crate::actores::estacion::io::{handle_stream_incoming, handle_stream_outgoing};
+use crate::actores::surtidor::actor::Surtidor;
 
 // Estructura para guardar información de una conexión
 #[derive(Clone)]
@@ -24,6 +25,8 @@ pub struct Estacion {
     pub(crate) total_estaciones: usize,
     pub(crate) todas_las_estaciones: Vec<SocketAddr>,
     pub(crate) primer_anillo_realizado: bool,
+
+    pub(crate) surtidores: HashMap<usize,Addr<Surtidor>>,
 }
 
 impl Estacion {
@@ -42,7 +45,8 @@ impl Estacion {
             siguiente_estacion: siguiente,
             total_estaciones: estaciones.len(),
             todas_las_estaciones: estaciones,
-            primer_anillo_realizado : false
+            primer_anillo_realizado : false,
+            surtidores: HashMap::new(),
         }
     }
 
@@ -121,9 +125,39 @@ impl Actor for Estacion {
     fn started(&mut self, ctx: &mut Self::Context) {
         let port = self.port;
         let id = self.id;
-        println!("[{}] escuchando en 127.0.0.1:{}", id, port);
-
         let addr_self = ctx.address();
+        let addr_self_clone = addr_self.clone();
+
+        println!("[{}] escuchando conexiones de clientes en 127.0.0.1:{}", id, port + 1000);
+        // correr listener en background
+        actix_rt::spawn(async move {
+            let listener = TcpListener::bind(("127.0.0.1", port + 1000)).await.unwrap();
+            loop {
+                match listener.accept().await {
+                    Ok((stream, peer_addr)) => {
+                        println!("[{}] conexión entrante desde {:?}", id, peer_addr);
+                        // se inicia un actor de surtidor por cada conexión entrante
+                        let estacion_addr = addr_self_clone.clone();
+                        let id_surtidor = rand::random::<u64>() as usize;
+                        actix_rt::spawn(async move {
+                            let estacion: Addr<Estacion> = estacion_addr.clone();
+                            let surtidor = Surtidor::new(id_surtidor, estacion_addr, stream, id as i32);
+                            let surtidor_addr = surtidor.start();
+                            estacion.do_send(HabilitarSurtidor {
+                                surtidor_id: id_surtidor,
+                                surtidor_addr,
+                            });
+                        });
+                    }
+                    Err(e) => {
+                        eprintln!("Error al aceptar conexión: {:?}", e);
+                    }
+                }
+            }
+        });
+
+
+        println!("[{}] escuchando conexiones de estaciones en 127.0.0.1:{}", id, port);
 
         // correr listener en background
         actix_rt::spawn(async move {

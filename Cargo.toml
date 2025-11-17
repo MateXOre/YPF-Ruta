@@ -1,4 +1,4 @@
 [workspace]
 
-members = [ "empresa", "estacion", "YPFRuta" ]
+members = [ "empresa", "estacion", "YPFRuta" , "util"]
 resolver = "2"

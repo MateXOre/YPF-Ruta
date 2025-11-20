@@ -89,36 +89,35 @@ impl Estacion {
 
     pub(crate) fn enviar_a_siguiente(&self, ctx: &mut Context<Self>, mensaje: String) {
         println!("[{}] 🔁 reenviando mensaje: {}", self.id, mensaje);
-        // if let Some(siguiente) = self.estaciones_cercanas.iter().find(|c| c.estacion_id == self.id + 1) {
-        //     siguiente.do_send(Reenviar(mensaje.clone()));
-        //     println!("[{}] 🔁 reenviando mensaje", self.id);
-        // } 
-        // else {
-        //     println!("[{}] ❌ sin conexión a {}, intentando reconectar...", self.id, siguiente);
+        if let Some(siguiente) = self.estaciones_cercanas.iter().find(|c| c.estacion_id == self.id + 1) {
+            siguiente.do_send(Reenviar(mensaje.clone()));
+            println!("[{}] 🔁 reenviando mensaje", self.id);
+        } else {
+            println!("[{}] ❌ sin conexión a {}, intentando reconectar...", self.id, siguiente);
 
-        //     let siguiente_clone = *siguiente;
-        //     let addr_self = ctx.address();
-        //     let self_id = self.id;
-        //     let mensaje_clone = mensaje.clone();
+            let siguiente_clone = *siguiente;
+            let addr_self = ctx.address();
+            let self_id = self.id;
+            let mensaje_clone = mensaje.clone();
 
-        //     // Intentar reconectar en background; si tiene éxito, pedir reenvío (Reenviar)
-        //     ctx.spawn(
-        //         actix::fut::wrap_future(async move {
-        //             if Estacion::intentar_conectar(siguiente_clone, addr_self.clone(), self_id).await.is_ok() {
-        //                 Some(mensaje_clone)
-        //             } else {
-        //                 None
-        //             }
-        //         })
-        //             .map(|maybe_msg, _act: &mut Estacion, ctx: &mut Context<Estacion>| {
-        //                 if let Some(mensaje) = maybe_msg {
-        //                     // cuando la reconexión haya registrado la conexión (AgregarEstacion),
-        //                     // recibiremos Reenviar y volveremos a intentar enviar.
-        //                     ctx.address().do_send(Reenviar(mensaje));
-        //                 }
-        //             }),
-        //     );
-        // }
+            // Intentar reconectar en background; si tiene éxito, pedir reenvío (Reenviar)
+            ctx.spawn(
+                actix::fut::wrap_future(async move {
+                    if Estacion::intentar_conectar(siguiente_clone, addr_self.clone(), self_id).await.is_ok() {
+                        Some(mensaje_clone)
+                    } else {
+                        None
+                    }
+                })
+                    .map(|maybe_msg, _act: &mut Estacion, ctx: &mut Context<Estacion>| {
+                        if let Some(mensaje) = maybe_msg {
+                            // cuando la reconexión haya registrado la conexión (AgregarEstacion),
+                            // recibiremos Reenviar y volveremos a intentar enviar.
+                            ctx.address().do_send(Reenviar(mensaje));
+                        }
+                    }),
+            );
+        }
     }
 
     // pub(crate) fn buscar_estacion_lider(&self) -> Option<Addr<EstacionCercana>> {

@@ -47,9 +47,39 @@ impl Handler<Reenviar> for EstacionCercana {
     type Result = ();
 
     fn handle(&mut self, msg: Reenviar, _ctx: &mut Context<Self>) {
-        let buf = serialize(msg);
-        self.socket_estacion_cercana.write_all(&buf);
-        println!("Enviamos mensaje al socket de la estación: {}", self.estacion_id);
+        self.enviar_por_socket(msg);
+    }
+}
+
+impl Handler<Eleccion> for EstacionCercana {
+    type Result = ();
+
+    fn handle(&mut self, msg: Eleccion, _ctx: &mut Context<Self>) {
+        self.enviar_por_socket(msg);
+    }
+}
+
+impl Handler<NotificarLider> for EstacionCercana {
+    type Result = ();
+
+    fn handle(&mut self, msg: NotificarLider, _ctx: &mut Context<Self>) {
+        self.enviar_por_socket(msg);
+    }
+}
+
+impl Handler<InformarVenta> for EstacionCercana {
+    type Result = ();
+
+    fn handle(&mut self, msg: InformarVenta, _ctx: &mut Context<Self>) {
+        self.enviar_por_socket(msg);
+    }
+}
+
+impl Handler<ConfirmarTransacciones> for EstacionCercana {
+    type Result = ();
+
+    fn handle(&mut self, msg: ConfirmarTransacciones, _ctx: &mut Context<Self>) {
+        self.enviar_por_socket(msg);
     }
 }
 
@@ -67,6 +97,12 @@ impl EstacionCercana {
         EstacionCercana::read_from_socket(reader, addr).await;
 
         estacion_cercana
+    }
+
+    pub fn enviar_por_socket(&mut self, msg: Reenviar) {
+        let buf = serialize(msg);
+        self.socket_estacion_cercana.write_all(&buf);
+        println!("Enviamos mensaje al socket de la estación: {}", self.estacion_id);
     }
 
     pub async fn read_from_socket(mut reader: OwnedReadHalf, estacion_local: Addr<Estacion>) {

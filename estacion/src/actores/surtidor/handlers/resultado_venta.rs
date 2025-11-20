@@ -1,7 +1,7 @@
 use actix::{Context, Handler};
 use tokio::io::AsyncWriteExt;
 
-use crate::actores::surtidor::{actor::Surtidor, messages::ResultadoVenta};
+use crate::actores::surtidor::{surtidor::Surtidor, messages::ResultadoVenta};
 
 impl Handler<ResultadoVenta> for Surtidor {
     type Result = ();

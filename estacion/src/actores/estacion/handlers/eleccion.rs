@@ -1,9 +1,7 @@
 use actix::{Handler, Context};
-use crate::actores::estacion::{Estacion, ConexionEstacion};
+use crate::actores::estacion::Estacion;
 use crate::actores::estacion::messages::*;
-use crate::actores::estacion_cercana::EstacionCercana;
 use actix::prelude::*;
-use actix::ActorFutureExt;
 
 
 impl Handler<Eleccion> for Estacion {

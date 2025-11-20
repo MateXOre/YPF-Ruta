@@ -1,19 +1,16 @@
 use actix::{Handler, Context};
 use actix::prelude::*;
-use actix::ActorFutureExt;
-use crate::actores::estacion::{Estacion, ConexionEstacion};
+use crate::actores::estacion::Estacion;
 use crate::actores::estacion::messages::*;
-use crate::actores::estacion_cercana::EstacionCercana;
 
 impl Handler<AgregarEstacion> for Estacion {
     type Result = ();
 
     fn handle(&mut self, msg: AgregarEstacion, ctx: &mut Context<Self>) {
-        println!("[{}] agregando estación conectada desde {}", self.id, msg.peer_addr);
-        self.estaciones_cercanas.push(ConexionEstacion {
-            peer_addr: msg.peer_addr,
-            actor: msg.peer,
-        });
+        println!("[{}] agregando estación conectada desde {}", self.id, msg.estacion_id);
+
+        self.estaciones_cercanas.push(msg.estacion);
+
 
         // Si es la última estación (id = total_estaciones - 1) y tiene su conexión lista, iniciar la ronda
         let es_ultima = self.id == self.total_estaciones - 1;

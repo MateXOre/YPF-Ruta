@@ -17,41 +17,15 @@ pub async fn handle_stream_outgoing(
 
     let peer_addr = stream.peer_addr()?;
 
-    let (r, mut w) = stream.into_split();
-    let (tx, mut rx) = tokio::sync::mpsc::channel::<String>(100);
+    println!("Vamos a intentar establecer conexión de {}", id);
+    let server_addr_clone = server_addr.clone();
+    let estacion = EstacionCercana::new(id, server_addr_clone, stream).await;
 
-    let conn = EstacionCercana {
-        estacion_id: format!("{}(outgoing)", id),
-        tx: tx.clone(),
-    }
-        .start();
-
+    let estacion_addr = estacion.start();
     server_addr.do_send(AgregarEstacion {
-        peer: conn.clone(),
-        peer_addr,
+        estacion: estacion_addr,
+        estacion_id: id,
     });
-
-    tokio::spawn(async move {
-        while let Some(line) = rx.recv().await {
-            if w.write_all(format!("{}\n", line).as_bytes()).await.is_err() {
-                break;
-            }
-        }
-    });
-
-    let mut reader = FramedRead::new(r, LinesCodec::new());
-
-    while let Some(res) = reader.next().await {
-        match res {
-            Ok(line) => {
-                procesar_mensaje(&line, &server_addr, &conn);
-            }
-            Err(e) => {
-                eprintln!("Error lectura saliente en {}: {:?}", id, e);
-                break;
-            }
-        }
-    }
 
     Ok(())
 }

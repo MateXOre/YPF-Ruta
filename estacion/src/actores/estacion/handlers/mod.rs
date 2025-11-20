@@ -4,6 +4,9 @@ pub mod notificar_lider;
 pub mod reenviar;
 pub mod informar_venta;
 pub mod habilitar_surtidor;
+pub mod transacciones_por_estacion;
+pub mod confirmar_transacciones;
+pub mod cobrar_a_cliente;
 
 pub use agregar_estacion::*;
 pub use eleccion::*;
@@ -11,3 +14,6 @@ pub use notificar_lider::*;
 pub use reenviar::*;
 pub use informar_venta::*;
 pub use habilitar_surtidor::*;
+pub use transacciones_por_estacion::*;
+pub use confirmar_transacciones::*;
+pub use cobrar_a_cliente::*;

@@ -1,31 +1,33 @@
 use actix::{Actor, Context, Addr};
 use std::collections::HashMap;
 use std::net::SocketAddr;
-use std::ops::Add;
 use tokio::net::{TcpStream, TcpListener};
 use actix::prelude::*;
-use crate::actores::estacion::{self, messages::*};
+use crate::actores::estacion::messages::*;
 use crate::actores::estacion_cercana::EstacionCercana;
+use crate::actores::estacion::messages::Reenviar;
 use crate::actores::estacion::io::{handle_stream_incoming, handle_stream_outgoing};
-use crate::actores::surtidor::actor::Surtidor;
+use crate::actores::surtidor::surtidor::Surtidor;
+
 
 // Estructura para guardar información de una conexión
-#[derive(Clone)]
-pub struct ConexionEstacion {
-    pub peer_addr: SocketAddr,
-    pub actor: Addr<EstacionCercana>,
-}
+// #[derive(Clone)]
+// pub struct ConexionEstacion {
+//     pub peer_addr: SocketAddr,
+//     pub actor: Addr<EstacionCercana>,
+//     pub estacion_id: usize
+// }
 
 pub struct Estacion {
     pub(crate) id: usize,
     pub(crate) port: u16,
     pub(crate) lider_actual: Option<usize>,
-    pub(crate) estaciones_cercanas: Vec<ConexionEstacion>,
+    pub(crate) estaciones_cercanas: Vec<Addr<EstacionCercana>>,
     pub(crate) siguiente_estacion: Option<SocketAddr>,
     pub(crate) total_estaciones: usize,
     pub(crate) todas_las_estaciones: Vec<SocketAddr>,
     pub(crate) primer_anillo_realizado: bool,
-
+    pub(crate) ventas_a_confirmar: HashMap<usize, usize>, // id_venta, id_surtidor
     pub(crate) surtidores: HashMap<usize,Addr<Surtidor>>,
 }
 
@@ -46,6 +48,7 @@ impl Estacion {
             total_estaciones: estaciones.len(),
             todas_las_estaciones: estaciones,
             primer_anillo_realizado : false,
+            ventas_a_confirmar: HashMap::new(),
             surtidores: HashMap::new(),
         }
     }
@@ -85,38 +88,55 @@ impl Estacion {
     }
 
     pub(crate) fn enviar_a_siguiente(&self, ctx: &mut Context<Self>, mensaje: String) {
-        if let Some(siguiente) = &self.siguiente_estacion {
-            if let Some(conexion) = self.estaciones_cercanas.iter().find(|c| c.peer_addr == *siguiente) {
-                conexion.actor.do_send(crate::actores::estacion_cercana::ConectarEstacion(mensaje.clone()));
-                println!("[{}] 🔁 reenviando mensaje a {}", self.id, siguiente);
-            } else {
-                println!("[{}] ❌ sin conexión a {}, intentando reconectar...", self.id, siguiente);
+        println!("[{}] 🔁 reenviando mensaje: {}", self.id, mensaje);
+        // if let Some(siguiente) = self.estaciones_cercanas.iter().find(|c| c.estacion_id == self.id + 1) {
+        //     siguiente.do_send(Reenviar(mensaje.clone()));
+        //     println!("[{}] 🔁 reenviando mensaje", self.id);
+        // } 
+        // else {
+        //     println!("[{}] ❌ sin conexión a {}, intentando reconectar...", self.id, siguiente);
 
-                let siguiente_clone = *siguiente;
-                let addr_self = ctx.address();
-                let self_id = self.id;
-                let mensaje_clone = mensaje.clone();
+        //     let siguiente_clone = *siguiente;
+        //     let addr_self = ctx.address();
+        //     let self_id = self.id;
+        //     let mensaje_clone = mensaje.clone();
 
-                // Intentar reconectar en background; si tiene éxito, pedir reenvío (Reenviar)
-                ctx.spawn(
-                    actix::fut::wrap_future(async move {
-                        if Estacion::intentar_conectar(siguiente_clone, addr_self.clone(), self_id).await.is_ok() {
-                            Some(mensaje_clone)
-                        } else {
-                            None
-                        }
-                    })
-                        .map(|maybe_msg, _act: &mut Estacion, ctx: &mut Context<Estacion>| {
-                            if let Some(mensaje) = maybe_msg {
-                                // cuando la reconexión haya registrado la conexión (AgregarEstacion),
-                                // recibiremos Reenviar y volveremos a intentar enviar.
-                                ctx.address().do_send(Reenviar(mensaje));
-                            }
-                        }),
-                );
-            }
-        }
+        //     // Intentar reconectar en background; si tiene éxito, pedir reenvío (Reenviar)
+        //     ctx.spawn(
+        //         actix::fut::wrap_future(async move {
+        //             if Estacion::intentar_conectar(siguiente_clone, addr_self.clone(), self_id).await.is_ok() {
+        //                 Some(mensaje_clone)
+        //             } else {
+        //                 None
+        //             }
+        //         })
+        //             .map(|maybe_msg, _act: &mut Estacion, ctx: &mut Context<Estacion>| {
+        //                 if let Some(mensaje) = maybe_msg {
+        //                     // cuando la reconexión haya registrado la conexión (AgregarEstacion),
+        //                     // recibiremos Reenviar y volveremos a intentar enviar.
+        //                     ctx.address().do_send(Reenviar(mensaje));
+        //                 }
+        //             }),
+        //     );
+        // }
     }
+
+    // pub(crate) fn buscar_estacion_lider(&self) -> Option<Addr<EstacionCercana>> {
+    //     if let Some(lider) = self.lider_actual {
+    //         // Buscar por ID si está almacenado
+    //         if let Some(conexion) = self.estaciones_cercanas.iter().find(|c| c.estacion_id == lider) {
+    //             return Some(conexion.clone());
+    //         }
+    //     }
+    //     None
+    // }
+
+    // pub(crate) fn buscar_estacion_por_id(&self, id: usize) -> Option<Addr<EstacionCercana>> {
+    //     if let Some(conexion) = self.estaciones_cercanas.iter().find(|c| c.estacion_id == id) {
+    //         return Some(conexion.clone());
+    //     }
+    //     None
+    // }
 }
 
 impl Actor for Estacion {
@@ -141,7 +161,7 @@ impl Actor for Estacion {
                         let id_surtidor = rand::random::<u64>() as usize;
                         actix_rt::spawn(async move {
                             let estacion: Addr<Estacion> = estacion_addr.clone();
-                            let surtidor = Surtidor::new(id_surtidor, estacion_addr, stream, id as i32);
+                            let surtidor = Surtidor::new(id_surtidor, estacion_addr, stream, id);
                             let surtidor_addr = surtidor.start();
                             estacion.do_send(HabilitarSurtidor {
                                 surtidor_id: id_surtidor,

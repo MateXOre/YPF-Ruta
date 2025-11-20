@@ -6,12 +6,12 @@ use tokio::net::TcpStream;
 use tokio::net::tcp::OwnedWriteHalf;
 use util::structs::venta::{EstadoVenta, Venta};
 use crate::actores::estacion::Estacion;
-use crate::actores::surtidor::messages::InformarVenta;
+use crate::actores::estacion::messages::CobrarACliente;
 
 pub struct Surtidor {
     pub(crate) id: usize,
     pub(crate) estacion: Addr<Estacion>,
-    pub(crate) estacion_id: i32,
+    pub(crate) estacion_id: usize,
     pub(crate) cliente: Option<TcpStream>,
     pub(crate) writer: Option<OwnedWriteHalf>,
 }
@@ -21,7 +21,7 @@ impl Surtidor {
         id: usize,
         estacion: Addr<Estacion>,
         cliente: TcpStream,
-        estacion_id: i32,
+        estacion_id: usize,
     ) -> Self {
         Surtidor {
             id,
@@ -87,7 +87,7 @@ impl Actor for Surtidor {
                             estado: EstadoVenta::Pendiente,
                             id_estacion: estacion_id,
                         };
-                        estacion_addr.do_send(InformarVenta {
+                        estacion_addr.do_send(CobrarACliente {
                             venta,
                             surtidor_id: id_surtidor,
                         });

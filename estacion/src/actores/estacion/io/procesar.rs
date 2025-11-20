@@ -31,8 +31,9 @@ pub fn procesar_mensaje(
             }
         }
 
-    } else {
-        // Mensaje normal → reenviar al actor de la conexión
-        conn.do_send(RespuestaConexion(line.to_string()));
-    }
+    } 
+    // else {
+    //     // Mensaje normal → reenviar al actor de la conexión
+    //     conn.do_send(RespuestaConexion(line.to_string()));
+    // }
 }

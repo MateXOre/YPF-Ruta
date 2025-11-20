@@ -7,6 +7,7 @@ pub mod habilitar_surtidor;
 pub mod transacciones_por_estacion;
 pub mod confirmar_transacciones;
 pub mod cobrar_a_cliente;
+pub mod estacion_desconectada;
 
 pub use agregar_estacion::*;
 pub use eleccion::*;
@@ -17,3 +18,4 @@ pub use habilitar_surtidor::*;
 pub use transacciones_por_estacion::*;
 pub use confirmar_transacciones::*;
 pub use cobrar_a_cliente::*;
+pub use estacion_desconectada::*;

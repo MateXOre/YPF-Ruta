@@ -304,6 +304,14 @@ impl ConfirmarTransacciones {
     }
 }
 
+#[derive(Message, Clone)]
+#[rtype(result = "()")]
+pub struct EstacionDesconectada {
+    pub estacion_id: usize,
+
+    pub mensaje: Vec<u8>,
+}
+
 
 #[derive(Message, Clone)]
 #[rtype(result = "()")]

@@ -19,13 +19,14 @@ use crate::actores::surtidor::surtidor::Surtidor;
 // }
 
 pub struct Estacion {
+    pub(crate) desconectada: bool,
     pub(crate) id: usize,
     pub(crate) port: u16,
-    pub(crate) lider_actual: Option<usize>,
-    pub(crate) estaciones_cercanas: Vec<Addr<EstacionCercana>>,
-    pub(crate) siguiente_estacion: Option<SocketAddr>,
+    pub(crate) lider_actual: Option<usize>,                     // id de la estación líder actual
+    pub(crate) siguiente_estacion: usize,               // id de la siguiente estación
+    pub(crate) estaciones_cercanas: HashMap<usize, Addr<EstacionCercana>>, // id_estacion, addr actor estacion cercana
     pub(crate) total_estaciones: usize,
-    pub(crate) todas_las_estaciones: Vec<SocketAddr>,
+    pub(crate) todas_las_estaciones: HashMap<usize, SocketAddr>,   // id_estacion, socketaddr
     pub(crate) primer_anillo_realizado: bool,
     pub(crate) ventas_a_confirmar: HashMap<usize, usize>, // id_venta, id_surtidor
     pub(crate) surtidores: HashMap<usize,Addr<Surtidor>>,
@@ -34,19 +35,20 @@ pub struct Estacion {
 impl Estacion {
     pub fn new(index_estacion: usize, estaciones: Vec<SocketAddr>) -> Self {
         let siguiente = if index_estacion + 1 < estaciones.len() {
-            Some(estaciones[index_estacion + 1])
+            index_estacion + 1
         } else {
-            Some(estaciones[0])
+            0
         };
 
         Self {
+            desconectada: false,
             id: index_estacion,
             port: estaciones[index_estacion].port(),
             lider_actual: None,
-            estaciones_cercanas: Vec::new(),
+            estaciones_cercanas: HashMap::new(),
             siguiente_estacion: siguiente,
             total_estaciones: estaciones.len(),
-            todas_las_estaciones: estaciones,
+            todas_las_estaciones: estaciones.into_iter().enumerate().collect(),
             primer_anillo_realizado : false,
             ventas_a_confirmar: HashMap::new(),
             surtidores: HashMap::new(),
@@ -57,8 +59,9 @@ impl Estacion {
         target: SocketAddr,
         actor_addr: Addr<Estacion>,
         id: usize,
+        id_destino: usize,
     ) {
-        let _ = Estacion::intentar_conectar(target, actor_addr, id).await;
+        let _ = Estacion::intentar_conectar(target, actor_addr, id, id_destino).await;
     }
 
     /// Intenta conectar a una estación (no bloquea, ejecuta en background)
@@ -66,6 +69,7 @@ impl Estacion {
         target: SocketAddr,
         actor_addr: Addr<Estacion>,
         id: usize,
+        id_destino: usize,
     ) -> Result<(), std::io::Error> {
         match TcpStream::connect(target).await {
             Ok(stream) => {
@@ -73,7 +77,7 @@ impl Estacion {
 
                 let addr_clone = actor_addr.clone();
                 actix_rt::spawn(async move {
-                    if let Err(e) = handle_stream_outgoing(stream, id, addr_clone).await {
+                    if let Err(e) = handle_stream_outgoing(stream, id, addr_clone, id_destino).await {
                         eprintln!("[{}] error al manejar conexión con {}: {:?}", id, target, e);
                     }
                 });
@@ -87,55 +91,41 @@ impl Estacion {
         }
     }
 
+    /// 
     pub(crate) fn enviar_a_siguiente(&self, ctx: &mut Context<Self>, mensaje: String) {
         println!("[{}] 🔁 reenviando mensaje: {}", self.id, mensaje);
-        if let Some(siguiente) = self.estaciones_cercanas.iter().find(|c| c.estacion_id == self.id + 1) {
-            siguiente.do_send(Reenviar(mensaje.clone()));
-            println!("[{}] 🔁 reenviando mensaje", self.id);
+        
+        let siguiente = if self.estaciones_cercanas.get(&self.siguiente_estacion).is_some() {
+            self.estaciones_cercanas.get(&self.siguiente_estacion).unwrap().clone()
         } else {
-            println!("[{}] ❌ sin conexión a {}, intentando reconectar...", self.id, siguiente);
+            println!("[{}] La siguiente estación {} no está conectada, no se puede reenviar el mensaje", self.id, self.siguiente_estacion);
+            ctx.address().do_send(EstacionDesconectada{estacion_id: self.siguiente_estacion.clone(), mensaje: mensaje.as_bytes().to_vec()});
+            return;
+        };
+        println!("[{}] 🔁 reenviando mensaje", self.id);
+        siguiente.do_send(Reenviar(mensaje.clone()));
 
-            let siguiente_clone = *siguiente;
-            let addr_self = ctx.address();
-            let self_id = self.id;
-            let mensaje_clone = mensaje.clone();
-
-            // Intentar reconectar en background; si tiene éxito, pedir reenvío (Reenviar)
-            ctx.spawn(
-                actix::fut::wrap_future(async move {
-                    if Estacion::intentar_conectar(siguiente_clone, addr_self.clone(), self_id).await.is_ok() {
-                        Some(mensaje_clone)
-                    } else {
-                        None
-                    }
-                })
-                    .map(|maybe_msg, _act: &mut Estacion, ctx: &mut Context<Estacion>| {
-                        if let Some(mensaje) = maybe_msg {
-                            // cuando la reconexión haya registrado la conexión (AgregarEstacion),
-                            // recibiremos Reenviar y volveremos a intentar enviar.
-                            ctx.address().do_send(Reenviar(mensaje));
-                        }
-                    }),
-            );
-        }
     }
 
-    // pub(crate) fn buscar_estacion_lider(&self) -> Option<Addr<EstacionCercana>> {
-    //     if let Some(lider) = self.lider_actual {
-    //         // Buscar por ID si está almacenado
-    //         if let Some(conexion) = self.estaciones_cercanas.iter().find(|c| c.estacion_id == lider) {
-    //             return Some(conexion.clone());
-    //         }
-    //     }
-    //     None
-    // }
+    pub(crate) fn id_siguiente_estacion(&self) -> usize {
+        (self.id + 1) % (self.todas_las_estaciones.len())
+    }
 
-    // pub(crate) fn buscar_estacion_por_id(&self, id: usize) -> Option<Addr<EstacionCercana>> {
-    //     if let Some(conexion) = self.estaciones_cercanas.iter().find(|c| c.estacion_id == id) {
-    //         return Some(conexion.clone());
-    //     }
-    //     None
-    // }
+    pub(crate) fn buscar_estacion_lider(&self) -> Option<Addr<EstacionCercana>> {
+        if let Some(lider) = self.lider_actual {
+            if let Some(conexion) = self.estaciones_cercanas.get(&lider) {
+                return Some(conexion.clone());
+            }
+        }
+        None
+    }
+
+    pub(crate) fn buscar_estacion_por_id(&self, id: usize) -> Option<Addr<EstacionCercana>> {
+        if let Some(conexion) = self.estaciones_cercanas.get(&id) {
+            return Some(conexion.clone());
+        }
+        None
+    }
 }
 
 impl Actor for Estacion {
@@ -146,7 +136,7 @@ impl Actor for Estacion {
         let id = self.id;
         let addr_self = ctx.address();
         let addr_self_clone = addr_self.clone();
-
+        println!("[{}] Soy la estacion {} la siguiente es la estacion {}", id, id, self.siguiente_estacion);
         println!("[{}] escuchando conexiones de clientes en 127.0.0.1:{}", id, port + 1000);
         // correr listener en background
         actix_rt::spawn(async move {
@@ -202,11 +192,12 @@ impl Actor for Estacion {
 
 
         // Conectar con la siguiente estación después de crear el hilo
-        if let Some(siguiente) = self.siguiente_estacion {
-            let addr_self_clone = ctx.address();
-            actix_rt::spawn(async move {
-                Estacion::connect_and_register(siguiente, addr_self_clone, id).await;
-            });
-        }
+        let addr_self_clone = ctx.address();
+        let sig_addr = self.todas_las_estaciones.get(&self.siguiente_estacion).unwrap().clone();
+        let sig_id = self.siguiente_estacion;
+        actix_rt::spawn(async move {
+            Estacion::connect_and_register(sig_addr, addr_self_clone, id, sig_id).await;
+        });
+        
     }
 }

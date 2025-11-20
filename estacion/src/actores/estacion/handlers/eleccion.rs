@@ -27,9 +27,8 @@ impl Handler<Eleccion> for Estacion {
         let mut nuevos_aspirantes = msg.aspirantes_ids.clone();
         nuevos_aspirantes.push(self.id);
         println!("[{}] agregue mi id. Nuevos aspirantes: {:?}", self.id, nuevos_aspirantes);
-
-        let ids_str: Vec<String> = nuevos_aspirantes.iter().map(|id| id.to_string()).collect();
-        let mensaje_serializado = format!("ANILLO:{}", ids_str.join(","));
-        self.enviar_a_siguiente(ctx, mensaje_serializado);
+        
+        let mensaje_bytes = Eleccion{aspirantes_ids: nuevos_aspirantes.clone()}.to_bytes();
+        self.enviar_a_siguiente(ctx, mensaje_bytes);
     }
 }

@@ -21,6 +21,7 @@ pub async fn handle_stream_outgoing(
     println!("Vamos a intentar establecer conexión de {}", id_destino);
     let server_addr_clone = server_addr.clone();
     let estacion = EstacionCercana::new(id_destino, server_addr_clone, stream).await;
+    println!("Se crea estacion cercana para {}", id_destino);
 
     let estacion_addr = estacion.start();
     server_addr.do_send(AgregarEstacion {

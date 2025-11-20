@@ -1,6 +1,7 @@
 use actix::{Handler, Context};
 use crate::actores::estacion::Estacion;
 use crate::actores::estacion::messages::*;
+use crate::actores::estacion_cercana::Enviar;
 
 impl Handler<AgregarEstacion> for Estacion {
     type Result = ();
@@ -34,9 +35,7 @@ impl Handler<AgregarEstacion> for Estacion {
                 let mensaje = Eleccion {
                     aspirantes_ids: vec![id_estacion],
                 };
-                let ids_str: Vec<String> = mensaje.aspirantes_ids.iter().map(|id| id.to_string()).collect();
-                let mensaje_serializado = format!("ANILLO:{}", ids_str.join(","));
-                siguiente.do_send(Reenviar(mensaje_serializado));
+                siguiente.do_send(Enviar{bytes: mensaje.to_bytes()});
                 println!("[{}] enviando mensaje inicial (via Reenviar) a siguiente estación en {}", id_estacion, siguiente_estacion);
                 
             });

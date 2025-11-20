@@ -1,7 +1,8 @@
 use crate::actores::estacion::messages::EstacionDesconectada;
 use crate::actores::estacion::messages::InformarVenta;
 use crate::actores::estacion::messages::Reenviar;
-use crate::actores::estacion::ConfirmarTransacciones;
+
+use crate::actores::estacion::{ConfirmarTransacciones, ProcesarMensaje};
 use crate::actores::estacion::Eleccion;
 use crate::actores::estacion::Estacion;
 use crate::actores::estacion::NotificarLider;
@@ -13,6 +14,13 @@ use tokio::net::TcpStream;
 use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
 
 // ===== Mensajes =====
+
+
+#[derive(Message)]
+#[rtype(result = "()")]
+pub struct Enviar {
+    pub bytes: Vec<u8>,
+}
 
 #[derive(Message)]
 #[rtype(result = "()")]
@@ -32,19 +40,19 @@ impl Actor for EstacionCercana {
     type Context = Context<Self>;
 }
 
-pub fn serialize(msg: Reenviar) -> Vec<u8> {
+/*pub fn serialize(msg: Enviar) -> Vec<u8> {
     msg.0.as_bytes().to_vec()
 }
 
-pub fn deserialize(buffer: Vec<u8>) -> Reenviar {
-    Reenviar(String::from_utf8(buffer).unwrap())
-}
+pub fn deserialize(buffer: Vec<u8>) -> Enviar {
+    Enviar(String::from_utf8(buffer).unwrap())
+}*/
 
-impl Handler<Reenviar> for EstacionCercana {
+impl Handler<Enviar> for EstacionCercana {
     type Result = ();
 
-    fn handle(&mut self, msg: Reenviar, _ctx: &mut Context<Self>) {
-        let buf = serialize(msg);
+    fn handle(&mut self, msg: Enviar, _ctx: &mut Context<Self>) {
+        let buf = msg.bytes.clone();
         self.enviar_por_socket(buf);
     }
 }
@@ -113,7 +121,7 @@ impl EstacionCercana {
             socket_estacion_cercana: tx,
         };
 
-        EstacionCercana::read_from_socket(reader, addr).await;
+        EstacionCercana::read_from_socket(reader, addr, estacion_id).await;
 
         estacion_cercana
     }
@@ -136,7 +144,7 @@ impl EstacionCercana {
         }
     }
 
-    pub async fn read_from_socket(mut reader: OwnedReadHalf, estacion_local: Addr<Estacion>) {
+    pub async fn read_from_socket(mut reader: OwnedReadHalf, estacion_local: Addr<Estacion>, estacion_remota_id: usize,) {
         tokio::spawn(async move {
             let mut buf = vec![0; 1024];
 
@@ -150,10 +158,12 @@ impl EstacionCercana {
                     return;
                 }
 
-                println!("Recibimos mensaje del socket");
-                let message = deserialize(buf.clone());
-                println!("Mensaje {}", message.0);
-                estacion_local.do_send(message)
+                println!("Recibimos mensaje del socket de la estacion {}", estacion_remota_id);
+
+                estacion_local.do_send(ProcesarMensaje {
+                    bytes: buf[..bytes].to_vec(),
+                    estacion_remota: estacion_remota_id,
+                })
             }
         });
     }

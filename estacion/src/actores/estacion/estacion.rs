@@ -5,7 +5,7 @@ use tokio::net::{TcpStream, TcpListener};
 use actix::prelude::*;
 use crate::actores::estacion::messages::*;
 use crate::actores::estacion_cercana::EstacionCercana;
-use crate::actores::estacion::messages::Reenviar;
+use crate::actores::estacion_cercana::Enviar;
 use crate::actores::estacion::io::{handle_stream_incoming, handle_stream_outgoing};
 use crate::actores::surtidor::surtidor::Surtidor;
 
@@ -73,15 +73,18 @@ impl Estacion {
     ) -> Result<(), std::io::Error> {
         match TcpStream::connect(target).await {
             Ok(stream) => {
-                println!("[{}] ✅ conectado a {}", id, target);
+                println!("[{}] ✅ conectado a {} con dirección:{}", id, id_destino, target);
+                println!(
+                    "[{}] ✅ conectado → local={} → remoto={}",
+                    id,
+                    stream.local_addr()?,
+                    stream.peer_addr()?
+                );
 
                 let addr_clone = actor_addr.clone();
-                actix_rt::spawn(async move {
-                    if let Err(e) = handle_stream_outgoing(stream, id, addr_clone, id_destino).await {
-                        eprintln!("[{}] error al manejar conexión con {}: {:?}", id, target, e);
-                    }
-                });
-
+                if let Err(e) = handle_stream_outgoing(stream, id, addr_clone, id_destino).await {
+                    eprintln!("[{}] error al manejar conexión con {}: {:?}", id, target, e);
+                }
                 Ok(())
             }
             Err(e) => {
@@ -92,18 +95,18 @@ impl Estacion {
     }
 
     /// 
-    pub(crate) fn enviar_a_siguiente(&self, ctx: &mut Context<Self>, mensaje: String) {
-        println!("[{}] 🔁 reenviando mensaje: {}", self.id, mensaje);
-        
+    pub(crate) fn enviar_a_siguiente(&self, ctx: &mut Context<Self>, mensaje: Vec<u8>) {
+        println!("[{}] 🔁 reenviando mensaje", self.id);
+
         let siguiente = if self.estaciones_cercanas.get(&self.siguiente_estacion).is_some() {
             self.estaciones_cercanas.get(&self.siguiente_estacion).unwrap().clone()
         } else {
             println!("[{}] La siguiente estación {} no está conectada, no se puede reenviar el mensaje", self.id, self.siguiente_estacion);
-            ctx.address().do_send(EstacionDesconectada{estacion_id: self.siguiente_estacion.clone(), mensaje: mensaje.as_bytes().to_vec()});
+            ctx.address().do_send(EstacionDesconectada{estacion_id: self.siguiente_estacion.clone(), mensaje: mensaje.clone()});
             return;
         };
-        println!("[{}] 🔁 reenviando mensaje", self.id);
-        siguiente.do_send(Reenviar(mensaje.clone()));
+        println!("[{}] 🔁 Mensaje reenviado exitosamente", self.id);
+        siguiente.do_send(Enviar { bytes: mensaje.clone() });
 
     }
 
@@ -144,7 +147,7 @@ impl Actor for Estacion {
             loop {
                 match listener.accept().await {
                     Ok((stream, peer_addr)) => {
-                        println!("[{}] conexión entrante desde {:?}", id, peer_addr);
+                        println!("[{}] conexión de cliente entrante desde {:?}", id, peer_addr);
                         // se inicia un actor de surtidor por cada conexión entrante
                         let estacion_addr = addr_self_clone.clone();
                         let id_surtidor = rand::random::<u64>() as usize;
@@ -174,7 +177,7 @@ impl Actor for Estacion {
             loop {
                 match listener.accept().await {
                     Ok((stream, peer_addr)) => {
-                        println!("[{}] conexión entrante desde {:?}", id, peer_addr);
+                        println!("[{}] conexión de estación entrante desde {:?}", id, peer_addr);
                         // Spawn en un task separado para no bloquear el accept de nuevas conexiones
                         let addr_clone = addr_self.clone();
                         actix_rt::spawn(async move {
@@ -192,12 +195,15 @@ impl Actor for Estacion {
 
 
         // Conectar con la siguiente estación después de crear el hilo
+
         let addr_self_clone = ctx.address();
         let sig_addr = self.todas_las_estaciones.get(&self.siguiente_estacion).unwrap().clone();
         let sig_id = self.siguiente_estacion;
+        println!("Conectando con siguiente estación {}", sig_id);
         actix_rt::spawn(async move {
             Estacion::connect_and_register(sig_addr, addr_self_clone, id, sig_id).await;
         });
         
     }
 }
+

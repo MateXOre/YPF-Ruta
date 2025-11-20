@@ -141,26 +141,23 @@ pub struct AgregarEstacion {
 
 #[derive(Message, Clone)]
 #[rtype(result = "()")]
-pub struct Reenviar(pub String);
+pub struct Reenviar {
+    pub bytes: Vec<u8>,
+}
 
 impl Reenviar {
     pub fn from_bytes(bytes: &[u8]) -> Result<Self, String> {
         if bytes.is_empty() {
             return Err("Buffer vacío".to_string());
         }
-        if bytes[0] != OPCODE_REENVIAR {
-            return Err("Opcode incorrecto para Reenviar".to_string());
-        }
-        let mut offset = 1;
-        let string = read_string(bytes, &mut offset)?;
-        Ok(Reenviar(string))
+
+        Ok(Reenviar {
+            bytes: bytes.to_vec(),
+        })
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = Vec::new();
-        buf.push(OPCODE_REENVIAR);
-        write_string(&mut buf, &self.0);
-        buf
+        self.bytes.clone()
     }
 }
 
@@ -318,6 +315,13 @@ pub struct EstacionDesconectada {
 pub struct CobrarACliente {
     pub venta: Venta,
     pub surtidor_id: usize,
+}
+
+#[derive(Message)]
+#[rtype(result = "()")]
+pub struct ProcesarMensaje {
+    pub bytes: Vec<u8>,
+    pub estacion_remota: usize,   // opcional
 }
 
 // ===== Función helper para deserializar cualquier mensaje =====

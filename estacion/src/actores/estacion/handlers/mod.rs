@@ -8,6 +8,7 @@ pub mod transacciones_por_estacion;
 pub mod confirmar_transacciones;
 pub mod cobrar_a_cliente;
 pub mod estacion_desconectada;
+mod procesar_mensaje;
 
 pub use agregar_estacion::*;
 pub use eleccion::*;

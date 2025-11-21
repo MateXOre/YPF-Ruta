@@ -1,0 +1,51 @@
+[
+  {
+    "id": 1,
+    "tarjeta_id": 1,
+    "estacion_id": 101,
+    "monto": 10000,
+    "fecha": "2024-01-15T10:30:00Z"
+  },
+  {
+    "id": 2,
+    "tarjeta_id": 2,
+    "estacion_id": 102,
+    "monto": 5000,
+    "fecha": "2024-01-16T11:00:00Z"
+  },
+  {
+    "id": 3,
+    "tarjeta_id": 3,
+    "estacion_id": 103,
+    "monto": 25000,
+    "fecha": "2024-01-17T12:15:00Z"
+  },
+  {
+    "id": 4,
+    "tarjeta_id": 4,
+    "estacion_id": 104,
+    "monto": 20000,
+    "fecha": "2024-01-18T13:45:00Z"
+  },
+  {
+    "id": 5,
+    "tarjeta_id": 5,
+    "estacion_id": 105,
+    "monto": 30000,
+    "fecha": "2024-01-19T14:30:00Z"
+  },
+  {
+    "id": 6,
+    "tarjeta_id": 6,
+    "estacion_id": 106,
+    "monto": 15000,
+    "fecha": "2024-01-20T15:00:00Z"
+  },
+  {
+    "id": 7,
+    "tarjeta_id": 7,
+    "estacion_id": 107,
+    "monto": 20000,
+    "fecha": "2024-01-21T16:20:00Z"
+  }
+]

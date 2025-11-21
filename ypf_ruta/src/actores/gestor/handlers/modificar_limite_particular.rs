@@ -1,6 +1,6 @@
 use actix::{Context, Handler};
 use crate::actores::gestor::gestor_actor::Gestor;
-use crate::actores::gestor::messages::{ModificarLimiteGeneral, ModificarLimiteParticular};
+use crate::actores::gestor::messages::ModificarLimiteParticular;
 
 impl Handler<ModificarLimiteParticular> for Gestor {
     type Result = Result<(), String>;

@@ -1,6 +1,5 @@
 use actix::{Context, Handler};
-use crate::actores::peer::messages::Eleccion;
-use crate::actores::ypf::messages::{NuevoLider, PeerDesconectado};
+use crate::actores::ypf::messages::NuevoLider;
 use crate::actores::ypf::ypf_actor::YpfRuta;
 
 impl Handler<NuevoLider> for YpfRuta {

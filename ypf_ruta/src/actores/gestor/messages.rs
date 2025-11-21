@@ -1,4 +1,4 @@
-use actix::{Context, Handler, Message};
+use actix::Message;
 use crate::actores::gestor::structs::{Empresa, Tarjeta, Venta};
 
 #[derive(Message)]

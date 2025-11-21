@@ -11,7 +11,7 @@ pub struct GuardarSocket(pub(crate) TcpStream);
 pub struct Eleccion(pub(crate) usize);
 
 impl Eleccion {
-    pub fn fromBytes(bytes: &[u8]) -> Self {
+    pub fn from_bytes(bytes: &[u8]) -> Self {
         if bytes.len() != 3 {
             println!("Error: bytes length incorrecto para Eleccion");
             return Eleccion(0);
@@ -25,7 +25,7 @@ impl Eleccion {
         Eleccion(id)
     }
 
-    pub fn toBytes(&self) -> Vec<u8> {
+    pub fn to_bytes(&self) -> Vec<u8> {
         let mut result = vec![b'3', b'+'];
         result.extend(self.0.to_string().as_bytes());
         result
@@ -39,7 +39,7 @@ pub struct VentaRegistrada {
 }
 
 impl VentaRegistrada {
-    pub fn fromBytes(bytes: &[u8]) -> Self {
+    pub fn from_bytes(bytes: &[u8]) -> Self {
         if bytes[0] != b'5' || bytes[1] != b'+' {
             println!("Error: formato incorrecto para VentaRegistrada");
             return VentaRegistrada { venta: Venta {
@@ -82,7 +82,7 @@ impl VentaRegistrada {
         }
     }
 
-    pub fn toBytes(&self) -> Vec<u8> {
+    pub fn to_bytes(&self) -> Vec<u8> {
         format!("5+{},{},{},{},{:?}", self.venta.id, self.venta.estacion_id, self.venta.tarjeta_id, self.venta.monto, self.venta.fecha).as_bytes().to_vec()
     }
 }

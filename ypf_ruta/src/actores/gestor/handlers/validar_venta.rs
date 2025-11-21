@@ -1,7 +1,6 @@
 use actix::{Context, Handler};
 use crate::actores::gestor::gestor_actor::Gestor;
-use crate::actores::gestor::messages::{ConsultarEstado, ModificarLimiteGeneral, ModificarLimiteParticular, ValidarVenta};
-use crate::actores::gestor::structs::{Empresa, Tarjeta};
+use crate::actores::gestor::messages::ValidarVenta;
 
 impl Handler<ValidarVenta> for Gestor {
     type Result = bool;

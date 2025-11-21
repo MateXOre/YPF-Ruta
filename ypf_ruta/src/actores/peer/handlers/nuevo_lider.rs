@@ -7,7 +7,7 @@ impl Handler<NuevoLider> for YpfPeer {
 
     fn handle(&mut self, msg: NuevoLider, _ctx: &mut Context<Self>) -> Self::Result {
         self.cola_envio.as_mut().map(|tx| {
-            tx.send(msg.toBytes()).expect("Fallo al enviar VentaRegistrada a la cola de envio");
+            tx.send(msg.to_bytes()).expect("Fallo al enviar VentaRegistrada a la cola de envio");
         });
     }
 }

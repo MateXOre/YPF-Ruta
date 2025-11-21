@@ -10,7 +10,7 @@ use tokio::net::tcp::OwnedReadHalf;
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 
 const PING_INTERVAL_SECS: u64 = 30;
-const TIMEOUT_SECS: u64 = 5;
+//const TIMEOUT_SECS: u64 = 5;
 
 pub struct YpfPeer {
     pub peer_id: usize,

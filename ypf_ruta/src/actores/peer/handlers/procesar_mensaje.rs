@@ -1,5 +1,5 @@
 use actix::{Context, Handler};
-use crate::actores::peer::messages::{Eleccion, ProcesarMensaje, VentaRegistrada};
+use crate::actores::peer::messages::{Eleccion, ProcesarMensaje};
 use crate::actores::peer::ypf_peer::YpfPeer;
 use crate::actores::ypf::messages::NuevoLider;
 
@@ -28,17 +28,17 @@ impl Handler<ProcesarMensaje> for YpfPeer {
                 println!("YpfPeer {}: Pong recibido.", self.peer_id);
             },
             b'3' => {
-                let msg = Eleccion::fromBytes(msg.bytes.as_slice());
+                let msg = Eleccion::from_bytes(msg.bytes.as_slice());
                 self.ypf_local_addr.do_send(msg);
             },
             b'4' => {
-                let msg = NuevoLider::fromBytes(msg.bytes.as_slice());
+                let msg = NuevoLider::from_bytes(msg.bytes.as_slice());
                 self.ypf_local_addr.do_send(msg);
             },
-            b'5' => {
-                let msg = VentaRegistrada::fromBytes(msg.bytes.as_slice());
-                //self.ypf_local_addr.do_send(msg);
-            },
+            // b'5' => {
+            //     let msg = VentaRegistrada::from_bytes(msg.bytes.as_slice());
+            //     //self.ypf_local_addr.do_send(msg);
+            // },
             _ => {
                 eprintln!("YpfPeer {}: Tipo de mensaje desconocido.", self.peer_id);
             }

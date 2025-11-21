@@ -59,7 +59,7 @@ async fn main() {
 
     let gestor = Gestor::new().start();
 
-    let ypf_server = YpfRuta::new(
+    let _ypf_server = YpfRuta::new(
         local.0,
         local.1,
         local.2,

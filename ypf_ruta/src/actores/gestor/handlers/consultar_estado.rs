@@ -1,6 +1,6 @@
 use actix::{Context, Handler};
 use crate::actores::gestor::gestor_actor::Gestor;
-use crate::actores::gestor::messages::{ConsultarEstado, ModificarLimiteGeneral, ModificarLimiteParticular};
+use crate::actores::gestor::messages::ConsultarEstado;
 use crate::actores::gestor::structs::{Empresa, Tarjeta};
 
 impl Handler<ConsultarEstado> for Gestor {

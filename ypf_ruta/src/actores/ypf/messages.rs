@@ -1,4 +1,5 @@
 use actix::Message;
+use tokio::net::TcpStream;
 
 #[derive(Message)]
 #[rtype(result = "()")]
@@ -13,7 +14,7 @@ pub struct NuevoLider {
 }
 
 impl NuevoLider {
-    pub fn fromBytes(bytes: &[u8]) -> Self {
+    pub fn from_bytes(bytes: &[u8]) -> Self {
         if bytes.len() != 3 {
             println!("Error: bytes length incorrecto para NuevoLider");
             return NuevoLider { id: 0 };
@@ -27,9 +28,18 @@ impl NuevoLider {
         NuevoLider { id }
     }
 
-    pub fn toBytes(&self) -> Vec<u8> {
+    pub fn to_bytes(&self) -> Vec<u8> {
         let mut result = vec![b'4', b'+'];
         result.extend(self.id.to_string().as_bytes());
         result
     }
 }
+
+// Mensaje para manejar conexiones entrantes
+#[derive(Message)]
+#[rtype(result = "()")]
+pub struct ConexionEntrante {
+    pub peer_id: usize,
+    pub socket: TcpStream,
+}
+

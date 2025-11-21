@@ -7,3 +7,14 @@ pub struct ResultadoVenta {
     pub exito: bool,
     pub id_venta: usize,
 }
+
+#[derive(Message)]
+#[rtype(result = "()")]
+pub struct Detenerme;
+
+
+#[derive(Message, Clone)]
+#[rtype(result = "()")]
+pub struct CargarCombustible {
+    pub venta: Venta,
+}

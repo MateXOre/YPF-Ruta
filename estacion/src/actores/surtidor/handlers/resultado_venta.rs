@@ -1,27 +1,29 @@
-use actix::{Context, Handler};
+use actix::{AsyncContext, Context, Handler};
 use tokio::io::AsyncWriteExt;
-
+use crate::actores::estacion::SurtidorLibre;
 use crate::actores::surtidor::{surtidor::Surtidor, messages::ResultadoVenta};
+use crate::actores::surtidor::messages::Detenerme;
 
 impl Handler<ResultadoVenta> for Surtidor {
     type Result = ();
 
-    fn handle(&mut self, msg: ResultadoVenta, _ctx: &mut Context<Self>) {
-        if let Some(mut wu) = self.writer.take() {
-            actix_rt::spawn(async move {
-                let respuesta = if msg.exito {
-                    format!("Venta exitosa. ID de venta: {}\n", msg.id_venta)
-                } else {
-                    "Venta fallida.\n".to_string()
-                };
-                if let Err(e) = wu.write_all(respuesta.as_bytes()).await {
-                    println!("Error al escribir al cliente: {:?}", e);
-                } else {
-                    println!("Respuesta enviada al cliente");
-                }
-            });
+    fn handle(&mut self, msg: ResultadoVenta, ctx: &mut Context<Self>) {
+        let respuesta = if msg.exito {
+            println!("Venta exitosa");
+            format!("Venta exitosa. ID de venta: {}\n", msg.id_venta)
         } else {
-            println!("No hay writer disponible (take devolvió None)");
+            println!("Venta Rechazada");
+            "Venta fallida.\n".to_string()
+        };
+
+        // Enviar la respuesta al cliente mediante el canal
+        if let Err(e) = self.writer_tx.send(respuesta.into_bytes()) {
+            println!("Error al enviar respuesta al writer: {:?}", e);
+            return;
+        } else {
+            println!("Respuesta enviada al cliente");
+
+            ctx.address().do_send(Detenerme);
         }
     }
     

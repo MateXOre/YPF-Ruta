@@ -9,6 +9,8 @@ use crate::actores::estacion_cercana::Enviar;
 use crate::actores::estacion::io::{handle_stream_incoming, handle_stream_outgoing};
 use crate::actores::surtidor::surtidor::Surtidor;
 
+use std::collections::VecDeque;
+
 
 // Estructura para guardar información de una conexión
 // #[derive(Clone)]
@@ -30,6 +32,8 @@ pub struct Estacion {
     pub(crate) primer_anillo_realizado: bool,
     pub(crate) ventas_a_confirmar: HashMap<usize, usize>, // id_venta, id_surtidor
     pub(crate) surtidores: HashMap<usize,Addr<Surtidor>>,
+    pub(crate) max_surtidores: usize,
+    pub cola_espera: VecDeque<AceptarCliente>,
 }
 
 impl Estacion {
@@ -52,6 +56,8 @@ impl Estacion {
             primer_anillo_realizado : false,
             ventas_a_confirmar: HashMap::new(),
             surtidores: HashMap::new(),
+            max_surtidores: 4,
+            cola_espera: VecDeque::new()
         }
     }
 
@@ -149,7 +155,8 @@ impl Actor for Estacion {
                     Ok((stream, peer_addr)) => {
                         println!("[{}] conexión de cliente entrante desde {:?}", id, peer_addr);
                         // se inicia un actor de surtidor por cada conexión entrante
-                        let estacion_addr = addr_self_clone.clone();
+                        addr_self_clone.do_send(AceptarCliente { stream, peer_addr});
+                        /*let estacion_addr = addr_self_clone.clone();
                         let id_surtidor = rand::random::<u64>() as usize;
                         actix_rt::spawn(async move {
                             let estacion: Addr<Estacion> = estacion_addr.clone();
@@ -159,10 +166,10 @@ impl Actor for Estacion {
                                 surtidor_id: id_surtidor,
                                 surtidor_addr,
                             });
-                        });
+                        });*/
                     }
                     Err(e) => {
-                        eprintln!("Error al aceptar conexión: {:?}", e);
+                        eprintln!("Error al aceptar conexión de cliente: {:?}", e);
                     }
                 }
             }

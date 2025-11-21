@@ -2,6 +2,7 @@ use actix::{Message, Addr};
 use std::net::SocketAddr;
 use crate::actores::{estacion_cercana::EstacionCercana, surtidor::surtidor::Surtidor};
 use util::structs::venta::Venta;
+use tokio::net::TcpStream;
 
 // ===== Opcodes del protocolo =====
 const OPCODE_REENVIAR: u8 = 0x01;
@@ -139,6 +140,12 @@ pub struct AgregarEstacion {
     pub estacion_id: usize,
 }
 
+#[derive(Message)]
+#[rtype(result = "()")]
+pub struct SurtidorLibre {
+    pub surtidor_id: usize,
+}
+
 #[derive(Message, Clone)]
 #[rtype(result = "()")]
 pub struct Reenviar {
@@ -226,7 +233,14 @@ impl NotificarLider {
     }
 }
 
-#[derive(Message, Clone)]
+#[derive(Message)]
+#[rtype(result = "()")]
+pub struct AceptarCliente {
+    pub stream: TcpStream,
+    pub peer_addr: SocketAddr,
+}
+
+#[derive(Message)]
 #[rtype(result = "()")]
 pub struct HabilitarSurtidor {
     pub surtidor_id: usize,

@@ -1,0 +1,10 @@
+[package]
+name = "ypf_ruta"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+serde_json = "1.0.145"
+serde = { version = "1.0.228", features = ["derive"] }
+actix = "0.13.5"
+tokio = "1.48.0"

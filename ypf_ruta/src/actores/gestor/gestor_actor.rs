@@ -122,7 +122,7 @@ impl Gestor {
         })
     }
 
-    fn crear_venta(&mut self, venta: Venta) {
+    pub fn crear_venta(&mut self, venta: Venta) {
         if let Some(t) = self.tarjetas.get_mut(&venta.tarjeta_id) {
             t.consumo_actual += venta.monto;
             let empresa_id = t.empresa_id;

@@ -1,21 +1,25 @@
 use crate::actores::gestor::gestor_actor::Gestor;
+use crate::actores::gestor::structs::Venta;
 use crate::actores::peer::ypf_peer::YpfPeer;
+use crate::actores::estacion::estacion_actor::Estacion;
 use actix::ActorFutureExt;
 use actix::{Actor, Addr, AsyncContext, WrapFuture};
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::net::SocketAddr;
 use crate::actores::ypf::messages::{ConexionEntrante, NuevoLider};
 
 pub struct YpfRuta {
     pub(crate) id: usize,
     puerto: usize,
+
     pub(crate) lider: Option<usize>,
     pub(crate) ypf_peers: HashMap<usize, Addr<YpfPeer>>,
     peer_addrs: HashMap<usize, SocketAddr>,
-    gestor_addr: Addr<Gestor>,
-    // Estado para algoritmo Bully
     pub(crate) en_eleccion: bool,
     pub(crate) respuestas_recibidas: usize,
+
+    pub(crate) gestor_addr: Addr<Gestor>,
+    pub(crate) ventas_por_confirmar: VecDeque<(Addr<Estacion>, Vec<Venta>)>,
 }
 
 impl YpfRuta {
@@ -28,15 +32,18 @@ impl YpfRuta {
     ) -> Self {
         let ypf_peers = HashMap::new();
         println!("YpfRuta {}: Creando instancia.", id);
+
+        let ventas_por_confirmar = VecDeque::new();
         YpfRuta {
             id,
             puerto,
             lider,
             ypf_peers,
             peer_addrs: peers,
-            gestor_addr,
             en_eleccion: false,
             respuestas_recibidas: 0,
+            gestor_addr,
+            ventas_por_confirmar,
         }
     }
 
@@ -120,6 +127,84 @@ impl YpfRuta {
             .map(|_, _, _| ()),
         );
     }
+
+    fn escuchar_estaciones(&mut self, ctx: &mut actix::Context<Self>) {
+        println!("YpfRuta {}: Escuchando conexiones entrantes de estaciones líderes...", self.id);
+        let puerto = (self.puerto + 10000) as u16; // Puerto offset para estaciones líderes
+        let self_id = self.id;
+        let self_addr = ctx.address();
+
+        ctx.spawn(
+            async move {
+                let listener = tokio::net::TcpListener::bind(("127.0.0.1", puerto))
+                    .await
+                    .unwrap_or_else(|e| {
+                        panic!("YpfRuta {}: Error al abrir listener de estaciones en puerto {}: {}", self_id, puerto, e);
+                    });
+                
+                println!("YpfRuta {}: Listener de estaciones activo en puerto {}", self_id, puerto);
+
+                loop {
+                    if let Ok((socket, peer_addr)) = listener.accept().await {
+                        println!("YpfRuta {}: Nueva conexión de estación desde {:?}", self_id, peer_addr);
+                        
+                        // Crear actor de Estacion para esta conexión
+                        // El actor leerá las ventas del socket automáticamente
+                        let estacion = Estacion::new(socket, self_addr.clone()).await;
+                        let _estacion_addr = estacion.start();
+                        
+                        println!("YpfRuta {}: Actor de Estacion creado para {:?}", self_id, peer_addr);
+                    }
+                }
+            }
+            .into_actor(self)
+            .map(|_, _, _| ()),
+        );
+    }
+
+    fn procesar_ventas(&mut self, ctx: &mut actix::Context<Self>) {
+        use actix::prelude::*;
+        
+        // Tarea periódica que procesa la cola de ventas
+        ctx.run_interval(std::time::Duration::from_millis(100), |act, _ctx| {
+            if let Some((estacion_addr, ventas)) = act.ventas_por_confirmar.pop_front() {
+                println!("YpfRuta {}: Procesando {} ventas de la cola", act.id, ventas.len());
+                
+                // Procesar ventas y guardar resultados
+                let gestor = act.gestor_addr.clone();
+                let ypf_id = act.id;
+                
+                // Spawn async task para procesar todas las ventas
+                actix::spawn(async move {
+                    use crate::actores::gestor::messages::ValidarVenta;
+                    use crate::actores::estacion::estacion_actor::ResultadoVentas;
+                    
+                    let mut ventas_aprobadas = Vec::new();
+                    
+                    for venta in ventas {
+                        println!("YpfRuta {}: Validando venta {} en el gestor", ypf_id, venta.id);
+                        
+                        // Enviar al gestor y esperar respuesta
+                        match gestor.send(ValidarVenta(venta.clone())).await {
+                            Ok(aprobada) => {
+                                println!("YpfRuta {}: Venta {} - Resultado: {}", ypf_id, venta.id, aprobada);
+                                if aprobada {
+                                    ventas_aprobadas.push(venta);
+                                }
+                            }
+                            Err(e) => {
+                                eprintln!("YpfRuta {}: Error validando venta {}: {:?}", ypf_id, venta.id, e);
+                            }
+                        }
+                    }
+                    
+                    // Enviar ventas aprobadas de vuelta a la estación
+                    println!("YpfRuta {}: Enviando {} ventas aprobadas a la estación", ypf_id, ventas_aprobadas.len());
+                    estacion_addr.do_send(ResultadoVentas { ventas: ventas_aprobadas });
+                });
+            }
+        });
+    }
 }
 
 impl Actor for YpfRuta {
@@ -135,6 +220,10 @@ impl Actor for YpfRuta {
         // Abrimos un listener para empresas
 
         // Abrimos un listener para estaciones lideres
+        self.escuchar_estaciones(ctx);
+        
+        // Iniciar procesador de cola de ventas
+        self.procesar_ventas(ctx);
     }
 }
 

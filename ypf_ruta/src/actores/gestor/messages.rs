@@ -26,3 +26,7 @@ pub struct ModificarLimiteParticular {
 #[derive(Message)]
 #[rtype(result = "()")]
 pub struct PersistirEstado;
+
+#[derive(Message)]
+#[rtype(result = "()")]
+pub struct RegistrarVenta(pub Venta);

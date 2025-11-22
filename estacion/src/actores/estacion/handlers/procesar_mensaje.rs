@@ -13,6 +13,7 @@ impl Handler<ProcesarMensaje> for Estacion {
                 MessageType::NotificarLider(m) => ctx.address().do_send(m),
                 MessageType::InformarVenta(m) => ctx.address().do_send(m),
                 MessageType::ConfirmarTransacciones(m) => ctx.address().do_send(m),
+                MessageType::IdentificarEstacion(m) => ctx.address().do_send(m),
             }
             Err(e) => eprintln!("Error deserializando: {}", e),
         }

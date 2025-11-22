@@ -10,6 +10,7 @@ const OPCODE_ELECCION: u8 = 0x02;
 const OPCODE_NOTIFICAR_LIDER: u8 = 0x03;
 const OPCODE_INFORMAR_VENTA: u8 = 0x04;
 const OPCODE_CONFIRMAR_TRANSACCIONES: u8 = 0x05;
+pub const OPCODE_IDENTIFICAR: u8 = 0x06;
 
 // ===== Funciones helper para serialización binaria =====
 fn write_u64(buf: &mut Vec<u8>, value: u64) {
@@ -131,6 +132,29 @@ fn read_venta(buf: &[u8], offset: &mut usize) -> Result<Venta, String> {
         offline,
         estado,
     })
+}
+
+#[derive(Message)]
+#[rtype(result = "()")]
+pub struct IdentificarEstacion {
+    pub id: usize,
+}
+
+impl IdentificarEstacion {
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut buf = vec![OPCODE_IDENTIFICAR];
+        write_usize(&mut buf, self.id);
+        buf
+    }
+
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self, String> {
+        if bytes[0] != OPCODE_IDENTIFICAR {
+            return Err("Opcode incorrecto para identificar".into());
+        }
+        let mut offset = 1;
+        let id = read_usize(bytes, &mut offset)?;
+        Ok(Self { id })
+    }
 }
 
 #[derive(Message)]
@@ -362,5 +386,6 @@ pub enum MessageType {
     NotificarLider(NotificarLider),
     InformarVenta(InformarVenta),
     ConfirmarTransacciones(ConfirmarTransacciones),
+    IdentificarEstacion(IdentificarEstacion),
 }
 

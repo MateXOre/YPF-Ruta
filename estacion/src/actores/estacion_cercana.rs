@@ -34,6 +34,7 @@ pub struct EstacionCercana {
     pub estacion_id: usize,
     pub estacion_local: Addr<Estacion>,
     pub socket_estacion_cercana: UnboundedSender<Vec<u8>>,
+    pub estacion_local_id: usize,
 }
 
 impl Actor for EstacionCercana {
@@ -97,11 +98,11 @@ impl EstacionCercana {
     pub async fn new(
         estacion_id: usize,
         estacion_local: Addr<Estacion>,
-        estacion_cercana_socket: TcpStream,
+        reader: OwnedReadHalf,
+        mut writer: OwnedWriteHalf,
+        estacion_local_id: usize,
     ) -> EstacionCercana {
         let addr = estacion_local.clone();
-        let (reader, mut writer) = estacion_cercana_socket.into_split();
-
         let (tx, mut rx) = unbounded_channel::<Vec<u8>>();
 
         // Task que posee el writer y serializa las escrituras
@@ -119,6 +120,7 @@ impl EstacionCercana {
             estacion_id,
             estacion_local,
             socket_estacion_cercana: tx,
+            estacion_local_id,
         };
 
         EstacionCercana::read_from_socket(reader, addr, estacion_id).await;

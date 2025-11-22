@@ -1,3 +1,4 @@
+use std::time::Duration;
 use actix::{Handler, Context, AsyncContext, ActorFutureExt, WrapFuture};
 use crate::actores::estacion::Estacion;
 use crate::actores::estacion_cercana::Enviar;
@@ -56,7 +57,8 @@ impl Handler<EstacionDesconectada> for Estacion {
                         println!("Reconexión exitosa desde Desconectada");
                         Some(mensaje2)
                     } else {
-                        println!("Reconexion fallida, reintentaremos con {}", prox_id);
+                        println!("Reconexion fallida, reintentaremos con {} en 500 ms", prox_id);
+                        tokio::time::sleep(Duration::from_millis(500)).await;
                         addr_self2.do_send(EstacionDesconectada {
                             estacion_id: prox_id,
                             mensaje: mensaje2,

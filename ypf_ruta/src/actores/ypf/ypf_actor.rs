@@ -207,8 +207,8 @@ impl YpfRuta {
 
                         match Estacion::new(socket, self_addr.clone()).await {
                             Ok(estacion_addr) => estacion_addr.start(),
-                            Err(e) => continue
-                        };;
+                            Err(_) => continue
+                        };
 
                         println!(
                             "YpfRuta {}: Actor de Estacion creado para {:?}",

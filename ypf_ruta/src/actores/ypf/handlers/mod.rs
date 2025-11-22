@@ -5,5 +5,5 @@ mod conexion_entrante;
 mod venta_registrada;
 mod validar_ventas;
 mod iniciar_eleccion;
-mod eleccion_ok;
 mod eleccion_timeout;
+mod eleccion_ok;

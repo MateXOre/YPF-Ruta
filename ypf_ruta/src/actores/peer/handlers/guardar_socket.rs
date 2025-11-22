@@ -1,9 +1,7 @@
 use actix::{AsyncContext, Context, Handler};
-use tokio::io::AsyncWriteExt;
 use tokio::sync::mpsc::unbounded_channel;
 use crate::actores::peer::messages::GuardarSocket;
 use crate::actores::peer::ypf_peer::YpfPeer;
-use crate::actores::ypf::messages::PeerDesconectado;
 
 impl Handler<GuardarSocket> for YpfPeer {
     type Result = ();

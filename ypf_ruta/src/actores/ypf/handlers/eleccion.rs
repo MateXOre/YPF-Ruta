@@ -1,6 +1,6 @@
 use actix::{AsyncContext, Context, Handler};
 use crate::actores::peer::messages::{Eleccion, EleccionOk};
-use crate::actores::ypf::messages::{NuevoLider, IniciarEleccion, EleccionTimeout};
+use crate::actores::ypf::messages::{NuevoLider, IniciarEleccion};
 use crate::actores::ypf::ypf_actor::YpfRuta;
 
 // Handler cuando recibo un mensaje ELECTION de otro nodo

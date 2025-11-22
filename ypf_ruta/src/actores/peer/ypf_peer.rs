@@ -1,8 +1,7 @@
-use actix::ActorFutureExt;
 use crate::actores::peer::messages::ProcesarMensaje;
-use crate::actores::ypf::messages::{NuevoLider, PeerDesconectado};
+use crate::actores::ypf::messages::PeerDesconectado;
 use crate::actores::ypf::ypf_actor::YpfRuta;
-use actix::{Actor, Addr, AsyncContext, Context, WrapFuture};
+use actix::{Actor, Addr, AsyncContext, Context};
 use tokio::net::TcpStream;
 use std::net::SocketAddr;
 use std::time::{Duration, Instant};

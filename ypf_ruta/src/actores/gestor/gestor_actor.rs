@@ -9,10 +9,6 @@ use crate::actores::gestor::structs::{Empresa, Tarjeta, Venta};
 
 const PERSISTENCE_INTERVAL_SECS: u64 = 30;
 
-<<<<<<< HEAD
-=======
-/// Actor Gestor
->>>>>>> 2c5ad610122945bc6a00a611dff43343a2f88cfd
 pub struct Gestor {
     empresas: HashMap<u64, Empresa>,
     tarjetas: HashMap<u64, Tarjeta>,
@@ -46,10 +42,6 @@ fn load_json_vec<T: for<'de> serde::Deserialize<'de>>(path: &Path) -> Vec<T> {
 }
 
 impl Gestor {
-<<<<<<< HEAD
-=======
-    /// Crea un Gestor y carga datos desde src/data/*.json
->>>>>>> 2c5ad610122945bc6a00a611dff43343a2f88cfd
     pub fn new() -> Gestor {
         let data_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("src").join("data");
 
@@ -129,11 +121,7 @@ impl Gestor {
     }
 
     pub fn crear_venta(&mut self, venta: Venta) {
-<<<<<<< HEAD
         if let Some(t) = self.tarjetas.get_mut(&venta.id_tarjeta) {
-=======
-        if let Some(t) = self.tarjetas.get_mut(&venta.tarjeta_id) {
->>>>>>> 2c5ad610122945bc6a00a611dff43343a2f88cfd
             t.consumo_actual += venta.monto;
             let empresa_id = t.empresa_id;
             if let Some(e) = self.empresas.get_mut(&empresa_id) {
@@ -143,20 +131,11 @@ impl Gestor {
         self.ventas.push(venta);
     }
 
-<<<<<<< HEAD
     pub fn procesar_venta_internal(&mut self, venta: &Venta) -> bool {
         let tarjeta = match self.tarjetas.get(&venta.id_tarjeta) {
             Some(t) => t.clone(),
             None => {
                 eprintln!("Tarjeta con ID {} no encontrada", venta.id_tarjeta);
-=======
-    // procesar venta sin imprimir, devuelve bool de éxito
-    pub fn procesar_venta_internal(&mut self, venta: &Venta) -> bool {
-        let tarjeta = match self.tarjetas.get(&venta.tarjeta_id) {
-            Some(t) => t.clone(),
-            None => {
-                eprintln!("Tarjeta con ID {} no encontrada", venta.tarjeta_id);
->>>>>>> 2c5ad610122945bc6a00a611dff43343a2f88cfd
                 return false;
             }
         };

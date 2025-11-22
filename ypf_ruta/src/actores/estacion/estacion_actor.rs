@@ -1,10 +1,9 @@
-use std::fmt::Error;
 use actix::prelude::*;
 use crate::actores::gestor::structs::Venta;
 use crate::actores::ypf::ypf_actor::YpfRuta;
 use serde_json;
 use tokio::net::TcpStream;
-use tokio::io::{AsyncWriteExt, BufReader};
+use tokio::io::BufReader;
 pub(crate) use crate::actores::estacion::messages::ValidarVentas;
 
 fn parse_msg_from_estacion(buffer: Vec<u8>) -> Result<Vec<Venta>, &'static str>{
@@ -15,12 +14,12 @@ fn parse_msg_from_estacion(buffer: Vec<u8>) -> Result<Vec<Venta>, &'static str>{
                     println!("Estacion: parseadas {} ventas iniciales.", vs.len());
                     Ok(vs)
                 }
-                Err(e) => {
+                Err(_) => {
                     Err("Estacion: error parseando JSON de ventas iniciales")
                 }
             }
         }
-        Err(e) => {
+        Err(_) => {
             Err("Estacion: buffer no es UTF-8")
         }
     }

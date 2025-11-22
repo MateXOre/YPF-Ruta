@@ -1,8 +1,6 @@
-use actix::{Actor, ActorFutureExt};
-use actix::{AsyncContext, Handler, WrapFuture};
+use actix::Handler;
 use crate::actores::peer::messages::GuardarSocket;
-use crate::actores::peer::ypf_peer::YpfPeer;
-use crate::actores::ypf::messages::{ConexionEntrante, NuevoLider};
+use crate::actores::ypf::messages::ConexionEntrante;
 use crate::actores::ypf::ypf_actor::YpfRuta;
 
 impl Handler<ConexionEntrante> for YpfRuta {

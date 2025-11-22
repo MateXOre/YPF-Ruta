@@ -11,7 +11,7 @@ async fn main() {
     println!("Hello, world!");
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 2 {
-        eprintln!("Uso: {} <index>", args[0]);
+        eprintln!("Uso: {} <index> [<lider>]", args[0]);
         return;
     }
 
@@ -28,26 +28,30 @@ async fn main() {
     });
     
     let mut peers = HashMap::new();
-    let mut local = (0, 0, None);
+    let mut local = (0, 0);
+    let lider = if args.len() >= 3 {
+        if args[2].to_lowercase() == "lider" || args[2] == "1" {
+            Some(index)
+        } else {
+            None
+        }
+    } else {
+        None
+    };
 
     for line in std::io::BufReader::new(f).lines().skip(1) {
         if let Ok(l) = line {
             let parts: Vec<&str> = l.split(',').collect();
-            if parts.len() != 3 {
+            if parts.len() != 2 {
                 eprintln!("Línea de configuración inválida: {}", l);
                 continue;
             }
 
             let id: usize = parts[0].parse().expect("ID inválido en configuración.");
             let puerto: usize = parts[1].parse().expect("Puerto inválido en configuración.");
-            let lider: Option<usize> = if parts[2] == "true" {
-                Some(id)
-            } else {
-                None
-            };
 
             if id == index {
-                local = (id, puerto, lider);
+                local = (id, puerto);
             } else {
                 peers.insert(
                     id,
@@ -62,7 +66,7 @@ async fn main() {
     let _ypf_server = YpfRuta::new(
         local.0,
         local.1,
-        local.2,
+        lider,
         peers,
         gestor
     ).start();

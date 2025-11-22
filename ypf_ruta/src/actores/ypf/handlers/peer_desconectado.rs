@@ -1,21 +1,19 @@
-use actix::{Context, Handler};
-use crate::actores::peer::messages::Eleccion;
-use crate::actores::ypf::messages::PeerDesconectado;
+use actix::{AsyncContext, Context, Handler};
+use crate::actores::ypf::messages::{PeerDesconectado, IniciarEleccion};
 use crate::actores::ypf::ypf_actor::YpfRuta;
 
 impl Handler<PeerDesconectado> for YpfRuta {
     type Result = ();
 
-    fn handle(&mut self, msg: PeerDesconectado, _ctx: &mut Context<Self>) -> Self::Result {
+    fn handle(&mut self, msg: PeerDesconectado, ctx: &mut Context<Self>) -> Self::Result {
+        println!("YpfRuta {}: Peer {} desconectado.", self.id, msg.id);
         self.ypf_peers.remove(&msg.id);
-        if msg.id == self.lider.unwrap_or(usize::MAX) {
+        
+        // Si el líder se desconectó, iniciar elección
+        if Some(msg.id) == self.lider {
             self.lider = None;
-            println!("YpfRuta {}: El líder se ha desconectado.", self.id);
-            
-            for (_, addr) in self.ypf_peers.iter() {
-                addr.do_send(Eleccion(self.id));
-            }
+            println!("YpfRuta {}: El líder {} se ha desconectado. Iniciando elección Bully.", self.id, msg.id);
+            ctx.address().do_send(IniciarEleccion);
         }
-        println!("YpfRuta {}: Peer {} desconectado y removido.", self.id, msg.id);
     }
 }

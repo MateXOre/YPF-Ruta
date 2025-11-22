@@ -134,7 +134,6 @@ impl YpfRuta {
                     if let Ok((socket, _)) = listener.accept().await {
                         let mut reader = tokio::io::BufReader::new(socket);
                         let mut line = String::new();
-
                         match tokio::io::AsyncBufReadExt::read_line(&mut reader, &mut line).await {
                             Ok(_) => {
                                 // parsear "ID_LOCAL:123\n"
@@ -298,7 +297,6 @@ impl Actor for YpfRuta {
 
         // Abrimos un listener para estaciones lideres
         self.escuchar_estaciones(ctx);
-
         // Iniciar procesador de cola de ventas
         self.procesar_ventas(ctx);
     }

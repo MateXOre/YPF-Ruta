@@ -34,7 +34,7 @@ impl Handler<IniciarEleccion> for YpfRuta {
             self.declarar_lider(ctx);
         } else {
             // Esperar timeout para respuestas (2 segundos)
-            ctx.run_later(Duration::from_secs(2), |act, ctx| {
+            ctx.run_later(Duration::from_secs(2), |_act, ctx| {
                 ctx.address().do_send(EleccionTimeout);
             });
         }

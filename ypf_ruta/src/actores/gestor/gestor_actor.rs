@@ -9,7 +9,6 @@ use crate::actores::gestor::structs::{Empresa, Tarjeta, Venta};
 
 const PERSISTENCE_INTERVAL_SECS: u64 = 30;
 
-/// Actor Gestor
 pub struct Gestor {
     empresas: HashMap<u64, Empresa>,
     tarjetas: HashMap<u64, Tarjeta>,
@@ -43,7 +42,6 @@ fn load_json_vec<T: for<'de> serde::Deserialize<'de>>(path: &Path) -> Vec<T> {
 }
 
 impl Gestor {
-    /// Crea un Gestor y carga datos desde src/data/*.json
     pub fn new() -> Gestor {
         let data_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("src").join("data");
 
@@ -123,7 +121,7 @@ impl Gestor {
     }
 
     pub fn crear_venta(&mut self, venta: Venta) {
-        if let Some(t) = self.tarjetas.get_mut(&venta.tarjeta_id) {
+        if let Some(t) = self.tarjetas.get_mut(&venta.id_tarjeta) {
             t.consumo_actual += venta.monto;
             let empresa_id = t.empresa_id;
             if let Some(e) = self.empresas.get_mut(&empresa_id) {
@@ -133,12 +131,11 @@ impl Gestor {
         self.ventas.push(venta);
     }
 
-    // procesar venta sin imprimir, devuelve bool de éxito
     pub fn procesar_venta_internal(&mut self, venta: &Venta) -> bool {
-        let tarjeta = match self.tarjetas.get(&venta.tarjeta_id) {
+        let tarjeta = match self.tarjetas.get(&venta.id_tarjeta) {
             Some(t) => t.clone(),
             None => {
-                eprintln!("Tarjeta con ID {} no encontrada", venta.tarjeta_id);
+                eprintln!("Tarjeta con ID {} no encontrada", venta.id_tarjeta);
                 return false;
             }
         };

@@ -6,13 +6,15 @@ pub struct Venta {
     #[serde(alias = "id_venta")]
     pub id: u64,
     #[serde(alias = "id_tarjeta")]
-    pub tarjeta_id: u64,
+    pub id_tarjeta: u64,
     #[serde(alias = "id_estacion")]
-    pub estacion_id: u64,
+    pub id_estacion: u64,
     pub monto: u64,
     #[serde(default)]
-    pub fecha: Option<String>,
+    pub fecha: String,
 }
+
+
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Tarjeta {

@@ -1,4 +1,5 @@
 use actix::Message;
+use chrono::Local;
 use tokio::net::TcpStream;
 use crate::actores::gestor::structs::Venta;
 
@@ -71,10 +72,10 @@ impl VentaRegistrada {
             println!("Error: formato incorrecto para VentaRegistrada");
             return VentaRegistrada { venta: Venta {
                 id: 0,
-                estacion_id: 0,
-                tarjeta_id: 0,
+                id_estacion: 0,
+                id_tarjeta: 0,
                 monto: 0,
-                fecha: None,
+                fecha: Local::now().format("%Y-%m-%d %H:%M:%S").to_string(),
             } };
         }
 
@@ -83,26 +84,26 @@ impl VentaRegistrada {
             println!("Error: formato incorrecto para VentaRegistrada");
             return VentaRegistrada { venta: Venta {
                 id: 0,
-                estacion_id: 0,
-                tarjeta_id: 0,
+                id_estacion: 0,
+                id_tarjeta: 0,
                 monto: 0,
-                fecha: None,
+                fecha: Local::now().format("%Y-%m-%d %H:%M:%S").to_string(),
             } };
 
         }
 
 
         let id = parts[0].parse::<u64>().unwrap_or(0);
-        let estacion_id = parts[1].parse::<u64>().unwrap_or(0);
-        let tarjeta_id = parts[2].parse::<u64>().unwrap_or(0);
+        let id_estacion = parts[1].parse::<u64>().unwrap_or(0);
+        let id_tarjeta = parts[2].parse::<u64>().unwrap_or(0);
         let monto = parts[3].parse::<u64>().unwrap_or(0);
-        let fecha = Some(parts[4].to_string());
+        let fecha = parts[4].to_string();
 
         VentaRegistrada {
             venta: Venta {
                 id,
-                estacion_id,
-                tarjeta_id,
+                id_estacion,
+                id_tarjeta,
                 monto,
                 fecha,
             }
@@ -110,7 +111,7 @@ impl VentaRegistrada {
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
-        format!("5+{},{},{},{},{:?}", self.venta.id, self.venta.estacion_id, self.venta.tarjeta_id, self.venta.monto, self.venta.fecha).as_bytes().to_vec()
+        format!("5+{},{},{},{},{:?}", self.venta.id, self.venta.id_estacion, self.venta.id_tarjeta, self.venta.monto, self.venta.fecha).as_bytes().to_vec()
     }
 }
 

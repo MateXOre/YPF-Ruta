@@ -8,3 +8,4 @@ serde_json = "1.0.145"
 serde = { version = "1.0.228", features = ["derive"] }
 actix = "0.13.5"
 tokio = "1.48.0"
+chrono = "0.4"

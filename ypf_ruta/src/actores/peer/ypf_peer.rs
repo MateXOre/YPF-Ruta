@@ -1,21 +1,20 @@
+use actix::ActorFutureExt;
 use crate::actores::peer::messages::ProcesarMensaje;
-use crate::actores::ypf::messages::PeerDesconectado;
+use crate::actores::ypf::messages::{NuevoLider, PeerDesconectado};
 use crate::actores::ypf::ypf_actor::YpfRuta;
-use actix::{Actor, Addr, AsyncContext, Context};
+use actix::{Actor, Addr, AsyncContext, Context, WrapFuture};
 use tokio::net::TcpStream;
 use std::net::SocketAddr;
 use std::time::{Duration, Instant};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::tcp::OwnedReadHalf;
-use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
+use tokio::sync::mpsc::{UnboundedSender, unbounded_channel, UnboundedReceiver};
 
 const PING_INTERVAL_SECS: u64 = 30;
-//const TIMEOUT_SECS: u64 = 5;
 
 pub struct YpfPeer {
     pub peer_id: usize,
     pub local_id: usize,
-    //pub lider_id: Option<usize>,
     pub cola_envio: Option<UnboundedSender<Vec<u8>>>,
     pub reader: Option<OwnedReadHalf>,
     pub ypf_local_addr: Addr<YpfRuta>,
@@ -24,91 +23,63 @@ pub struct YpfPeer {
     last_ping_sent: Instant,
 }
 
+async fn empezar_conexion(ip_addr: SocketAddr, id_local: usize) -> Option<TcpStream> {
+    match TcpStream::connect(ip_addr).await {
+        Ok(mut s) => {
+            s.write_all(format!("ID_LOCAL:{}\n", id_local).as_bytes())
+                .await
+                .unwrap();
+            Some(s)
+        }
+        Err(_) => None
+    }
+}
+
 impl YpfPeer {
+    fn default(
+        id_peer: usize,
+        id_local: usize,
+        ypf_local_addr: Addr<YpfRuta>
+    ) -> Self {
+        YpfPeer {
+            peer_id: id_peer,
+            local_id: id_local,
+            cola_envio: None,
+            reader: None,
+            ypf_local_addr,
+            last_ping: Instant::now(),
+            last_pong: Instant::now(),
+            last_ping_sent: Instant::now(),
+        }
+    }
+
     pub async fn new(
         peer_id: usize,
         local_id: usize,
-        //lider_id: Option<usize>,
-        socket: Option<TcpStream>,
+        socket_tcp: Option<TcpStream>,
         addr: Option<SocketAddr>,
         local_addr: Addr<YpfRuta>,
     ) -> Self {
-
-        let socket_f : TcpStream;
-
-        if let Some(s) = socket {
-            socket_f = s;
-        } else {
-            if let Some(a) = addr {
-                match tokio::net::TcpStream::connect(a).await {
-                    Ok(mut s) => {
-                        println!("Conectado exitosamente al YpfPeer {} en {}", peer_id, a);
-
-                        // enviamos nuestro ID_LOCAL
-                        s.write_all(format!("ID_LOCAL:{}\n", local_id).as_bytes())
-                            .await
-                            .unwrap();
-                        socket_f = s;
-                    }
-                    Err(e) => {
-                        eprintln!("No se pudo conectar al YpfPeer {}: {}", peer_id, e);
-                        return YpfPeer {
-                            peer_id,
-                            local_id,
-                            //lider_id,
-                            cola_envio: None,
-                            reader: None,
-                            ypf_local_addr: local_addr,
-                            last_ping: Instant::now(),
-                            last_pong: Instant::now(),
-                            last_ping_sent: Instant::now(),
-                        };
-                    }
-                };
-            } else {
-                eprintln!(
-                    "YpfPeer {}: No se proporcionó socket ni dirección para la conexión.",
-                    peer_id
-                );
-                return YpfPeer {
-                    peer_id,
-                    local_id,
-                    //lider_id,
-                    cola_envio: None,
-                    reader: None,
-                    ypf_local_addr: local_addr,
-                    last_ping: Instant::now(),
-                    last_pong: Instant::now(),
-                    last_ping_sent: Instant::now(),
-                };
+        
+        let socket = match Self::obtener_socket(socket_tcp, addr, local_id, peer_id).await {
+            Ok(s) => s,
+            Err(msg) => {
+                eprintln!("{}", msg);
+                return YpfPeer::default(peer_id, local_id, local_addr);
             }
-        }
+        };
 
-        let (reader, mut writer) = socket_f.into_split();
-
-        let (tx, mut rx) = unbounded_channel::<Vec<u8>>();
+        let (reader, writer) = socket.into_split();
+        let (tx, rx) = unbounded_channel::<Vec<u8>>();
 
         let local_clone = local_addr.clone();
+        
         // Task que posee el writer y serializa las escrituras
-        tokio::spawn(async move {
-            println!("YpfPeer {}: Iniciando tarea de escritura del socket...", peer_id);
-            while let Some(buf) = rx.recv().await {
-                if let Err(e) = writer.write_all(&buf).await {
-                    eprintln!("Error writing to socket: {}", e);
-                    break;
-                } else {
-                    println!("YpfPeer {}: Mensaje enviado por socket.", peer_id);
-                }
-            }
-
-            println!("YpfPeer {}: Tarea de escritura del socket finalizada.", peer_id);
-            local_clone.do_send(PeerDesconectado { id: peer_id });
-        });
+        Self::escribir_a_socket(rx, writer, peer_id, local_clone);
 
         YpfPeer {
             peer_id,
             local_id,
-            //lider_id,
             cola_envio: Some(tx),
             reader: Some(reader),
             ypf_local_addr: local_addr,
@@ -118,6 +89,47 @@ impl YpfPeer {
         }
     }
 
+    async fn obtener_socket(socket_tcp: Option<TcpStream>, addr: Option<SocketAddr>, local_id: usize, peer_id: usize) -> Result<TcpStream, String> {
+        if let Some(s) = socket_tcp {
+            Ok(s)
+        } else if let Some(a) = addr {
+            match TcpStream::connect(a).await {
+                Ok(_) => {
+                    println!("Conectado exitosamente al YpfPeer {} en {}", peer_id, a);
+                    match empezar_conexion(a, local_id).await {
+                        Some(sock) => Ok(sock),
+                        None => Err(format!(
+                            "No se pudo iniciar la conexión con el YpfPeer {} después de conectar.",
+                            peer_id
+                        )),
+                    }
+                }
+                Err(e) => Err(format!("No se pudo conectar al YpfPeer {}: {}", peer_id, e)),
+            }
+        } else {
+            Err(format!(
+                "YpfPeer {}: No se proporcionó socket ni dirección para la conexión.",
+                peer_id
+            ))
+        }
+    }
+
+    pub(crate) fn escribir_a_socket(mut rx:  UnboundedReceiver<Vec<u8>>, mut writer: tokio::net::tcp::OwnedWriteHalf, peer_id: usize, local_clone: Addr<YpfRuta>) {
+        tokio::spawn(async move {
+            println!("YpfPeer {}: Iniciando tarea de escritura del socket...", peer_id);
+            
+            while let Some(buf) = rx.recv().await {
+                if let Err(e) = writer.write_all(&buf).await {
+                    eprintln!("Error writing to socket: {}", e);
+                    break;
+                }
+            }
+
+            println!("YpfPeer {}: Tarea de escritura del socket finalizada.", peer_id);
+            local_clone.do_send(PeerDesconectado { id: peer_id });
+        });
+    }
+    
     pub fn start_ping_loop(&mut self, ctx: &mut Context<Self>) {
         let socket = match self.cola_envio.as_ref() {
             Some(s) => s.clone(),

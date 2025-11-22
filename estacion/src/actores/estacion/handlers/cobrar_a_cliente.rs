@@ -1,38 +1,60 @@
-use actix::{Context, Handler};
-use crate::actores::estacion::Estacion;
+use std::collections::HashMap;
+use std::time::Duration;
+use actix::{AsyncContext, Context, Handler, WrapFuture};
+use tokio::time::sleep;
+use crate::actores::estacion::{EnviarVentasAgrupadas, Estacion};
 use crate::actores::estacion::messages::CobrarACliente;
 use crate::actores::estacion::messages::InformarVenta;
+use crate::actores::estacion_cercana::Enviar;
 use crate::actores::surtidor::messages::ResultadoVenta;
 
 impl Handler<CobrarACliente> for Estacion {
     type Result = ();
 
-    fn handle(&mut self, msg: CobrarACliente, _ctx: &mut Context<Self>) {
+    fn handle(&mut self, msg: CobrarACliente, ctx: &mut Context<Self>) {
         println!("[{}] Cobranza informada: {:?} por surtidor: {}", self.id, msg.venta.id_venta, msg.surtidor_id);
-/*
+
         if self.lider_actual == Some(self.id) {
-            // Soy líder: respondo directo por ahora
-            if let Some(surtidor) = self.surtidores.get(&msg.surtidor_id) {
-                surtidor.do_send(ResultadoVenta {
-                    exito: true,
-                    id_venta: msg.venta.id_venta,
-                });
+
+            if self.ventas_por_informar.is_empty() {
+                // iniciar temporizador
+                if !self.temporizador_activo {
+                    self.temporizador_activo = true;
+
+                    let addr = ctx.address();
+                    ctx.spawn(
+                        async move {
+                            sleep(Duration::from_secs(10)).await;
+                            addr.do_send(EnviarVentasAgrupadas);
+                        }
+                            .into_actor(self)
+                    );
+                }
             }
+
+            // Soy líder
+            self.ventas_por_informar
+                .entry(self.id)
+                .or_insert_with(HashMap::new)
+                .entry(msg.surtidor_id)
+                .or_insert_with(Vec::new)
+                .push(msg.venta);
         } else {
             // NO soy líder → envío venta al líder
             if let Some(lider_addr) = self.buscar_estacion_lider() {
 
-                /*lider_addr.do_send(InformarVenta {
+                let venta = InformarVenta {
                     venta: msg.venta,
-                    surtidor_id: msg.surtidor_id,
-                    estacion_origen: self.id,
-                });*/
+                    id_surtidor: msg.surtidor_id,
+                    id_estacion: self.id,
+                };
+                lider_addr.do_send(Enviar{bytes: venta.to_bytes()});
             }
-        }*/
+        }
 
-        let surtidor = self.surtidores.get(&msg.surtidor_id);
+        /*let surtidor = self.surtidores.get(&msg.surtidor_id);
 
-        surtidor.unwrap().do_send(ResultadoVenta{exito: true, id_venta : msg.venta.id_venta}) //de momento la confirma unilateralmente(parecido a lo que debería hacer si esta offline)
+        surtidor.unwrap().do_send(ResultadoVenta{exito: true, id_venta : msg.venta.id_venta}) //de momento la confirma unilateralmente(parecido a lo que debería hacer si esta offline)*/
 
         // if self.lider_actual != Some(self.id) {
 

@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use actix::{Message, Addr};
 use std::net::SocketAddr;
 use crate::actores::{estacion_cercana::EstacionCercana, surtidor::surtidor::Surtidor};
@@ -11,6 +12,7 @@ const OPCODE_NOTIFICAR_LIDER: u8 = 0x03;
 const OPCODE_INFORMAR_VENTA: u8 = 0x04;
 const OPCODE_CONFIRMAR_TRANSACCIONES: u8 = 0x05;
 pub const OPCODE_IDENTIFICAR: u8 = 0x06;
+pub const OPCODE_RESULTADO_VENTAS: u8 = 0x07;
 
 // ===== Funciones helper para serialización binaria =====
 fn write_u64(buf: &mut Vec<u8>, value: u64) {
@@ -275,26 +277,122 @@ pub struct HabilitarSurtidor {
 #[derive(Message, Clone)]
 #[rtype(result = "()")]
 pub struct InformarVenta {
-    pub venta: Venta
+    pub venta: Venta,
+    pub id_surtidor: usize,
+    pub id_estacion: usize,
 }
+
+#[derive(Message, Clone)]
+#[rtype(result = "()")]
+pub struct EnviarVentasAgrupadas;
 
 impl InformarVenta {
     pub fn from_bytes(bytes: &[u8]) -> Result<Self, String> {
+        println!("descerializando Informar Venta");
         if bytes.is_empty() {
             return Err("Buffer vacío".to_string());
         }
         if bytes[0] != OPCODE_INFORMAR_VENTA {
             return Err("Opcode incorrecto para InformarVenta".to_string());
         }
+
         let mut offset = 1;
+
+        println!("descerializando Informar Venta: venta");
+        // Leer venta
         let venta = read_venta(bytes, &mut offset)?;
-        Ok(InformarVenta { venta })
+
+        println!("descerializando Informar Venta: id_surtidor");
+        // Leer id_surtidor
+        let id_surtidor = read_usize(bytes, &mut offset)?;
+
+        println!("descerializando Informar Venta: id_estacion");
+        // Leer id_estacion
+        let id_estacion = read_usize(bytes, &mut offset)?;
+
+        println!("descerializando Informar Venta finalizado");
+
+        Ok(InformarVenta {
+            venta,
+            id_surtidor,
+            id_estacion,
+        })
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
         let mut buf = Vec::new();
         buf.push(OPCODE_INFORMAR_VENTA);
+
+        // venta
         write_venta(&mut buf, &self.venta);
+
+        // id_surtidor
+        write_usize(&mut buf, self.id_surtidor);
+
+        // id_estacion
+        write_usize(&mut buf, self.id_estacion);
+
+        buf
+    }
+}
+
+#[derive(Message)]
+#[rtype(result = "()")]
+pub struct ResultadoVentas {
+    pub resultados: HashMap<usize, Vec<(usize, bool)>>,
+}
+
+impl ResultadoVentas {
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self, String> {
+        if bytes.is_empty() {
+            return Err("Buffer vacío".to_string());
+        }
+        if bytes[0] != OPCODE_RESULTADO_VENTAS {
+            return Err("Opcode incorrecto en ResultadoVentas".to_string());
+        }
+
+        let mut offset = 1;
+
+        let cant_surtidores = read_usize(bytes, &mut offset)?;
+        let mut resultados = HashMap::new();
+
+        for _ in 0..cant_surtidores {
+            let id_surtidor = read_usize(bytes, &mut offset)?;
+            let cant_ventas = read_usize(bytes, &mut offset)?;
+
+            let mut ventas = Vec::new();
+
+            for _ in 0..cant_ventas {
+                let id_venta = read_usize(bytes, &mut offset)?;
+                let ok = bytes[offset] != 0;
+                offset += 1;
+
+                ventas.push((id_venta, ok));
+            }
+
+            resultados.insert(id_surtidor, ventas);
+        }
+
+        Ok(Self { resultados })
+    }
+
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut buf = Vec::new();
+        buf.push(OPCODE_RESULTADO_VENTAS);
+
+        // cantidad_surtidores
+        write_usize(&mut buf, self.resultados.len());
+
+        for (id_surtidor, ventas) in &self.resultados {
+            write_usize(&mut buf, *id_surtidor);
+            write_usize(&mut buf, ventas.len());
+
+            for (id_venta, ok) in ventas {
+                write_usize(&mut buf, *id_venta);
+                buf.push(*ok as u8); // 0 o 1
+            }
+        }
+
         buf
     }
 }
@@ -375,6 +473,7 @@ pub fn deserialize_message(bytes: &[u8]) -> Result<MessageType, String> {
         OPCODE_NOTIFICAR_LIDER => NotificarLider::from_bytes(bytes).map(MessageType::NotificarLider),
         OPCODE_INFORMAR_VENTA => InformarVenta::from_bytes(bytes).map(MessageType::InformarVenta),
         OPCODE_CONFIRMAR_TRANSACCIONES => ConfirmarTransacciones::from_bytes(bytes).map(MessageType::ConfirmarTransacciones),
+        OPCODE_RESULTADO_VENTAS => ResultadoVentas::from_bytes(bytes).map(MessageType::ResultadoVentas),
         _ => Err(format!("Opcode desconocido: 0x{:02x}", opcode)),
     }
 }
@@ -387,5 +486,6 @@ pub enum MessageType {
     InformarVenta(InformarVenta),
     ConfirmarTransacciones(ConfirmarTransacciones),
     IdentificarEstacion(IdentificarEstacion),
+    ResultadoVentas(ResultadoVentas),
 }
 

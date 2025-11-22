@@ -5,7 +5,6 @@ use util::structs::venta::Venta;
 #[rtype(result = "()")]
 pub struct ResultadoVenta {
     pub exito: bool,
-    pub id_venta: usize,
 }
 
 #[derive(Message)]

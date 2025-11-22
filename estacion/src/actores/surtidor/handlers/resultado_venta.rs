@@ -10,7 +10,7 @@ impl Handler<ResultadoVenta> for Surtidor {
     fn handle(&mut self, msg: ResultadoVenta, ctx: &mut Context<Self>) {
         let respuesta = if msg.exito {
             println!("Venta exitosa");
-            format!("Venta exitosa. ID de venta: {}\n", msg.id_venta)
+            format!("Venta exitosa.\n")
         } else {
             println!("Venta Rechazada");
             "Venta fallida.\n".to_string()

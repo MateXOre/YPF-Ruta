@@ -12,4 +12,6 @@ mod procesar_mensaje;
 mod habilitar_surtidor;
 mod surtidor_libre;
 mod identificar_estacion;
+mod enviar_ventas_agrupadas;
+mod resultado_ventas;
 

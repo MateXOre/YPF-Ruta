@@ -10,8 +10,7 @@ use crate::actores::estacion::io::{handle_stream_incoming, handle_stream_outgoin
 use crate::actores::surtidor::surtidor::Surtidor;
 
 use std::collections::VecDeque;
-
-
+use util::structs::venta::Venta;
 // Estructura para guardar información de una conexión
 // #[derive(Clone)]
 // pub struct ConexionEstacion {
@@ -33,7 +32,9 @@ pub struct Estacion {
     pub(crate) ventas_a_confirmar: HashMap<usize, usize>, // id_venta, id_surtidor
     pub(crate) surtidores: HashMap<usize,Addr<Surtidor>>,
     pub(crate) max_surtidores: usize,
-    pub cola_espera: VecDeque<AceptarCliente>,
+    pub(crate) cola_espera: VecDeque<AceptarCliente>,
+    pub(crate) ventas_por_informar: HashMap<usize, HashMap<usize, Vec<Venta>>>,//id_estacion, id_surtidor, ventas es un vector porque cuando levantemos las offline puede haber más siempre podemos plantear no agruparlas en el mismo vector
+    pub(crate) temporizador_activo: bool,
 }
 
 impl Estacion {
@@ -57,7 +58,9 @@ impl Estacion {
             ventas_a_confirmar: HashMap::new(),
             surtidores: HashMap::new(),
             max_surtidores: 4,
-            cola_espera: VecDeque::new()
+            cola_espera: VecDeque::new(),
+            ventas_por_informar: HashMap::new(),
+            temporizador_activo: false,
         }
     }
 

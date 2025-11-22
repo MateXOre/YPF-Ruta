@@ -6,11 +6,13 @@ impl Handler<NuevoLider> for YpfRuta {
     type Result = ();
 
     fn handle(&mut self, msg: NuevoLider, _ctx: &mut Context<Self>) -> Self::Result {
-        if let Some(lider_actual) = self.lider {
-            println!("Ya hay un líder actual: {}. No se puede asignar un nuevo líder: {}.", lider_actual, msg.id);
-        } else {
-            self.lider = Some(self.id);
-            println!("Nuevo líder asignado: {} (yo).", self.lider.unwrap_or(0));
-        }
+        println!("YpfRuta {}: Recibido anuncio de COORDINATOR del nodo {}", self.id, msg.id);
+        
+        // Aceptar el nuevo líder y cancelar cualquier elección en curso
+        self.lider = Some(msg.id);
+        self.en_eleccion = false;
+        self.respuestas_recibidas = 0;
+        
+        println!("🎖️  YpfRuta {}: Nuevo líder confirmado: {}", self.id, msg.id);
     }
 }

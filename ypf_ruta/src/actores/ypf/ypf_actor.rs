@@ -4,7 +4,7 @@ use actix::ActorFutureExt;
 use actix::{Actor, Addr, AsyncContext, WrapFuture};
 use std::collections::HashMap;
 use std::net::SocketAddr;
-use crate::actores::ypf::messages::ConexionEntrante;
+use crate::actores::ypf::messages::{ConexionEntrante, NuevoLider};
 
 pub struct YpfRuta {
     pub(crate) id: usize,
@@ -13,6 +13,9 @@ pub struct YpfRuta {
     pub(crate) ypf_peers: HashMap<usize, Addr<YpfPeer>>,
     peer_addrs: HashMap<usize, SocketAddr>,
     gestor_addr: Addr<Gestor>,
+    // Estado para algoritmo Bully
+    pub(crate) en_eleccion: bool,
+    pub(crate) respuestas_recibidas: usize,
 }
 
 impl YpfRuta {
@@ -32,16 +35,18 @@ impl YpfRuta {
             ypf_peers,
             peer_addrs: peers,
             gestor_addr,
+            en_eleccion: false,
+            respuestas_recibidas: 0,
         }
     }
 
     fn intentar_conectar_peers(&mut self, ctx: &mut actix::Context<Self>) {
         println!("YpfRuta {}: Intentando conectar a peers...", self.id);
         let peers = self.peer_addrs.clone();
+        let self_id = self.id.clone();
+        let lider = self.lider.clone();
 
         for (peer_id, addr) in peers {
-            let self_id = self.id.clone();
-            //let lider = self.lider.clone();
             let self_addr = ctx.address().clone();
             let fut =
                 async move { YpfPeer::new(peer_id.clone(), self_id, None, Some(addr), self_addr).await };
@@ -49,8 +54,17 @@ impl YpfRuta {
 
             let fut = fut.into_actor(self).map(move |peer, act, _ctx| {
                 let addr = peer.start();
+
+                if let Some(lider_id) = lider {
+                    println!("YpfRuta {}: Enviando información de líder al peer {}", self_id.clone(), peer_id.clone());
+                    
+                    addr.do_send(NuevoLider { id: lider_id });
+                }
+
                 act.ypf_peers.insert(id.clone(), addr);
                 println!("YpfRuta {}: Peer {} iniciado.", act.id, id);
+
+                
             });
 
             ctx.spawn(fut);

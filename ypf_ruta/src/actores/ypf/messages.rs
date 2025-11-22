@@ -9,6 +9,14 @@ pub struct PeerDesconectado {
 
 #[derive(Message)]
 #[rtype(result = "()")]
+pub struct IniciarEleccion;
+
+#[derive(Message)]
+#[rtype(result = "()")]
+pub struct EleccionTimeout;
+
+#[derive(Message)]
+#[rtype(result = "()")]
 pub struct NuevoLider {
     pub id: usize,
 }

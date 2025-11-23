@@ -1,13 +1,14 @@
-use actix::{Context, Handler};
+use actix::{Context, Handler, AsyncContext};
 use crate::actores::estacion::Estacion;
 use crate::actores::estacion::messages::TransaccionesPorEstacion;
 use crate::actores::estacion::messages::ConfirmarTransacciones;
 use std::collections::HashMap;
+use crate::actores::estacion_cercana::Enviar;
 
 impl Handler<TransaccionesPorEstacion> for Estacion {
     type Result = ();
 
-    fn handle(&mut self, msg: TransaccionesPorEstacion, _ctx: &mut Context<Self>) {
+    fn handle(&mut self, msg: TransaccionesPorEstacion, ctx: &mut Context<Self>) {
         println!("[{}] Soy el lider y recibi las transacciones para confirmar: {:?}", self.id, msg.transacciones);
         // separo las ventas confirmadas por estación y se las mando a cada una
         for (id_estacion, surtidores) in &msg.transacciones {
@@ -23,10 +24,19 @@ impl Handler<TransaccionesPorEstacion> for Estacion {
 
                 resultados_estacion.insert(*id_surtidor, resultados_surtidor);
             }
-            self.estaciones_cercanas.get(id_estacion).unwrap().do_send(ConfirmarTransacciones {
-                transacciones: resultados_estacion,
-            });
-        }
 
+            let transacciones_confirmadas = ConfirmarTransacciones {
+                transacciones: resultados_estacion,
+            };
+            if let Some(estacion_addr) = self.estaciones_cercanas.get(id_estacion) {
+                println!("[Estación {}] Mando las transacciones a la estación {}", self.id, id_estacion);
+                estacion_addr.do_send(Enviar{bytes: transacciones_confirmadas.to_bytes()});
+            } else if *id_estacion == self.id {
+                println!("[Estación {}] Me mando las transacciones a mi mismo porque soy el lider", self.id);
+                ctx.address().do_send(transacciones_confirmadas);
+            } else {
+                println!("[Estación {}] Ignorando transacciones para estación inexistente {}", self.id, id_estacion);
+            }
+        }
     }
 }

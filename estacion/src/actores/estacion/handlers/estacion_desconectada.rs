@@ -1,7 +1,6 @@
 use std::time::Duration;
-use actix::{Handler, Context, AsyncContext, ActorFutureExt, WrapFuture};
+use actix::{Handler, Context, AsyncContext, ActorFutureExt};
 use crate::actores::estacion::Estacion;
-use crate::actores::estacion_cercana::Enviar;
 use crate::actores::estacion::messages::{EstacionDesconectada, Reenviar};
 
 impl Handler<EstacionDesconectada> for Estacion {
@@ -67,7 +66,7 @@ impl Handler<EstacionDesconectada> for Estacion {
                     }
                 }
             })
-                .map(move |maybe_msg, act: &mut Estacion, ctx: &mut Context<Estacion>| {
+                .map(move |maybe_msg, _act: &mut Estacion, ctx: &mut Context<Estacion>| {
 
                     if let Some(mensaje) = maybe_msg {
                         println!("Enviando mensaje desde Desconectada con id: {}", &current_id);

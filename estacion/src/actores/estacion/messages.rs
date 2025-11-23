@@ -14,6 +14,7 @@ const OPCODE_CONFIRMAR_TRANSACCIONES: u8 = 0x05;
 pub const OPCODE_IDENTIFICAR: u8 = 0x06;
 pub const OPCODE_RESULTADO_VENTAS: u8 = 0x07;
 const OPCODE_INFORMAR_VENTAS_OFFLINE: u8 = 0x08;
+const OPCODE_TRANSACCIONES_POR_ESTACION: u8 = 0x09;
 
 // ===== Funciones helper para serialización binaria =====
 fn write_u64(buf: &mut Vec<u8>, value: u64) {
@@ -401,13 +402,74 @@ impl ResultadoVentas {
 #[derive(Message, Clone)]
 #[rtype(result = "()")]
 pub struct TransaccionesPorEstacion {
-    pub transacciones: Vec<Venta>,
+    pub transacciones: HashMap<usize, HashMap<usize, Vec<(usize, bool)>>>,
+}
+
+impl TransaccionesPorEstacion {
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self, String> {
+        if bytes.is_empty() {
+            return Err("Buffer vacío".to_string());
+        }
+        if bytes[0] != OPCODE_TRANSACCIONES_POR_ESTACION {
+            return Err("Opcode incorrecto para TransaccionesPorEstacion".to_string());
+        }
+        let mut offset = 1;
+        let cant_estaciones = read_usize(bytes, &mut offset)?;
+        let mut transacciones = HashMap::new();
+        
+        for _ in 0..cant_estaciones {
+            let id_estacion = read_usize(bytes, &mut offset)?;
+            let cant_surtidores = read_usize(bytes, &mut offset)?;
+            let mut surtidores = HashMap::new();
+            
+            for _ in 0..cant_surtidores {
+                let id_surtidor = read_usize(bytes, &mut offset)?;
+                let cant_transacciones = read_usize(bytes, &mut offset)?;
+                let mut transacciones_vec = Vec::new();
+                
+                for _ in 0..cant_transacciones {
+                    let id_venta = read_usize(bytes, &mut offset)?;
+                    let ok = read_bool(bytes, &mut offset)?;
+                    transacciones_vec.push((id_venta, ok));
+                }
+                
+                surtidores.insert(id_surtidor, transacciones_vec);
+            }
+            
+            transacciones.insert(id_estacion, surtidores);
+        }
+        
+        Ok(TransaccionesPorEstacion { transacciones })
+    }
+
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut buf = Vec::new();
+        buf.push(OPCODE_TRANSACCIONES_POR_ESTACION);
+        write_usize(&mut buf, self.transacciones.len());
+        
+        for (id_estacion, surtidores) in &self.transacciones {
+            write_usize(&mut buf, *id_estacion);
+            write_usize(&mut buf, surtidores.len());
+            
+            for (id_surtidor, transacciones_vec) in surtidores {
+                write_usize(&mut buf, *id_surtidor);
+                write_usize(&mut buf, transacciones_vec.len());
+                
+                for (id_venta, ok) in transacciones_vec {
+                    write_usize(&mut buf, *id_venta);
+                    write_bool(&mut buf, *ok);
+                }
+            }
+        }
+        
+        buf
+    }
 }
 
 #[derive(Message, Clone)]
 #[rtype(result = "()")]
 pub struct ConfirmarTransacciones {
-    pub transacciones: Vec<Venta>,
+    pub transacciones: HashMap<usize, Vec<(usize, bool)>>,
 }
 
 impl ConfirmarTransacciones {
@@ -419,21 +481,45 @@ impl ConfirmarTransacciones {
             return Err("Opcode incorrecto para ConfirmarTransacciones".to_string());
         }
         let mut offset = 1;
-        let count = read_u32(bytes, &mut offset)? as usize;
-        let mut transacciones = Vec::with_capacity(count);
-        for _ in 0..count {
-            transacciones.push(read_venta(bytes, &mut offset)?);
+        let cant_surtidores = read_usize(bytes, &mut offset)?;
+        let mut transacciones = HashMap::new();
+
+        for _ in 0..cant_surtidores {
+            let id_surtidor = read_usize(bytes, &mut offset)?;
+            let cant_ventas = read_usize(bytes, &mut offset)?;
+
+            let mut ventas = Vec::new();
+
+            for _ in 0..cant_ventas {
+                let id_venta = read_usize(bytes, &mut offset)?;
+                let ok = read_bool(bytes, &mut offset)?;
+
+                ventas.push((id_venta, ok));
+            }
+
+            transacciones.insert(id_surtidor, ventas);
         }
+
         Ok(ConfirmarTransacciones { transacciones })
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
         let mut buf = Vec::new();
         buf.push(OPCODE_CONFIRMAR_TRANSACCIONES);
-        write_u32(&mut buf, self.transacciones.len() as u32);
-        for venta in &self.transacciones {
-            write_venta(&mut buf, venta);
+
+        // cantidad_surtidores
+        write_usize(&mut buf, self.transacciones.len());
+
+        for (id_surtidor, ventas) in &self.transacciones {
+            write_usize(&mut buf, *id_surtidor);
+            write_usize(&mut buf, ventas.len());
+
+            for (id_venta, ok) in ventas {
+                write_usize(&mut buf, *id_venta);
+                write_bool(&mut buf, *ok);
+            }
         }
+
         buf
     }
 }
@@ -476,6 +562,7 @@ pub fn deserialize_message(bytes: &[u8]) -> Result<MessageType, String> {
         OPCODE_CONFIRMAR_TRANSACCIONES => ConfirmarTransacciones::from_bytes(bytes).map(MessageType::ConfirmarTransacciones),
         OPCODE_RESULTADO_VENTAS => ResultadoVentas::from_bytes(bytes).map(MessageType::ResultadoVentas),
         OPCODE_INFORMAR_VENTAS_OFFLINE => InformarVentasOffline::from_bytes(bytes).map(MessageType::InformarVentasOffline),
+        OPCODE_TRANSACCIONES_POR_ESTACION => TransaccionesPorEstacion::from_bytes(bytes).map(MessageType::TransaccionesPorEstacion),
         _ => Err(format!("Opcode desconocido: 0x{:02x}", opcode)),
     }
 }
@@ -490,6 +577,7 @@ pub enum MessageType {
     IdentificarEstacion(IdentificarEstacion),
     ResultadoVentas(ResultadoVentas),
     InformarVentasOffline(InformarVentasOffline),
+    TransaccionesPorEstacion(TransaccionesPorEstacion),
 }
 
 

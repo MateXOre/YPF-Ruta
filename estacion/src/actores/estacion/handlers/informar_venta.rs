@@ -4,7 +4,6 @@ use actix::{Context, Handler, AsyncContext, WrapFuture};
 use tokio::time::sleep;
 use crate::actores::estacion::{EnviarVentasAgrupadas, Estacion};
 use crate::actores::estacion::messages::InformarVenta;
-use crate::actores::estacion::messages::TransaccionesPorEstacion;
 
 impl Handler<InformarVenta> for Estacion {
     type Result = ();

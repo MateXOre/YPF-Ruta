@@ -1,8 +1,6 @@
 use actix::{Handler, Context, AsyncContext, WrapFuture};
 use crate::actores::estacion::Estacion;
 use crate::actores::estacion::messages::*;
-use actix::prelude::*;
-use std::collections::HashMap;
 use tokio::time::sleep;
 use std::time::Duration;
 

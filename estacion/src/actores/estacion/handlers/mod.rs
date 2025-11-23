@@ -14,4 +14,6 @@ mod surtidor_libre;
 mod identificar_estacion;
 mod enviar_ventas_agrupadas;
 mod resultado_ventas;
+mod empezar_informar_ventas_offline;
+mod informar_ventas_offline;
 

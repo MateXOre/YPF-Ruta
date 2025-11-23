@@ -35,9 +35,15 @@ pub struct Estacion {
     pub(crate) cola_espera: VecDeque<AceptarCliente>,
     pub(crate) ventas_por_informar: HashMap<usize, HashMap<usize, Vec<Venta>>>,//id_estacion, id_surtidor, ventas es un vector porque cuando levantemos las offline puede haber más siempre podemos plantear no agruparlas en el mismo vector
     pub(crate) temporizador_activo: bool,
+    pub(crate) temporizador_ventas_offline_activo: bool,
 }
 
+
+
 impl Estacion {
+    pub const TIEMPO_INFORMAR_VENTAS_OFFLINE: u64 = 10;
+
+
     pub fn new(index_estacion: usize, estaciones: Vec<SocketAddr>) -> Self {
         let siguiente = if index_estacion + 1 < estaciones.len() {
             index_estacion + 1
@@ -61,6 +67,7 @@ impl Estacion {
             cola_espera: VecDeque::new(),
             ventas_por_informar: HashMap::new(),
             temporizador_activo: false,
+            temporizador_ventas_offline_activo: false,
         }
     }
 
@@ -138,6 +145,23 @@ impl Estacion {
         }
         None
     }
+
+    pub(crate) fn agregar_ventas_acumuladas(&mut self,mut ventas_acumuladas: HashMap<usize, HashMap<usize, Vec<Venta>>>) -> HashMap<usize, HashMap<usize, Vec<Venta>>> {
+        // Combinar las ventas de esta estación con las acumuladas
+        let mut ventas_por_informar = self.ventas_por_informar.clone();
+        for (id_estacion, surtidores_acumuladas) in ventas_por_informar {
+            let entry_estacion_acumulada = ventas_acumuladas.entry(id_estacion).or_insert_with(HashMap::new);
+        
+            for (id_surtidor, mut ventas_acumuladas_surtidor) in surtidores_acumuladas {
+                let entry_surtidor = entry_estacion_acumulada.entry(id_surtidor).or_insert_with(Vec::new);
+        
+                entry_surtidor.append(&mut ventas_acumuladas_surtidor);
+            }
+        }
+        ventas_acumuladas
+    }
+
+
 }
 
 impl Actor for Estacion {

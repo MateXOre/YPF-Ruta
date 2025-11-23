@@ -113,7 +113,6 @@ impl Estacion {
 
     /// 
     pub(crate) fn enviar_a_siguiente(&self, ctx: &mut Context<Self>, mensaje: Vec<u8>) {
-        println!("[{}] 🔁 reenviando mensaje", self.id);
 
         let siguiente = if self.estaciones_cercanas.get(&self.siguiente_estacion).is_some() {
             self.estaciones_cercanas.get(&self.siguiente_estacion).unwrap().clone()
@@ -122,7 +121,6 @@ impl Estacion {
             ctx.address().do_send(EstacionDesconectada{estacion_id: self.siguiente_estacion.clone(), mensaje: mensaje.clone()});
             return;
         };
-        println!("[{}] 🔁 Mensaje reenviado exitosamente", self.id);
         siguiente.do_send(Enviar { bytes: mensaje.clone() });
 
     }
@@ -227,6 +225,7 @@ impl Actor for Estacion {
                     Ok((stream, peer_addr)) => {
                         // Verificar si el listener aún está activo antes de procesar
                         let esta_activo = listener_activo.load(Ordering::Relaxed);
+                        println!("[{}] DEBUG: Conexión recibida, listener_activo = {}", id, esta_activo);
                         if !esta_activo {
                             println!("[{}] ⚠️ Listener detenido (activo={}), rechazando conexión de {:?}", id, esta_activo, peer_addr);
                             drop(stream); // Cerrar la conexión
@@ -247,7 +246,6 @@ impl Actor for Estacion {
                     }
                 }
             }
-            println!("[{}] Listener cerrado", id);
         });
 
         println!("[{}] escuchando conexiones para cambiar conexión listener en 127.0.0.1:{}", id, port + 2000);

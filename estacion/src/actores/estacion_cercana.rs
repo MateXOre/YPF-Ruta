@@ -1,16 +1,15 @@
 use crate::actores::estacion::messages::EstacionDesconectada;
 use crate::actores::estacion::messages::InformarVenta;
-use crate::actores::estacion::messages::Reenviar;
 
 use crate::actores::estacion::{ConfirmarTransacciones, ProcesarMensaje};
 use crate::actores::estacion::Eleccion;
 use crate::actores::estacion::Estacion;
 use crate::actores::estacion::NotificarLider;
-use actix::{Actor, Addr, AsyncContext, Context, Handler, Message, WrapFuture};
+use actix::{Actor, Addr, Context, Handler, Message};
+use actix::prelude::*;
 use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
 use tokio::net::tcp::{OwnedReadHalf, OwnedWriteHalf};
-use tokio::net::TcpStream;
 use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
 
 // ===== Mensajes =====
@@ -29,6 +28,10 @@ pub struct ConectarEstacion(pub String);
 #[derive(Message)]
 #[rtype(result = "()")]
 pub struct RespuestaConexion(pub String);
+
+#[derive(Message)]
+#[rtype(result = "()")]
+pub struct CerrarConexion;
 
 pub struct EstacionCercana {
     pub estacion_id: usize,
@@ -91,6 +94,27 @@ impl Handler<ConfirmarTransacciones> for EstacionCercana {
     fn handle(&mut self, msg: ConfirmarTransacciones, _ctx: &mut Context<Self>) {
         let buf = msg.to_bytes();
         self.enviar_por_socket(buf);
+    }
+}
+
+impl Handler<CerrarConexion> for EstacionCercana {
+    type Result = ();
+
+    fn handle(&mut self, _msg: CerrarConexion, ctx: &mut Context<Self>) {
+        println!("[{}] Cerrando conexión con estación {} y deteniendo actor EstacionCercana", 
+                 self.estacion_local_id, self.estacion_id);
+        
+        // Cerrar el sender para que el task de escritura termine
+        // Al dropear el sender (aunque sea un clone), cerramos el channel
+        // El task de escritura recibirá None cuando el último sender se dropee
+        // Como este es el único sender activo (el original está en el struct),
+        // al dropear este clone, el channel se cierra
+        drop(self.socket_estacion_cercana.clone());
+        
+        // Detener el actor - esto también cerrará el socket automáticamente
+        // El task de lectura terminará cuando detecte que el socket está cerrado
+        // Al destruirse el actor, el sender original también se dropeará
+        ctx.stop();
     }
 }
 

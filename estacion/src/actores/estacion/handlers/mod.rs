@@ -8,6 +8,7 @@ pub mod transacciones_por_estacion;
 pub mod confirmar_transacciones;
 pub mod cobrar_a_cliente;
 pub mod estacion_desconectada;
+pub mod cambiar_conexion_listener;
 mod procesar_mensaje;
 mod habilitar_surtidor;
 mod surtidor_libre;

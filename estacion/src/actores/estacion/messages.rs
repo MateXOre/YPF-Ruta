@@ -270,6 +270,12 @@ pub struct AceptarCliente {
 
 #[derive(Message)]
 #[rtype(result = "()")]
+pub struct CambiarConexionListener {
+    pub stream: TcpStream,
+}
+
+#[derive(Message)]
+#[rtype(result = "()")]
 pub struct HabilitarSurtidor {
     pub surtidor_id: usize,
     pub surtidor_addr: Addr<Surtidor>,

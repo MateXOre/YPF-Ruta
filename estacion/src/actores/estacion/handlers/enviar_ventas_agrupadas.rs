@@ -1,15 +1,15 @@
 use std::collections::HashMap;
-use actix::{Context, Handler};
-use util::structs::venta::EstadoVenta::Confirmada;
-use crate::actores::estacion::{EnviarVentasAgrupadas, Estacion, ResultadoVentas};
-use crate::actores::estacion_cercana::Enviar;
-use crate::actores::surtidor::messages::ResultadoVenta;
+use actix::{Context, Handler, AsyncContext};
+use crate::actores::estacion::{EnviarVentasAgrupadas, Estacion};
+use crate::actores::estacion::messages::TransaccionesPorEstacion;
 
 impl Handler<EnviarVentasAgrupadas> for Estacion {
     type Result = ();
 
-    fn handle(&mut self, _msg: EnviarVentasAgrupadas, _ctx: &mut Context<Self>) {
+    fn handle(&mut self, _msg: EnviarVentasAgrupadas, ctx: &mut Context<Self>) {
         // Recorro ventas agrupadas
+        // simula que valido las ventas y devuelvo el resultado de la venta (como si fuese ypf ruta)
+        let mut resultados_estaciones: HashMap<usize, HashMap<usize, Vec<(usize, bool)>>> = HashMap::new();
         for (id_estacion, surtidores) in &self.ventas_por_informar {
             let mut resultados_estacion: HashMap<usize, Vec<(usize, bool)>> = HashMap::new();
 
@@ -24,18 +24,13 @@ impl Handler<EnviarVentasAgrupadas> for Estacion {
                 resultados_estacion.insert(*id_surtidor, resultados_surtidor);
             }
 
-            // Construyo el mensaje final para la estación
-            let mensaje = ResultadoVentas {
-                resultados: resultados_estacion,
-            }
-                .to_bytes();
-
-            // Envío a estación correspondiente
-            if let Some(estacion_addr) = self.estaciones_cercanas.get(id_estacion) {
-                estacion_addr.do_send(Enviar{ bytes: mensaje});
-            }
+            resultados_estaciones.insert(*id_estacion, resultados_estacion);
         }
 
+        // simulo que esto me llega desde YPFRuta
+        ctx.address().do_send(TransaccionesPorEstacion {
+            transacciones: resultados_estaciones,
+        });
         self.ventas_por_informar.clear();
         self.temporizador_activo = false;
     }

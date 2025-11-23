@@ -1,16 +1,15 @@
 use crate::actores::estacion::messages::EstacionDesconectada;
 use crate::actores::estacion::messages::InformarVenta;
-use crate::actores::estacion::messages::Reenviar;
 
 use crate::actores::estacion::{ConfirmarTransacciones, ProcesarMensaje};
 use crate::actores::estacion::Eleccion;
 use crate::actores::estacion::Estacion;
 use crate::actores::estacion::NotificarLider;
-use actix::{Actor, Addr, AsyncContext, Context, Handler, Message, WrapFuture};
+use actix::{Actor, Addr, Context, Handler, Message};
+use actix::prelude::*;
 use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
 use tokio::net::tcp::{OwnedReadHalf, OwnedWriteHalf};
-use tokio::net::TcpStream;
 use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
 
 // ===== Mensajes =====
@@ -30,11 +29,16 @@ pub struct ConectarEstacion(pub String);
 #[rtype(result = "()")]
 pub struct RespuestaConexion(pub String);
 
+#[derive(Message)]
+#[rtype(result = "()")]
+pub struct CerrarConexion;
+
 pub struct EstacionCercana {
     pub estacion_id: usize,
     pub estacion_local: Addr<Estacion>,
     pub socket_estacion_cercana: UnboundedSender<Vec<u8>>,
     pub estacion_local_id: usize,
+    reader_task: Option<tokio::task::JoinHandle<()>>, // Guardamos el handle del task de lectura para poder abortarlo
 }
 
 impl Actor for EstacionCercana {
@@ -94,6 +98,32 @@ impl Handler<ConfirmarTransacciones> for EstacionCercana {
     }
 }
 
+impl Handler<CerrarConexion> for EstacionCercana {
+    type Result = ();
+
+    fn handle(&mut self, _msg: CerrarConexion, ctx: &mut Context<Self>) {
+        println!("[{}] Cerrando conexión con estación {} y deteniendo actor EstacionCercana", 
+                 self.estacion_local_id, self.estacion_id);
+        
+        // SOLUCIÓN: Dropear el sender ORIGINAL, no un clone
+        // Creamos un channel dummy para reemplazar el original y poder dropearlo
+        let (dummy_tx, _dummy_rx) = tokio::sync::mpsc::unbounded_channel::<Vec<u8>>();
+        let sender_original = std::mem::replace(&mut self.socket_estacion_cercana, dummy_tx);
+        // Ahora dropeamos el sender ORIGINAL, lo que cierra el channel
+        drop(sender_original);
+        
+        // Abortar el task de lectura para cerrar el reader explícitamente
+        if let Some(reader_task) = self.reader_task.take() {
+            println!("[{}] Abortando task de lectura para cerrar reader y notificar desconexión a estación {}", 
+                     self.estacion_local_id, self.estacion_id);
+            reader_task.abort(); // Abortar el task, lo que dropeará el reader y cerrará el socket TCP
+        }
+        
+        // Detener el actor
+        ctx.stop();
+    }
+}
+
 impl EstacionCercana {
     pub async fn new(
         estacion_id: usize,
@@ -102,7 +132,6 @@ impl EstacionCercana {
         mut writer: OwnedWriteHalf,
         estacion_local_id: usize,
     ) -> EstacionCercana {
-        let addr = estacion_local.clone();
         let (tx, mut rx) = unbounded_channel::<Vec<u8>>();
 
         // Task que posee el writer y serializa las escrituras
@@ -116,14 +145,15 @@ impl EstacionCercana {
             // aquí puedes notificar desconexión si es necesario
         });
 
+        let reader_task = EstacionCercana::read_from_socket(reader, estacion_local.clone(), estacion_id);
+
         let estacion_cercana = EstacionCercana {
             estacion_id,
-            estacion_local,
+            estacion_local: estacion_local,
             socket_estacion_cercana: tx,
             estacion_local_id,
+            reader_task: Some(reader_task),
         };
-
-        EstacionCercana::read_from_socket(reader, addr, estacion_id).await;
 
         estacion_cercana
     }
@@ -146,27 +176,31 @@ impl EstacionCercana {
         }
     }
 
-    pub async fn read_from_socket(mut reader: OwnedReadHalf, estacion_local: Addr<Estacion>, estacion_remota_id: usize,) {
+    pub fn read_from_socket(mut reader: OwnedReadHalf, estacion_local: Addr<Estacion>, estacion_remota_id: usize) -> tokio::task::JoinHandle<()> {
         tokio::spawn(async move {
             let mut buf = vec![0; 1024];
 
             loop {
-                let bytes = reader
-                    .read(&mut buf)
-                    .await
-                    .expect("failed to read data from socket");
+                match reader.read(&mut buf).await {
+                    Ok(bytes) => {
+                        if bytes == 0 {
+                            println!("[{}] Reader detectó fin de conexión (0 bytes)", estacion_remota_id);
+                            return;
+                        }
 
-                if bytes == 0 {
-                    return;
+                        println!("Recibimos mensaje del socket de la estacion {}", estacion_remota_id);
+
+                        estacion_local.do_send(ProcesarMensaje {
+                            bytes: buf[..bytes].to_vec(),
+                            estacion_remota: estacion_remota_id,
+                        });
+                    }
+                    Err(e) => {
+                        println!("[{}] Error leyendo del socket: {:?}", estacion_remota_id, e);
+                        return;
+                    }
                 }
-
-                println!("Recibimos mensaje del socket de la estacion {}", estacion_remota_id);
-
-                estacion_local.do_send(ProcesarMensaje {
-                    bytes: buf[..bytes].to_vec(),
-                    estacion_remota: estacion_remota_id,
-                })
             }
-        });
+        })
     }
 }

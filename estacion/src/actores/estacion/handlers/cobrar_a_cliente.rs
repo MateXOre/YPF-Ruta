@@ -6,7 +6,6 @@ use crate::actores::estacion::{EnviarVentasAgrupadas, Estacion};
 use crate::actores::estacion::messages::CobrarACliente;
 use crate::actores::estacion::messages::InformarVenta;
 use crate::actores::estacion_cercana::Enviar;
-use crate::actores::surtidor::messages::ResultadoVenta;
 
 impl Handler<CobrarACliente> for Estacion {
     type Result = ();

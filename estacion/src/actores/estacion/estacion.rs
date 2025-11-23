@@ -10,6 +10,7 @@ use crate::actores::estacion::io::{handle_stream_incoming, handle_stream_outgoin
 use crate::actores::surtidor::surtidor::Surtidor;
 
 use std::collections::VecDeque;
+use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
 use util::structs::venta::Venta;
 // Estructura para guardar información de una conexión
 // #[derive(Clone)]
@@ -35,9 +36,15 @@ pub struct Estacion {
     pub(crate) cola_espera: VecDeque<AceptarCliente>,
     pub(crate) ventas_por_informar: HashMap<usize, HashMap<usize, Vec<Venta>>>,//id_estacion, id_surtidor, ventas es un vector porque cuando levantemos las offline puede haber más siempre podemos plantear no agruparlas en el mismo vector
     pub(crate) temporizador_activo: bool,
+    pub(crate) listener_activo: Arc<AtomicBool>, // Controla si el listener debe seguir aceptando conexiones
 }
 
+
+
 impl Estacion {
+    pub const TIEMPO_INFORMAR_VENTAS_OFFLINE: u64 = 10;
+
+
     pub fn new(index_estacion: usize, estaciones: Vec<SocketAddr>) -> Self {
         let siguiente = if index_estacion + 1 < estaciones.len() {
             index_estacion + 1
@@ -61,6 +68,7 @@ impl Estacion {
             cola_espera: VecDeque::new(),
             ventas_por_informar: HashMap::new(),
             temporizador_activo: false,
+            listener_activo: Arc::new(AtomicBool::new(true)),
         }
     }
 
@@ -105,7 +113,6 @@ impl Estacion {
 
     /// 
     pub(crate) fn enviar_a_siguiente(&self, ctx: &mut Context<Self>, mensaje: Vec<u8>) {
-        println!("[{}] 🔁 reenviando mensaje", self.id);
 
         let siguiente = if self.estaciones_cercanas.get(&self.siguiente_estacion).is_some() {
             self.estaciones_cercanas.get(&self.siguiente_estacion).unwrap().clone()
@@ -114,7 +121,6 @@ impl Estacion {
             ctx.address().do_send(EstacionDesconectada{estacion_id: self.siguiente_estacion.clone(), mensaje: mensaje.clone()});
             return;
         };
-        println!("[{}] 🔁 Mensaje reenviado exitosamente", self.id);
         siguiente.do_send(Enviar { bytes: mensaje.clone() });
 
     }
@@ -138,6 +144,23 @@ impl Estacion {
         }
         None
     }
+
+    pub(crate) fn agregar_ventas_acumuladas(&mut self,mut ventas_acumuladas: HashMap<usize, HashMap<usize, Vec<Venta>>>) -> HashMap<usize, HashMap<usize, Vec<Venta>>> {
+        // Combinar las ventas de esta estación con las acumuladas
+        let ventas_por_informar = self.ventas_por_informar.clone();
+        for (id_estacion, surtidores_acumuladas) in ventas_por_informar {
+            let entry_estacion_acumulada = ventas_acumuladas.entry(id_estacion).or_insert_with(HashMap::new);
+        
+            for (id_surtidor, mut ventas_acumuladas_surtidor) in surtidores_acumuladas {
+                let entry_surtidor = entry_estacion_acumulada.entry(id_surtidor).or_insert_with(Vec::new);
+        
+                entry_surtidor.append(&mut ventas_acumuladas_surtidor);
+            }
+        }
+        ventas_acumuladas
+    }
+
+
 }
 
 impl Actor for Estacion {
@@ -148,8 +171,10 @@ impl Actor for Estacion {
         let id = self.id;
         let addr_self = ctx.address();
         let addr_self_clone = addr_self.clone();
+        let addr_self_clone_2 = addr_self.clone();
         println!("[{}] Soy la estacion {} la siguiente es la estacion {}", id, id, self.siguiente_estacion);
         println!("[{}] escuchando conexiones de clientes en 127.0.0.1:{}", id, port + 1000);
+
         // correr listener en background
         actix_rt::spawn(async move {
             let listener = TcpListener::bind(("127.0.0.1", port + 1000)).await.unwrap();
@@ -180,13 +205,33 @@ impl Actor for Estacion {
 
 
         println!("[{}] escuchando conexiones de estaciones en 127.0.0.1:{}", id, port);
+        println!("[{}] Estado inicial del listener: activo = {}", id, self.listener_activo.load(Ordering::Relaxed));
 
         // correr listener en background
+        // Para detener el listener desde cualquier handler, usar:
+        // self.listener_activo.store(false, Ordering::Relaxed);
+        let listener_activo = Arc::clone(&self.listener_activo);
         actix_rt::spawn(async move {
-            let listener = TcpListener::bind(("127.0.0.1", port)).await.unwrap();
+            let listener: TcpListener = match TcpListener::bind(("127.0.0.1", port)).await {
+                Ok(listener) => listener,
+                Err(e) => {
+                    eprintln!("Error al crear listener en puerto {}: {:?}", port, e);
+                    return;
+                }
+            };
+            
             loop {
                 match listener.accept().await {
                     Ok((stream, peer_addr)) => {
+                        // Verificar si el listener aún está activo antes de procesar
+                        let esta_activo = listener_activo.load(Ordering::Relaxed);
+                        println!("[{}] DEBUG: Conexión recibida, listener_activo = {}", id, esta_activo);
+                        if !esta_activo {
+                            println!("[{}] ⚠️ Listener detenido (activo={}), rechazando conexión de {:?}", id, esta_activo, peer_addr);
+                            drop(stream); // Cerrar la conexión
+                            continue;
+                        }
+                        
                         println!("[{}] conexión de estación entrante desde {:?}", id, peer_addr);
                         // Spawn en un task separado para no bloquear el accept de nuevas conexiones
                         let addr_clone = addr_self.clone();
@@ -198,6 +243,24 @@ impl Actor for Estacion {
                     }
                     Err(e) => {
                         eprintln!("Error al aceptar conexión: {:?}", e);
+                    }
+                }
+            }
+        });
+
+        println!("[{}] escuchando conexiones para cambiar conexión listener en 127.0.0.1:{}", id, port + 2000);
+
+
+        actix_rt::spawn(async move {
+            let listener = TcpListener::bind(("127.0.0.1", port + 2000)).await.unwrap();
+            loop {
+                match listener.accept().await {
+                    Ok((stream, peer_addr)) => {
+                        println!("[{}] conexión entrante para cambiar conexión listener desde {:?}", id, peer_addr);
+                        addr_self_clone_2.do_send(CambiarConexionListener { stream});
+                    }
+                    Err(e) => {
+                        eprintln!("Error al aceptar conexión para cambiar conexión listener: {:?}", e);
                     }
                 }
             }

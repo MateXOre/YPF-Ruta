@@ -3,6 +3,8 @@ use crate::actores::estacion::Estacion;
 use crate::actores::estacion::messages::*;
 use actix::prelude::*; 
 use actix::ActorFutureExt;
+use tokio::time::sleep;
+use std::time::Duration;
 
 impl Handler<NotificarLider> for Estacion {
     type Result = ();
@@ -13,8 +15,18 @@ impl Handler<NotificarLider> for Estacion {
                 "[{}] 🔁 Mensaje de líder {} completó el ciclo, fin de propagación.",
                 self.id, msg.id_lider
             );
+            let addr = ctx.address();
+            ctx.spawn(
+                async move {
+                    sleep(Duration::from_secs(Estacion::TIEMPO_INFORMAR_VENTAS_OFFLINE)).await;
+                    addr.do_send(EmpezarInformarVentasOffline{});
+                }
+                .into_actor(self)
+            );
             return;
         }
+
+
 
         self.lider_actual = Some(msg.id_lider);
 

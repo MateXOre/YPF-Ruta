@@ -15,4 +15,4 @@ mod identificar_estacion;
 mod enviar_ventas_agrupadas;
 mod empezar_informar_ventas_offline;
 mod informar_ventas_offline;
-
+mod procesar_mensaje;

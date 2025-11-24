@@ -1,7 +1,9 @@
+use serde::{Deserialize, Serialize};
 
 #[allow(dead_code)]
 #[derive(Clone)]
 #[derive(Debug)]
+#[derive(Serialize, Deserialize)]
 pub struct Venta {
     pub id_venta: usize,
     pub id_tarjeta: usize,
@@ -13,6 +15,7 @@ pub struct Venta {
 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
+#[derive(Serialize, Deserialize)]
 pub enum EstadoVenta {
     Pendiente,
     Confirmada,

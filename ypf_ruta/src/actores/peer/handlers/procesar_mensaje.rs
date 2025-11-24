@@ -2,26 +2,40 @@ use crate::actores::peer::messages::{Eleccion, EleccionOk, ProcesarMensaje, Vent
 use crate::actores::peer::ypf_peer::YpfPeer;
 use crate::actores::ypf::messages::NuevoLider;
 use actix::{Context, Handler};
+use util::{log_debug, log_error};
 
 impl Handler<ProcesarMensaje> for YpfPeer {
     type Result = ();
 
     fn handle(&mut self, msg: ProcesarMensaje, _ctx: &mut Context<Self>) -> Self::Result {
-        println!("Byte 0 recibido: {}", msg.bytes[0]);
         match msg.bytes[0] {
             b'0' => {
                 // Ping recibido
                 self.last_ping = std::time::Instant::now();
-                println!("YpfPeer {}: Ping recibido.", self.peer_id);
+                log_debug!(
+                    self.logger,
+                    "YpfPeer {}: Ping recibido.",
+                    self.peer_id
+                );
                 if let Some(cola) = self.cola_envio.as_mut() {
                     match cola.send(vec![b'1', b'\n']) {
-                        Ok(_) => println!("YpfPeer {}: Pong enviado exitosamente", self.peer_id),
+                        Ok(_) => log_debug!(
+                            self.logger,
+                            "YpfPeer {}: Pong enviado exitosamente",
+                            self.peer_id
+                        ),
                         Err(e) => {
-                            eprintln!("YpfPeer {}: Error enviando pong: {:?}", self.peer_id, e)
+                            log_error!(
+                                self.logger,
+                                "YpfPeer {}: Error enviando pong: {:?}",
+                                self.peer_id,
+                                e
+                            );
                         }
                     }
                 } else {
-                    eprintln!(
+                    log_error!(
+                        self.logger,
                         "YpfPeer {}: cola_envio es None, no se puede enviar pong",
                         self.peer_id
                     );
@@ -30,7 +44,11 @@ impl Handler<ProcesarMensaje> for YpfPeer {
             b'1' => {
                 // Pong recibido
                 self.last_pong = std::time::Instant::now();
-                println!("YpfPeer {}: Pong recibido.", self.peer_id);
+                log_debug!(
+                    self.logger,
+                    "YpfPeer {}: Pong recibido.",
+                    self.peer_id
+                );
             }
             b'3' => {
                 // Mensaje ELECTION
@@ -52,7 +70,8 @@ impl Handler<ProcesarMensaje> for YpfPeer {
                 self.ypf_local_addr.do_send(msg);
             }
             _ => {
-                eprintln!(
+                log_error!(
+                    self.logger,
                     "YpfPeer {}: Tipo de mensaje desconocido: {}",
                     self.peer_id, msg.bytes[0]
                 );

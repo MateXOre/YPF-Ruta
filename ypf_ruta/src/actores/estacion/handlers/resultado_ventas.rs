@@ -3,6 +3,7 @@ use crate::actores::estacion::messages::{Resultado, ResultadoVentas};
 use actix::{ActorContext, ActorFutureExt};
 use actix::{AsyncContext, Context, Handler, WrapFuture};
 use tokio::io::AsyncWriteExt;
+use util::{log_debug, log_error};
 
 fn parse_to_json(ventas: Resultado) -> Vec<u8> {
     match serde_json::to_vec(&ventas) {
@@ -21,13 +22,13 @@ impl Handler<ResultadoVentas> for Estacion {
     type Result = ();
 
     fn handle(&mut self, msg: ResultadoVentas, ctx: &mut Context<Self>) -> Self::Result {
-        println!("Estacion: recibí ResultadoVentas");
-
+        log_debug!(self.logger, "Estacion: recibí ResultadoVentas");
         if let Some(mut socket) = self.socket.take() {
+            let logger = self.logger.clone();
             let fut = async move {
                 let bytes = parse_to_json(msg.ventas);
-                if socket.write_all(&bytes).await.is_err() {
-                    eprintln!("Estacion: error serializando ResultadoVentas");
+                if socket.write_all(&*bytes).await.is_err() {
+                    log_error!(logger, "Estacion: error serializando ResultadoVentas");
                 }
             };
 
@@ -35,7 +36,7 @@ impl Handler<ResultadoVentas> for Estacion {
                 ctx.stop();
             }));
         } else {
-            println!("Estacion: no hay socket para enviar ResultadoVentas, finalizando actor.");
+            log_debug!(self.logger, "Estacion: no hay socket para enviar ResultadoVentas, finalizando actor.");
             ctx.stop();
         }
     }

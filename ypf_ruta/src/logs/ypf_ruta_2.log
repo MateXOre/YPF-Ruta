@@ -1,0 +1,61 @@
+24/11/2025 - 18:57:59 [INFO] YpfRuta 2: Creando instancia
+24/11/2025 - 18:57:59 [INFO] Gestor actor iniciado
+24/11/2025 - 18:57:59 [INFO] YpfRuta 2: Intentando conectar a peers...
+24/11/2025 - 18:57:59 [INFO] YpfRuta 2: Escuchando conexiones entrantes de peers...
+24/11/2025 - 18:57:59 [DEBUG] YpfRuta 2: Iniciando procesador de cola de ventas...
+24/11/2025 - 18:57:59 [INFO] YpfRuta 2: Peer 3 iniciado.
+24/11/2025 - 18:57:59 [INFO] YpfRuta 2: Peer 1 iniciado.
+24/11/2025 - 18:57:59 [INFO] YpfPeer 3: Iniciado correctamente.
+24/11/2025 - 18:57:59 [DEBUG] YpfPeer 3: Iniciando ping loop...
+24/11/2025 - 18:57:59 [INFO] YpfPeer 1: Iniciado correctamente.
+24/11/2025 - 18:57:59 [DEBUG] YpfPeer 1: Iniciando ping loop...
+24/11/2025 - 18:57:59 [DEBUG] YpfRuta 2: Socket del peer 3 está listo
+24/11/2025 - 18:57:59 [DEBUG] YpfRuta 2: Socket del peer 1 está listo
+24/11/2025 - 18:57:59 [DEBUG] YpfPeer 3: Iniciando tarea de escritura del socket...
+24/11/2025 - 18:57:59 [DEBUG] YpfPeer 1: Iniciando tarea de escritura del socket...
+24/11/2025 - 18:57:59 [DEBUG] YpfPeer 3: Iniciando tarea de lectura del socket...
+24/11/2025 - 18:57:59 [DEBUG] YpfPeer 1: Iniciando tarea de lectura del socket...
+24/11/2025 - 18:57:59 [DEBUG] YpfRuta 2: Recibido anuncio de COORDINATOR del nodo 3
+24/11/2025 - 18:57:59 [INFO] YpfRuta 2: Nodo 3 es el nuevo líder.
+24/11/2025 - 18:58:29 [INFO] Gestor: estado persistido periódicamente
+24/11/2025 - 18:58:29 [DEBUG] YpfPeer 3: PING enviado.
+24/11/2025 - 18:58:29 [DEBUG] YpfPeer 1: PING enviado.
+24/11/2025 - 18:58:29 [DEBUG] YpfPeer 1: Ping recibido.
+24/11/2025 - 18:58:29 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+24/11/2025 - 18:58:29 [DEBUG] YpfPeer 3: Ping recibido.
+24/11/2025 - 18:58:29 [DEBUG] YpfPeer 3: Pong enviado exitosamente
+24/11/2025 - 18:58:29 [DEBUG] YpfPeer 3: Pong recibido.
+24/11/2025 - 18:58:29 [DEBUG] YpfPeer 1: Pong recibido.
+24/11/2025 - 18:58:59 [INFO] Gestor: estado persistido periódicamente
+24/11/2025 - 18:58:59 [DEBUG] YpfPeer 3: PING enviado.
+24/11/2025 - 18:58:59 [DEBUG] YpfPeer 1: PING enviado.
+24/11/2025 - 18:58:59 [DEBUG] YpfPeer 3: Ping recibido.
+24/11/2025 - 18:58:59 [DEBUG] YpfPeer 3: Pong enviado exitosamente
+24/11/2025 - 18:58:59 [DEBUG] YpfPeer 1: Ping recibido.
+24/11/2025 - 18:58:59 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+24/11/2025 - 18:58:59 [DEBUG] YpfPeer 1: Pong recibido.
+24/11/2025 - 18:58:59 [DEBUG] YpfPeer 3: Pong recibido.
+24/11/2025 - 18:59:29 [INFO] Gestor: estado persistido periódicamente
+24/11/2025 - 18:59:29 [DEBUG] YpfPeer 3: PING enviado.
+24/11/2025 - 18:59:29 [DEBUG] YpfPeer 1: PING enviado.
+24/11/2025 - 18:59:29 [DEBUG] YpfPeer 1: Ping recibido.
+24/11/2025 - 18:59:29 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+24/11/2025 - 18:59:29 [DEBUG] YpfPeer 3: Ping recibido.
+24/11/2025 - 18:59:29 [DEBUG] YpfPeer 3: Pong enviado exitosamente
+24/11/2025 - 18:59:29 [DEBUG] YpfPeer 3: Pong recibido.
+24/11/2025 - 18:59:29 [DEBUG] YpfPeer 1: Pong recibido.
+24/11/2025 - 18:59:58 [WARN] YpfPeer 3: Conexión cerrada por el peer remoto.
+24/11/2025 - 18:59:58 [WARN] YpfRuta 2: Peer 3 desconectado.
+24/11/2025 - 18:59:58 [INFO] YpfRuta 2: El líder 3 se ha desconectado. Iniciando elección Bully.
+24/11/2025 - 18:59:58 [INFO] YpfRuta 2: Iniciando elección Bully
+24/11/2025 - 18:59:58 [INFO] YpfRuta 2: No hay nodos con ID mayor. Me declaro líder.
+24/11/2025 - 18:59:58 [INFO] YpfRuta 2: Soy el nuevo LÍDER
+24/11/2025 - 18:59:58 [INFO] YpfRuta 2: Enviando COORDINATOR al peer 1
+24/11/2025 - 18:59:58 [DEBUG] YpfPeer 1: Recibido nuevo líder: 2
+24/11/2025 - 18:59:58 [DEBUG] YpfPeer 1: Enviando nuevo líder al socket: byte[0] = 52
+24/11/2025 - 18:59:59 [INFO] Gestor: estado persistido periódicamente
+24/11/2025 - 18:59:59 [DEBUG] YpfPeer 3: PING enviado.
+24/11/2025 - 18:59:59 [DEBUG] YpfPeer 1: PING enviado.
+24/11/2025 - 18:59:59 [DEBUG] YpfPeer 1: Ping recibido.
+24/11/2025 - 18:59:59 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+24/11/2025 - 18:59:59 [DEBUG] YpfPeer 1: Pong recibido.

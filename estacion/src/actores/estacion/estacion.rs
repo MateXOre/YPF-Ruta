@@ -30,20 +30,20 @@ pub struct Estacion {
     pub(crate) total_estaciones: usize,
     pub(crate) todas_las_estaciones: HashMap<usize, SocketAddr>,   // id_estacion, socketaddr
     pub(crate) primer_anillo_realizado: bool,
-    pub(crate) ventas_a_confirmar: HashMap<usize, usize>, // id_venta, id_surtidor
+    pub(crate) ventas_a_confirmar: HashMap<usize, Venta>, // id_surtidor, venta (es solo una porque estas son ventas online)
     pub(crate) surtidores: HashMap<usize,Addr<Surtidor>>,
     pub(crate) max_surtidores: usize,
     pub(crate) cola_espera: VecDeque<AceptarCliente>,
     pub(crate) ventas_por_informar: HashMap<usize, HashMap<usize, Vec<Venta>>>,//id_estacion, id_surtidor, ventas es un vector porque cuando levantemos las offline puede haber más siempre podemos plantear no agruparlas en el mismo vector
     pub(crate) temporizador_activo: bool,
     pub(crate) listener_activo: Arc<AtomicBool>, // Controla si el listener debe seguir aceptando conexiones
-    pub(crate) estoy_desconectada: bool,
+    pub(crate) estoy_conectada: bool,
 }
 
 
 
 impl Estacion {
-    pub const TIEMPO_INFORMAR_VENTAS_OFFLINE: u64 = 10;
+    pub const TIEMPO_INFORMAR_VENTAS_OFFLINE: u64 = 120;
 
 
     pub fn new(index_estacion: usize, estaciones: Vec<SocketAddr>) -> Self {
@@ -70,11 +70,11 @@ impl Estacion {
             ventas_por_informar: HashMap::new(),
             temporizador_activo: false,
             listener_activo: Arc::new(AtomicBool::new(true)),
-            estoy_desconectada: false,
+            estoy_conectada: true,
         }
     }
 
-    async fn connect_and_register(
+    pub async fn connect_and_register(
         target: SocketAddr,
         actor_addr: Addr<Estacion>,
         id: usize,
@@ -132,6 +132,7 @@ impl Estacion {
     }
 
     pub(crate) fn buscar_estacion_lider(&self) -> Option<Addr<EstacionCercana>> {
+        println!("Buscando lider actual: {:?}", self.lider_actual);
         if let Some(lider) = self.lider_actual {
             if let Some(conexion) = self.estaciones_cercanas.get(&lider) {
                 return Some(conexion.clone());
@@ -207,7 +208,6 @@ impl Actor for Estacion {
 
 
         println!("[{}] escuchando conexiones de estaciones en 127.0.0.1:{}", id, port);
-        println!("[{}] Estado inicial del listener: activo = {}", id, self.listener_activo.load(Ordering::Relaxed));
 
         // correr listener en background
         // Para detener el listener desde cualquier handler, usar:
@@ -225,9 +225,7 @@ impl Actor for Estacion {
             loop {
                 match listener.accept().await {
                     Ok((stream, peer_addr)) => {
-                        // Verificar si el listener aún está activo antes de procesar
                         let esta_activo = listener_activo.load(Ordering::Relaxed);
-                        println!("[{}] DEBUG: Conexión recibida, listener_activo = {}", id, esta_activo);
                         if !esta_activo {
                             println!("[{}] ⚠️ Listener detenido (activo={}), rechazando conexión de {:?}", id, esta_activo, peer_addr);
                             drop(stream); // Cerrar la conexión

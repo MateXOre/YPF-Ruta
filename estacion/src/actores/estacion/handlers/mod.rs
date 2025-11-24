@@ -9,11 +9,14 @@ pub mod confirmar_transacciones;
 pub mod cobrar_a_cliente;
 pub mod estacion_desconectada;
 pub mod cambiar_conexion_listener;
-mod procesar_mensaje;
 mod habilitar_surtidor;
 mod surtidor_libre;
 mod identificar_estacion;
 mod enviar_ventas_agrupadas;
 mod empezar_informar_ventas_offline;
 mod informar_ventas_offline;
-
+mod procesar_mensaje;
+mod liberar_clientes_en_cola;
+mod enviar_a_siguiente;
+mod lider_caido;
+mod nuevo_lider_conectado;

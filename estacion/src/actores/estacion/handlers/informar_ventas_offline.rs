@@ -10,6 +10,10 @@ impl Handler<InformarVentasOffline> for Estacion {
 
     fn handle(&mut self, msg: InformarVentasOffline, ctx: &mut Context<Self>) {
         println!("[{}] Informar ventas offline a lider: {}", self.id, msg.id_lider);
+        if !self.estoy_conectada {
+            self.estoy_conectada = true;
+            self.lider_actual = Some(msg.id_lider);
+        }
 
         if self.id == msg.id_lider {
             println!("[{}] Soy el lider, y me guardo las ventas offline acumuladas para informar a YPF RUTA", self.id);

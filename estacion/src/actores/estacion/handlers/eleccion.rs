@@ -11,6 +11,15 @@ impl Handler<Eleccion> for Estacion {
         println!("[{}] recibió mensaje del anillo: {:?}", self.id, msg.aspirantes_ids);
         self.primer_anillo_realizado = true;
 
+        if let Some(lider) = self.lider_actual {
+            if lider == self.id {
+                println!("[{}] Soy el líder, entonces no es necesario que siga el anillo", self.id);
+                return;
+            } 
+        }
+
+
+
         if msg.aspirantes_ids.contains(&self.id) {
             if let Some(nuevo_lider) = msg.aspirantes_ids.iter().max().copied() {
                 println!(

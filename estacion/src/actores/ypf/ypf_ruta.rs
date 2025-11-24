@@ -1,7 +1,7 @@
 use crate::actores::estacion::{Estacion, TransaccionesPorEstacion};
 use actix::{Actor, Addr, Context};
 use std::collections::HashMap;
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::io::AsyncWriteExt;
 use tokio::net::tcp::{OwnedReadHalf, OwnedWriteHalf};
 
 const YPF_ADDRS: [&str; 3] = ["127.0.0.1:18080", "127.0.0.1:18081", "127.0.0.1:18082"];
@@ -49,7 +49,7 @@ impl Ypf {
     }
 
     pub fn leer_de_socket(&mut self) {
-        let mut reader = if let Some(r) = self.reader.take() {
+        let reader = if let Some(r) = self.reader.take() {
             r
         } else {
             eprintln!("No hay reader disponible para leer datos de YPF.");
@@ -57,23 +57,36 @@ impl Ypf {
         };
         let estacion = self.estacion_addr.clone();
         tokio::spawn(async move {
-            let mut buf = vec![0; 1024];
+            use tokio::io::AsyncBufReadExt;
+            let mut buf_reader = tokio::io::BufReader::new(reader);
+            let mut line = Vec::new();
 
-            #[allow(clippy::never_loop)]
-            loop {
-                match reader.read(&mut buf).await {
-                    Ok(_) => {
-                        let transacciones: HashMap<usize, HashMap<usize, Vec<(usize, bool)>>> =
-                            HashMap::new(); // Reemplazar con el parseo real
-                        estacion.do_send(TransaccionesPorEstacion { transacciones });
-                        break; // Salir del loop después de una lectura para este ejemplo
+            match buf_reader.read_until(b'\n', &mut line).await {
+                Ok(0) => {
+                    eprintln!("Conexión cerrada por YPF.");
+                }
+                Ok(_) => {
+                    // Remover el \n final si existe
+                    if line.last() == Some(&b'\n') {
+                        line.pop();
                     }
-                    Err(e) => {
-                        eprintln!("Error leyendo de YPF: {}", e);
-                        break;
-                    }
+                    
+                    let transacciones: HashMap<usize, HashMap<usize, Vec<(usize, bool)>>> =
+                        match serde_json::from_slice(&line) {
+                            Ok(data) => data,
+                            Err(e) => {
+                                eprintln!("Error deserializando datos de YPF: {}", e);
+                                eprintln!("Datos recibidos: {:?}", String::from_utf8_lossy(&line));
+                                return;
+                            }
+                        };
+                    estacion.do_send(TransaccionesPorEstacion { transacciones });
+                }
+                Err(e) => {
+                    eprintln!("Error leyendo de YPF: {}", e);
                 }
             }
+            
         });
     }
 }

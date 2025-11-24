@@ -13,6 +13,7 @@ impl Handler<CambiarConexionListener> for Estacion {
         if self.listener_activo.load(Ordering::Relaxed) {
             self.listener_activo.store(false, Ordering::Relaxed);
             self.estoy_conectada = false;
+            self.lider_actual = None;
             println!("[{}] Listener detenido", self.id);
         
             let estaciones_ids: Vec<usize> = self.estaciones_cercanas.keys().cloned().collect();

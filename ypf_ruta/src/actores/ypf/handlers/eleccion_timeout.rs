@@ -1,6 +1,7 @@
 use crate::actores::ypf::messages::EleccionTimeout;
 use crate::actores::ypf::ypf_actor::YpfRuta;
 use actix::{Context, Handler};
+use util::log_info;
 
 impl Handler<EleccionTimeout> for YpfRuta {
     type Result = ();
@@ -12,15 +13,18 @@ impl Handler<EleccionTimeout> for YpfRuta {
 
         if self.respuestas_recibidas == 0 {
             // No recibí respuestas, me declaro líder
-            println!(
+            log_info!(
+                self.logger,
                 "YpfRuta {}: Timeout alcanzado sin respuestas. Me declaro líder.",
                 self.id
             );
             self.declarar_lider(ctx);
         } else {
-            println!(
+            log_info!(
+                self.logger,
                 "YpfRuta {}: Recibí {} respuestas OK. Esperando anuncio del nuevo líder.",
-                self.id, self.respuestas_recibidas
+                self.id,
+                self.respuestas_recibidas
             );
             self.en_eleccion = false;
         }

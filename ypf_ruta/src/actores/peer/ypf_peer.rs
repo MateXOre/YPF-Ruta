@@ -3,11 +3,13 @@ use crate::actores::ypf::messages::PeerDesconectado;
 use crate::actores::ypf::ypf_actor::YpfRuta;
 use actix::{Actor, Addr, AsyncContext, Context};
 use std::net::SocketAddr;
+use std::sync::mpsc::Sender;
 use std::time::{Duration, Instant};
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpStream;
 use tokio::net::tcp::OwnedReadHalf;
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender, unbounded_channel};
+use util::{log_debug, log_error, log_info, log_warning};
 
 const PING_INTERVAL_SECS: u64 = 30;
 
@@ -19,6 +21,7 @@ pub struct YpfPeer {
     pub(crate) last_ping: Instant,
     pub(crate) last_pong: Instant,
     last_ping_sent: Instant,
+    pub logger: Sender<Vec<u8>>,
 }
 
 async fn empezar_conexion(ip_addr: SocketAddr, id_local: usize) -> Option<TcpStream> {
@@ -34,7 +37,7 @@ async fn empezar_conexion(ip_addr: SocketAddr, id_local: usize) -> Option<TcpStr
 }
 
 impl YpfPeer {
-    fn default(id_peer: usize, ypf_local_addr: Addr<YpfRuta>) -> Self {
+    fn default(id_peer: usize, ypf_local_addr: Addr<YpfRuta>, logger: Sender<Vec<u8>>) -> Self {
         YpfPeer {
             peer_id: id_peer,
             cola_envio: None,
@@ -43,6 +46,7 @@ impl YpfPeer {
             last_ping: Instant::now(),
             last_pong: Instant::now(),
             last_ping_sent: Instant::now(),
+            logger,
         }
     }
 
@@ -52,12 +56,18 @@ impl YpfPeer {
         socket_tcp: Option<TcpStream>,
         addr: Option<SocketAddr>,
         local_addr: Addr<YpfRuta>,
+        logger: Sender<Vec<u8>>,
     ) -> Self {
         let socket = match Self::obtener_socket(socket_tcp, addr, local_id, peer_id).await {
             Ok(s) => s,
             Err(msg) => {
-                eprintln!("{}", msg);
-                return YpfPeer::default(peer_id, local_addr);
+                log_error!(
+                    logger,
+                    "YpfPeer {}: Error al obtener socket - {}",
+                    peer_id,
+                    msg
+                );
+                return YpfPeer::default(peer_id, local_addr, logger);
             }
         };
 
@@ -67,7 +77,7 @@ impl YpfPeer {
         let local_clone = local_addr.clone();
 
         // Task que posee el writer y serializa las escrituras
-        Self::escribir_a_socket(rx, writer, peer_id, local_clone);
+        Self::escribir_a_socket(rx, writer, peer_id, local_clone, logger.clone());
 
         YpfPeer {
             peer_id,
@@ -77,6 +87,7 @@ impl YpfPeer {
             last_ping: Instant::now(),
             last_pong: Instant::now(),
             last_ping_sent: Instant::now(),
+            logger,
         }
     }
 
@@ -90,16 +101,13 @@ impl YpfPeer {
             Ok(s)
         } else if let Some(a) = addr {
             match TcpStream::connect(a).await {
-                Ok(_) => {
-                    println!("Conectado exitosamente al YpfPeer {} en {}", peer_id, a);
-                    match empezar_conexion(a, local_id).await {
-                        Some(sock) => Ok(sock),
-                        None => Err(format!(
-                            "No se pudo iniciar la conexión con el YpfPeer {} después de conectar.",
-                            peer_id
-                        )),
-                    }
-                }
+                Ok(_) => match empezar_conexion(a, local_id).await {
+                    Some(sock) => Ok(sock),
+                    None => Err(format!(
+                        "No se pudo iniciar la conexión con el YpfPeer {} después de conectar.",
+                        peer_id
+                    )),
+                },
                 Err(e) => Err(format!("No se pudo conectar al YpfPeer {}: {}", peer_id, e)),
             }
         } else {
@@ -115,29 +123,24 @@ impl YpfPeer {
         mut writer: tokio::net::tcp::OwnedWriteHalf,
         peer_id: usize,
         local_clone: Addr<YpfRuta>,
+        logger: Sender<Vec<u8>>,
     ) {
         tokio::spawn(async move {
-            println!(
+            log_debug!(
+                logger,
                 "YpfPeer {}: Iniciando tarea de escritura del socket...",
                 peer_id
             );
-            println!(
-                "YpfPeer {}: Tarea de escritura del socket iniciada, hay {} por enviar",
-                peer_id,
-                rx.len()
-            );
+
             while let Some(buf) = rx.recv().await {
-                println!(
-                    "YpfPeer {}: Enviando byte[0] al socket: {}",
-                    peer_id, buf[0]
-                );
                 if let Err(e) = writer.write_all(&buf).await {
-                    eprintln!("Error writing to socket: {}", e);
+                    log_error!(logger, "Error escribiendo en el socket: {}", e);
                     break;
                 }
             }
 
-            println!(
+            log_info!(
+                logger,
                 "YpfPeer {}: Tarea de escritura del socket finalizada.",
                 peer_id
             );
@@ -149,7 +152,8 @@ impl YpfPeer {
         let socket = match self.cola_envio.as_ref() {
             Some(s) => s.clone(),
             None => {
-                eprintln!(
+                log_warning!(
+                    self.logger,
                     "YpfPeer {}: No se puede iniciar el ping loop sin un socket válido.",
                     self.peer_id
                 );
@@ -157,13 +161,17 @@ impl YpfPeer {
             }
         };
 
-        println!("YpfPeer {}: Iniciando ping loop...", self.peer_id);
+        log_debug!(
+            self.logger,
+            "YpfPeer {}: Iniciando ping loop...",
+            self.peer_id
+        );
         ctx.run_interval(Duration::from_secs(PING_INTERVAL_SECS), move |act, _ctx| {
             act.last_ping_sent = Instant::now();
             if let Err(e) = socket.send(b"0\n".to_vec()) {
-                eprintln!("YpfPeer {}: Error enviando PING: {}", act.peer_id, e);
+                log_error!(act.logger, "YpfPeer {}: Error enviando PING: {}", act.peer_id, e);
             } else {
-                println!("YpfPeer {}: PING enviado.", act.peer_id);
+                log_debug!(act.logger, "YpfPeer {}: PING enviado.", act.peer_id);
             }
         });
     }
@@ -173,6 +181,7 @@ impl YpfPeer {
         self_addr: Addr<YpfPeer>,
         id: usize,
         local_addr: Addr<YpfRuta>,
+        logger: Sender<Vec<u8>>,
     ) {
         tokio::spawn(async move {
             use tokio::io::AsyncBufReadExt;
@@ -182,22 +191,15 @@ impl YpfPeer {
                 let mut line = Vec::new();
                 match buf_reader.read_until(b'\n', &mut line).await {
                     Ok(0) => {
-                        println!("YpfPeer {}: Conexión cerrada por el peer remoto.", id);
+                        log_warning!(logger, "YpfPeer {}: Conexión cerrada por el peer remoto.", id);
                         local_addr.do_send(PeerDesconectado { id });
                         break;
                     }
-                    Ok(bytes_read) => {
-                        // Enviar el mensaje completo (incluyendo el \n)
-                        println!(
-                            "YpfPeer {}: Línea recibida del socket ({} bytes): {:?}",
-                            id,
-                            bytes_read,
-                            String::from_utf8_lossy(&line)
-                        );
+                    Ok(_) => {
                         self_addr.do_send(ProcesarMensaje { bytes: line });
                     }
                     Err(e) => {
-                        eprintln!("YpfPeer {}: Error leyendo del socket: {}", id, e);
+                        log_error!(logger, "YpfPeer {}: Error leyendo del socket: {}", id, e);
                         local_addr.do_send(PeerDesconectado { id });
                         break;
                     }
@@ -210,8 +212,13 @@ impl YpfPeer {
 impl Actor for YpfPeer {
     type Context = Context<Self>;
     fn started(&mut self, ctx: &mut Self::Context) {
-        println!("YpfPeer {} iniciado.", self.peer_id);
 
+        let logger = self.logger.clone();
+        log_info!(
+            logger,
+            "YpfPeer {}: Iniciado correctamente.",
+            self.peer_id
+        );
         // Notificar que el socket está listo solo si ya tenemos cola_envio
         if self.cola_envio.is_some() {
             self.ypf_local_addr
@@ -226,16 +233,21 @@ impl Actor for YpfPeer {
             let peer_id = self.peer_id;
             let local_addr = self.ypf_local_addr.clone();
             tokio::spawn(async move {
-                println!(
+                log_debug!(
+                    logger,
                     "YpfPeer {}: Iniciando tarea de lectura del socket...",
                     peer_id
                 );
-                YpfPeer::read_from_socket(reader, self_addr, peer_id, local_addr).await;
+                YpfPeer::read_from_socket(reader, self_addr, peer_id, local_addr, logger).await;
             });
         }
     }
 
     fn stopped(&mut self, _ctx: &mut Self::Context) {
-        println!("YpfPeer {} detenido.", self.peer_id);
+        log_warning!(
+            self.logger,
+            "YpfPeer {}: Deteniéndose...",
+            self.peer_id
+        );
     }
 }

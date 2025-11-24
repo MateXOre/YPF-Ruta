@@ -11,6 +11,7 @@ impl Handler<VentaRegistrada> for YpfPeer {
         } else {
             return
         };
+        println!("YpfPeer: encolando venta registrada");
         self.cola_envio.as_mut().map(|tx| {
             tx.send(mensaje).expect("Fallo al enviar VentaRegistrada a la cola de envio");
         });

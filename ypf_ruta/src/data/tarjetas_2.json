@@ -1,21 +1,9 @@
 [
   {
-    "id": 7,
-    "empresa_id": 3,
-    "limite_particular": 70000,
+    "id": 4,
+    "empresa_id": 2,
+    "limite_particular": 80000,
     "consumo_actual": 20000.0
-  },
-  {
-    "id": 2,
-    "empresa_id": 1,
-    "limite_particular": 30000,
-    "consumo_actual": 8000.0
-  },
-  {
-    "id": 1,
-    "empresa_id": 1,
-    "limite_particular": 50000,
-    "consumo_actual": 15000.0
   },
   {
     "id": 3,
@@ -24,9 +12,15 @@
     "consumo_actual": 25000.0
   },
   {
-    "id": 4,
-    "empresa_id": 2,
-    "limite_particular": 80000,
+    "id": 1,
+    "empresa_id": 1,
+    "limite_particular": 50000,
+    "consumo_actual": 15000.0
+  },
+  {
+    "id": 7,
+    "empresa_id": 3,
+    "limite_particular": 70000,
     "consumo_actual": 20000.0
   },
   {
@@ -40,5 +34,11 @@
     "empresa_id": 2,
     "limite_particular": 90000,
     "consumo_actual": 30000.0
+  },
+  {
+    "id": 2,
+    "empresa_id": 1,
+    "limite_particular": 30000,
+    "consumo_actual": 8000.0
   }
 ]

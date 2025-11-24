@@ -23,7 +23,7 @@ pub struct NuevoLider {
 
 impl NuevoLider {
     pub fn from_bytes(bytes: &[u8]) -> Self {
-        if bytes.len() != 3 {
+        if bytes.len() < 3 {
             println!("Error: bytes length incorrecto para NuevoLider");
             return NuevoLider { id: 0 };
         }
@@ -31,14 +31,32 @@ impl NuevoLider {
             println!("Error: formato incorrecto para NuevoLider");
             return NuevoLider { id: 0 };
         }
-        let id_bytes = &bytes[2..];
-        let id = std::str::from_utf8(id_bytes).unwrap_or("0").parse::<usize>().unwrap_or(0);
+        
+        // Extraer los bytes del ID (desde posición 2 hasta el final, sin el \n)
+        let id_bytes = if bytes[bytes.len() - 1] == b'\n' {
+            &bytes[2..bytes.len() - 1]
+        } else {
+            &bytes[2..]
+        };
+        
+        let id = if let Ok(id_str) = std::str::from_utf8(id_bytes) {
+            if let Ok(parsed_id) = id_str.trim().parse::<usize>() {
+                parsed_id
+            } else {
+                println!("Error: no se pudo parsear el id para NuevoLider: '{}'", id_str);
+                0
+            }
+        } else {
+            println!("Error: no se pudo convertir bytes a UTF-8 para NuevoLider");
+            0
+        };
         NuevoLider { id }
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
         let mut result = vec![b'4', b'+'];
         result.extend(self.id.to_string().as_bytes());
+        result.push(b'\n');
         result
     }
 }
@@ -49,5 +67,12 @@ impl NuevoLider {
 pub struct ConexionEntrante {
     pub peer_id: usize,
     pub socket: TcpStream,
+}
+
+// Mensaje para notificar que el socket de un peer está listo
+#[derive(Message)]
+#[rtype(result = "()")]
+pub struct SocketListo {
+    pub peer_id: usize,
 }
 

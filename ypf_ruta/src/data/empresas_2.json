@@ -6,15 +6,15 @@
     "consumo_actual": 50000.0
   },
   {
-    "id": 1,
-    "nombre": "Transportes Argentinos S.A.",
-    "limite_general": 1000000,
-    "consumo_actual": 48000.0
-  },
-  {
     "id": 3,
     "nombre": "Distribuciones del Sur",
     "limite_general": 1500000,
     "consumo_actual": 35000.0
+  },
+  {
+    "id": 1,
+    "nombre": "Transportes Argentinos S.A.",
+    "limite_general": 1000000,
+    "consumo_actual": 48000.0
   }
 ]

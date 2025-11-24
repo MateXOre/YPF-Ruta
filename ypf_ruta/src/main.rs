@@ -61,7 +61,7 @@ async fn main() {
         }
     }
 
-    let gestor = Gestor::new().start();
+    let gestor = Gestor::new(index).start();
 
     let _ypf_server = YpfRuta::new(
         local.0,
@@ -71,10 +71,6 @@ async fn main() {
         gestor
     ).start();
 
-    // no bloquees Actix con sleep, mejor mantené el sistema vivo:
-    // System::current().run().await;
 
-    loop {
-        tokio::time::sleep(std::time::Duration::from_secs(60)).await;
-    }
+    std::future::pending::<()>().await;
 }

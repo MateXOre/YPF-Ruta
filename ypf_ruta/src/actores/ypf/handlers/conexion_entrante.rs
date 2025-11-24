@@ -14,6 +14,7 @@ impl Handler<ConexionEntrante> for YpfRuta {
         if let Some(peer_addr) = self.ypf_peers.get(&peer_id) {
             println!("YpfRuta {}: Peer {} ya existe, enviando socket", self.id, peer_id);
             peer_addr.do_send(GuardarSocket(socket));
+            // NuevoLider se enviará automáticamente cuando el socket esté listo (SocketListo)
         } else {
             println!("YpfRuta {}: Creando nuevo peer {} con socket entrante", self.id, peer_id);
             self.spawn_peer(peer_id, Some(socket), None, ctx);

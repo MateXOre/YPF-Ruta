@@ -14,7 +14,7 @@ impl Handler<ProcesarMensaje> for YpfPeer {
                 self.last_ping = std::time::Instant::now();
                 println!("YpfPeer {}: Ping recibido.", self.peer_id);
                 if let Some(cola) = self.cola_envio.as_mut() {
-                    match cola.send(vec![b'1']) {
+                    match cola.send(vec![b'1', b'\n']) {
                         Ok(_) => println!("YpfPeer {}: Pong enviado exitosamente", self.peer_id),
                         Err(e) => eprintln!("YpfPeer {}: Error enviando pong: {:?}", self.peer_id, e),
                     }

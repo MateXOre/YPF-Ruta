@@ -2,8 +2,9 @@ use crate::actores::estacion::estacion_actor::Estacion;
 use crate::actores::estacion::messages::{ResultadoVentas, Solicitud};
 use crate::actores::gestor::gestor_actor::Gestor;
 use crate::actores::gestor::messages::ValidarVenta;
+use crate::actores::peer::messages::VentaRegistrada;
 use crate::actores::peer::ypf_peer::YpfPeer;
-use crate::actores::ypf::messages::{ConexionEntrante, NuevoLider};
+use crate::actores::ypf::messages::ConexionEntrante;
 use actix::ActorFutureExt;
 use actix::{Actor, Addr, AsyncContext, WrapFuture};
 use std::collections::{HashMap, VecDeque};
@@ -59,7 +60,6 @@ impl YpfRuta {
         ctx: &mut actix::Context<YpfRuta>,
     ) {
         let self_id = self.id;
-        let lider = self.lider;
         let self_addr = ctx.address();
 
         let fut = async move {
@@ -68,12 +68,6 @@ impl YpfRuta {
 
         let fut = fut.into_actor(self).map(move |peer, act, _ctx| {
             let addr = peer.start();
-            if let Some(lider_id) = lider {
-                println!("YpfRuta {}: Enviando información de líder al peer {}", self_id, peer_id);
-                addr.do_send(NuevoLider { id: lider_id });
-            } else {
-                println!("YpfRuta {}: No hay líder asignado al enviar socket al peer {}", self_id, peer_id);
-            }
             act.ypf_peers.insert(peer_id, addr);
             println!("YpfRuta {}: Peer {} registrado desde conexión entrante", act.id, peer_id);
         });
@@ -85,7 +79,6 @@ impl YpfRuta {
         println!("YpfRuta {}: Intentando conectar a peers...", self.id);
         let peers = self.peer_addrs.clone();
         let self_id = self.id.clone();
-        let lider = self.lider.clone();
 
         for (peer_id, addr) in peers {
             let self_addr = ctx.address().clone();
@@ -96,17 +89,6 @@ impl YpfRuta {
 
             let fut = fut.into_actor(self).map(move |peer, act, _ctx| {
                 let addr = peer.start();
-
-                if let Some(lider_id) = lider {
-                    println!(
-                        "YpfRuta {}: Enviando información de líder al peer {}",
-                        self_id.clone(),
-                        peer_id.clone()
-                    );
-
-                    addr.do_send(NuevoLider { id: lider_id });
-                }
-
                 act.ypf_peers.insert(id.clone(), addr);
                 println!("YpfRuta {}: Peer {} iniciado.", act.id, id);
             });
@@ -135,6 +117,10 @@ impl YpfRuta {
                         let mut line = String::new();
                         match tokio::io::AsyncBufReadExt::read_line(&mut reader, &mut line).await {
                             Ok(_) => {
+                                println!(
+                                    "YpfRuta {}: Línea recibida del socket entrante: {}",
+                                    self_id, line.trim_end()
+                                );
                                 // parsear "ID_LOCAL:123\n"
                                 if let Some(id_str) = line.strip_prefix("ID_LOCAL:") {
                                     if let Ok(peer_id) = id_str.trim().parse::<usize>() {
@@ -173,11 +159,16 @@ impl YpfRuta {
         );
     }
 
-    fn escuchar_estaciones(&mut self, ctx: &mut actix::Context<Self>) {
-        println!(
-            "YpfRuta {}: Escuchando conexiones entrantes de estaciones líderes...",
-            self.id
-        );
+    pub fn escuchar_estaciones(&mut self, ctx: &mut actix::Context<Self>) {
+        if let Some(lider) = self.lider && lider == self.id {
+            println!(
+                "YpfRuta {}: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...",
+                self.id
+            );
+        } else {
+            return;
+        }
+        
         let puerto = (self.puerto + OFFSET_ESTACIONES) as u16;
         let self_id = self.id;
         let self_addr = ctx.address();
@@ -234,10 +225,11 @@ impl YpfRuta {
                 // Procesar ventas y guardar resultados
                 let gestor = act.gestor_addr.clone();
                 let ypf_id = act.id;
-
+                let ypfs_addr: Vec<Addr<YpfPeer>> = act.ypf_peers.values().cloned().collect();
+                
                 // procesar todas las ventas
                 actix::spawn(async move {
-                    //let mut ventas_aprobadas = Vec::new(); TODO: necesitamos broadcastear las ventas aprobadas
+                    let mut ventas_aprobadas = Vec::new(); 
                     let mut resultados_por_estacion = HashMap::new();
                     for (estacion, ventas_por_surtidor) in ventas {
                         let mut resultado_por_surtidor = HashMap::new();
@@ -257,6 +249,10 @@ impl YpfRuta {
                                             ypf_id, venta.id_venta, aprobada
                                         );
 
+                                        if aprobada {
+                                            ventas_aprobadas.push(venta.clone());
+                                        }
+                                        
                                         resultado_ventas.push((venta.id_venta.clone(), aprobada));
                                     }
                                     Err(e) => {
@@ -276,6 +272,20 @@ impl YpfRuta {
                     estacion_addr.do_send(ResultadoVentas {
                         ventas: resultados_por_estacion,
                     });
+
+                    // Enviar cada venta aprobada individualmente a todos los peers
+                    for venta in ventas_aprobadas {
+                        println!(
+                            "YpfRuta {}: Replicando venta {} a {} peers",
+                            ypf_id, venta.id_venta, ypfs_addr.len()
+                        );
+                        for peer in &ypfs_addr {
+                            peer.do_send(VentaRegistrada {
+                                venta: venta.clone()
+                            });
+                        }
+                    }
+                    
                 });
             }
         });

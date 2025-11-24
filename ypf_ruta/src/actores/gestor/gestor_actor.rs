@@ -14,6 +14,7 @@ pub struct Gestor {
     empresas: HashMap<usize, Empresa>,
     tarjetas: HashMap<usize, Tarjeta>,
     ventas: Vec<Venta>,
+    index: usize,
 }
 
 impl Default for Gestor {
@@ -22,6 +23,7 @@ impl Default for Gestor {
             empresas: HashMap::new(),
             tarjetas: HashMap::new(),
             ventas: Vec::new(),
+            index: 1,
         }
     }
 }
@@ -43,12 +45,12 @@ fn load_json_vec<T: for<'de> serde::Deserialize<'de>>(path: &Path) -> Vec<T> {
 }
 
 impl Gestor {
-    pub fn new() -> Gestor {
+    pub fn new(index: usize) -> Gestor {
         let data_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("src").join("data");
 
-        let empresas_path = data_dir.join("empresas.json");
-        let tarjetas_path = data_dir.join("tarjetas.json");
-        let ventas_path = data_dir.join("ventas.json");
+        let empresas_path = data_dir.join(format!("empresas_{}.json", index));
+        let tarjetas_path = data_dir.join(format!("tarjetas_{}.json", index));
+        let ventas_path = data_dir.join(format!("ventas_{}.json", index));
 
         let empresas_vec: Vec<Empresa> = load_json_vec(&empresas_path);
         let tarjetas_vec: Vec<Tarjeta> = load_json_vec(&tarjetas_path);
@@ -68,6 +70,7 @@ impl Gestor {
             empresas: empresas_map,
             tarjetas: tarjetas_map,
             ventas: ventas_vec,
+            index,
         }
     }
 
@@ -172,9 +175,9 @@ impl Gestor {
     pub fn persistir_estado_actual(&self) {
         let data_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("src").join("data");
 
-        let empresas_path = data_dir.join("empresas.json");
-        let tarjetas_path = data_dir.join("tarjetas.json");
-        let ventas_path = data_dir.join("ventas.json");
+        let empresas_path = data_dir.join(format!("empresas_{}.json", self.index));
+        let tarjetas_path = data_dir.join(format!("tarjetas_{}.json", self.index));
+        let ventas_path = data_dir.join(format!("ventas_{}.json", self.index));
 
         // Persistir empresas
         if let Ok(file) = File::create(&empresas_path) {

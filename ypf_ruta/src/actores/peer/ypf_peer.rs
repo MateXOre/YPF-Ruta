@@ -5,7 +5,7 @@ use actix::{Actor, Addr, AsyncContext, Context};
 use tokio::net::TcpStream;
 use std::net::SocketAddr;
 use std::time::{Duration, Instant};
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::io::AsyncWriteExt;
 use tokio::net::tcp::OwnedReadHalf;
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel, UnboundedReceiver};
 
@@ -116,8 +116,9 @@ impl YpfPeer {
     pub(crate) fn escribir_a_socket(mut rx:  UnboundedReceiver<Vec<u8>>, mut writer: tokio::net::tcp::OwnedWriteHalf, peer_id: usize, local_clone: Addr<YpfRuta>) {
         tokio::spawn(async move {
             println!("YpfPeer {}: Iniciando tarea de escritura del socket...", peer_id);
-            
+            println!("YpfPeer {}: Tarea de escritura del socket iniciada, hay {} por enviar", peer_id, rx.len());
             while let Some(buf) = rx.recv().await {
+                println!("YpfPeer {}: Enviando byte[0] al socket: {}", peer_id, buf[0]);
                 if let Err(e) = writer.write_all(&buf).await {
                     eprintln!("Error writing to socket: {}", e);
                     break;
@@ -152,31 +153,32 @@ impl YpfPeer {
         });
     }
 
-    pub async fn read_from_socket(mut reader: OwnedReadHalf, self_addr: Addr<YpfPeer>, id: usize, local_addr: Addr<YpfRuta>) {
+    pub async fn read_from_socket(reader: OwnedReadHalf, self_addr: Addr<YpfPeer>, id: usize, local_addr: Addr<YpfRuta>) {
         tokio::spawn(async move {
-            let mut buf = vec![0; 1024];
+            use tokio::io::AsyncBufReadExt;
+            let mut buf_reader = tokio::io::BufReader::new(reader);
 
             loop {
-                match reader.read(&mut buf).await {
+                let mut line = Vec::new();
+                match buf_reader.read_until(b'\n', &mut line).await {
                     Ok(0) => {
                         println!("YpfPeer {}: Conexión cerrada por el peer remoto.", id);
                         local_addr.do_send(PeerDesconectado { id });
                         break;
                     }
-                    Ok(bytes) => {
+                    Ok(bytes_read) => {
+                        // Enviar el mensaje completo (incluyendo el \n)
+                        println!("YpfPeer {}: Línea recibida del socket ({} bytes): {:?}", id, bytes_read, String::from_utf8_lossy(&line));
                         self_addr.do_send(ProcesarMensaje {
-                            bytes: buf[..bytes].to_vec(),
+                            bytes: line,
                         });
                     }
                     Err(e) => {
                         eprintln!("YpfPeer {}: Error leyendo del socket: {}", id, e);
-
                         local_addr.do_send(PeerDesconectado { id });
                         break;
-
                     }
                 }
-
             }
         });
     }
@@ -186,6 +188,14 @@ impl Actor for YpfPeer {
     type Context = Context<Self>;
     fn started(&mut self, ctx: &mut Self::Context) {
         println!("YpfPeer {} iniciado.", self.peer_id);
+        
+        // Notificar que el socket está listo solo si ya tenemos cola_envio
+        if self.cola_envio.is_some() {
+            self.ypf_local_addr.do_send(crate::actores::ypf::messages::SocketListo { 
+                peer_id: self.peer_id 
+            });
+        }
+        
         self.start_ping_loop(ctx);
         if let Some(reader) = self.reader.take() {
             let self_addr = ctx.address();

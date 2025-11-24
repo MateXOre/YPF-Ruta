@@ -21,7 +21,7 @@ impl Handler<ResultadoVentas> for Estacion {
     type Result = ();
 
     fn handle(&mut self, msg: ResultadoVentas, ctx: &mut Context<Self>) -> Self::Result {
-        println!("Estacion: recibí ResultadoVentas con {} ventas.", msg.ventas.len());
+        println!("Estacion: recibí ResultadoVentas");
 
         if let Some(mut socket) = self.socket.take() {
             let fut = async move {

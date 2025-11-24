@@ -6,6 +6,7 @@ use crate::actores::estacion::{EnviarVentasAgrupadas, Estacion};
 use crate::actores::estacion::messages::CobrarACliente;
 use crate::actores::estacion::messages::InformarVenta;
 use crate::actores::estacion_cercana::Enviar;
+use crate::actores::surtidor::messages::ResultadoVenta;
 
 impl Handler<CobrarACliente> for Estacion {
     type Result = ();
@@ -40,14 +41,27 @@ impl Handler<CobrarACliente> for Estacion {
                 .push(msg.venta);
         } else {
             // NO soy líder → envío venta al líder
-            if let Some(lider_addr) = self.buscar_estacion_lider() {
+            if self.estoy_conectada {
+                if let Some(lider_addr) = self.buscar_estacion_lider() {
 
-                let venta = InformarVenta {
-                    venta: msg.venta,
-                    id_surtidor: msg.surtidor_id,
-                    id_estacion: self.id,
-                };
-                lider_addr.do_send(Enviar{bytes: venta.to_bytes()});
+                    let venta = InformarVenta {
+                        venta: msg.venta,
+                        id_surtidor: msg.surtidor_id,
+                        id_estacion: self.id,
+                    };  
+                    lider_addr.do_send(Enviar{bytes: venta.to_bytes()});
+                }
+            } else {
+                println!("[{}] Estoy desconectada, me guardo la venta como offline", self.id);  
+                let mut venta = msg.venta.clone();
+                self.surtidores.get(&msg.surtidor_id).unwrap().do_send(ResultadoVenta{exito: true});
+                venta.offline = true;
+                self.ventas_por_informar
+                    .entry(self.id)
+                    .or_insert_with(HashMap::new)
+                    .entry(msg.surtidor_id)
+                    .or_insert_with(Vec::new)
+                    .push(venta);
             }
         }
 

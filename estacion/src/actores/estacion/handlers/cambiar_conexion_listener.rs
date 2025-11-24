@@ -10,30 +10,29 @@ impl Handler<CambiarConexionListener> for Estacion {
     fn handle(&mut self, msg: CambiarConexionListener, _ctx: &mut Context<Self>) {
         println!("[{}] Cambiando conexión - deteniendo listener y cerrando todas las conexiones", self.id);
         
-        // 1. Detener el listener estableciendo listener_activo a false
-        self.listener_activo.store(false, Ordering::Relaxed);
-        println!("[{}] Listener detenido", self.id);
+        if self.listener_activo.load(Ordering::Relaxed) {
+            self.listener_activo.store(false, Ordering::Relaxed);
+            println!("[{}] Listener detenido", self.id);
         
-        // 2. Dropear todas las conexiones en estaciones_cercanas
-        // Para cerrar las conexiones, necesitamos detener los actores EstacionCercana
-        // Al detener los actores, se cerrarán los sockets automáticamente
-        let estaciones_ids: Vec<usize> = self.estaciones_cercanas.keys().cloned().collect();
-        
-        for estacion_id in estaciones_ids {
-            if let Some(estacion_addr) = self.estaciones_cercanas.remove(&estacion_id) {
-                println!("[{}] Cerrando conexión con estación {}", self.id, estacion_id);
-                // Enviar mensaje para cerrar limpiamente la conexión y detener el actor
-                // Esto cerrará el sender, terminando el task de escritura, y luego detendrá el actor
-                estacion_addr.do_send(CerrarConexion);
+            let estaciones_ids: Vec<usize> = self.estaciones_cercanas.keys().cloned().collect();
+            
+            for estacion_id in estaciones_ids {
+                if let Some(estacion_addr) = self.estaciones_cercanas.remove(&estacion_id) {
+                    println!("[{}] Cerrando conexión con estación {}", self.id, estacion_id);
+
+                    estacion_addr.do_send(CerrarConexion);
+                }
             }
+            
+            println!("[{}] Todas las conexiones cerradas. Total de estaciones cercanas: {}", 
+                        self.id, self.estaciones_cercanas.len());
+            
+            drop(msg.stream);
+            println!("[{}] Stream de nueva conexión cerrado", self.id);
+        } else {
+            println!("[{}] Vuelvo a empezar a escuchar conexiones", self.id);
+            self.listener_activo.store(true, Ordering::Relaxed);
         }
-        
-        println!("[{}] Todas las conexiones cerradas. Total de estaciones cercanas: {}", 
-                 self.id, self.estaciones_cercanas.len());
-        
-        // 3. Dropear el stream de la nueva conexión que llegó
-        drop(msg.stream);
-        println!("[{}] Stream de nueva conexión cerrado", self.id);
     }
 }
 

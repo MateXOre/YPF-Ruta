@@ -344,67 +344,6 @@ impl InformarVenta {
     }
 }
 
-#[derive(Message)]
-#[rtype(result = "()")]
-pub struct ResultadoVentas {
-    pub resultados: HashMap<usize, Vec<(usize, bool)>>,
-}
-
-impl ResultadoVentas {
-    pub fn from_bytes(bytes: &[u8]) -> Result<Self, String> {
-        if bytes.is_empty() {
-            return Err("Buffer vacío".to_string());
-        }
-        if bytes[0] != OPCODE_RESULTADO_VENTAS {
-            return Err("Opcode incorrecto en ResultadoVentas".to_string());
-        }
-
-        let mut offset = 1;
-
-        let cant_surtidores = read_usize(bytes, &mut offset)?;
-        let mut resultados = HashMap::new();
-
-        for _ in 0..cant_surtidores {
-            let id_surtidor = read_usize(bytes, &mut offset)?;
-            let cant_ventas = read_usize(bytes, &mut offset)?;
-
-            let mut ventas = Vec::new();
-
-            for _ in 0..cant_ventas {
-                let id_venta = read_usize(bytes, &mut offset)?;
-                let ok = bytes[offset] != 0;
-                offset += 1;
-
-                ventas.push((id_venta, ok));
-            }
-
-            resultados.insert(id_surtidor, ventas);
-        }
-
-        Ok(Self { resultados })
-    }
-
-    pub fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = Vec::new();
-        buf.push(OPCODE_RESULTADO_VENTAS);
-
-        // cantidad_surtidores
-        write_usize(&mut buf, self.resultados.len());
-
-        for (id_surtidor, ventas) in &self.resultados {
-            write_usize(&mut buf, *id_surtidor);
-            write_usize(&mut buf, ventas.len());
-
-            for (id_venta, ok) in ventas {
-                write_usize(&mut buf, *id_venta);
-                buf.push(*ok as u8); // 0 o 1
-            }
-        }
-
-        buf
-    }
-}
-
 #[derive(Message, Clone)]
 #[rtype(result = "()")]
 pub struct TransaccionesPorEstacion {
@@ -566,7 +505,6 @@ pub fn deserialize_message(bytes: &[u8]) -> Result<MessageType, String> {
         OPCODE_NOTIFICAR_LIDER => NotificarLider::from_bytes(bytes).map(MessageType::NotificarLider),
         OPCODE_INFORMAR_VENTA => InformarVenta::from_bytes(bytes).map(MessageType::InformarVenta),
         OPCODE_CONFIRMAR_TRANSACCIONES => ConfirmarTransacciones::from_bytes(bytes).map(MessageType::ConfirmarTransacciones),
-        OPCODE_RESULTADO_VENTAS => ResultadoVentas::from_bytes(bytes).map(MessageType::ResultadoVentas),
         OPCODE_INFORMAR_VENTAS_OFFLINE => InformarVentasOffline::from_bytes(bytes).map(MessageType::InformarVentasOffline),
         OPCODE_TRANSACCIONES_POR_ESTACION => TransaccionesPorEstacion::from_bytes(bytes).map(MessageType::TransaccionesPorEstacion),
         _ => Err(format!("Opcode desconocido: 0x{:02x}", opcode)),
@@ -581,7 +519,6 @@ pub enum MessageType {
     InformarVenta(InformarVenta),
     ConfirmarTransacciones(ConfirmarTransacciones),
     IdentificarEstacion(IdentificarEstacion),
-    ResultadoVentas(ResultadoVentas),
     InformarVentasOffline(InformarVentasOffline),
     TransaccionesPorEstacion(TransaccionesPorEstacion),
 }

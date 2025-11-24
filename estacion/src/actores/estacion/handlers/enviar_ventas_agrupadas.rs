@@ -33,7 +33,7 @@ impl Handler<EnviarVentasAgrupadas> for Estacion {
         ctx.spawn(
             async move {
                 match Ypf::new(self_addr.clone()).await {
-                    Ok(mut ypf) => {
+                    Ok(ypf) => {
                         let addr = ypf.start();
                         match generar_mensaje(&ventas) {
                             Ok(mensaje) => {

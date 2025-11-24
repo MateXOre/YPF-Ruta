@@ -1,21 +1,22 @@
 use actix::prelude::*;
+use tokio::net::tcp::OwnedWriteHalf;
 use crate::actores::estacion::messages::Solicitud;
 use crate::actores::ypf::ypf_actor::YpfRuta;
 use serde_json;
 use tokio::net::TcpStream;
-use tokio::io::{AsyncReadExt, BufReader};
+use tokio::io::{AsyncReadExt};
 pub(crate) use crate::actores::estacion::messages::ValidarVentas;
 
 
 pub struct Estacion {
-    pub(crate) socket: Option<TcpStream>,
+    pub(crate) socket: Option<OwnedWriteHalf>,
     ypf_addr: Addr<YpfRuta>,
     ventas_iniciales: Option<Solicitud>,
 }
 
 impl Estacion {
     pub async fn new(socket: TcpStream, ypf_addr: Addr<YpfRuta>) -> Result<Estacion, ()> {
-        let mut reader = BufReader::new(socket);
+        let (mut reader, writer) = socket.into_split();
         
         // Leer el tamaño (4 bytes)
         let mut len_bytes = [0u8; 4];
@@ -37,7 +38,7 @@ impl Estacion {
         };
 
         Ok(Estacion {
-            socket: todo!(),
+            socket: Some(writer),
             ypf_addr,
             ventas_iniciales: Some(solicitud),
         })

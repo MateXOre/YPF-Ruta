@@ -273,12 +273,6 @@ impl YpfRuta {
                         resultados_por_estacion.insert(estacion, resultado_por_surtidor);                           
                     }
 
-                    // Enviar ventas aprobadas de vuelta a la estación
-                    // println!(
-                    //     "YpfRuta {}: Enviando {} ventas aprobadas a la estación",
-                    //     ypf_id,
-                    //     ventas_aprobadas.len()
-                    // );
                     estacion_addr.do_send(ResultadoVentas {
                         ventas: resultados_por_estacion,
                     });

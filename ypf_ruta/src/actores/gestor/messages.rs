@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use actix::Message;
 use util::structs::venta::Venta;
 use crate::actores::gestor::structs::{Empresa, Tarjeta};

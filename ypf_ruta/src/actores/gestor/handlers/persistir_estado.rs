@@ -1,6 +1,6 @@
-use actix::{Context, Handler};
 use crate::actores::gestor::gestor_actor::Gestor;
 use crate::actores::gestor::messages::PersistirEstado;
+use actix::{Context, Handler};
 
 impl Handler<PersistirEstado> for Gestor {
     type Result = ();

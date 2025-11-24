@@ -5,4 +5,3 @@ use actix::Message;
 pub struct EnviarYpf {
     pub bytes: Vec<u8>,
 }
-

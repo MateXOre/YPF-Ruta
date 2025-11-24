@@ -1,14 +1,11 @@
-use std::io::Read;
-
-use actix::{Actor, Addr, AsyncContext, Context, WrapFuture};
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use tokio::net::TcpStream;
-use tokio::net::tcp::{OwnedWriteHalf, OwnedReadHalf};
-use util::structs::venta::{EstadoVenta, Venta};
 use crate::actores::estacion::Estacion;
-use crate::actores::estacion::messages::CobrarACliente;
 use crate::actores::surtidor::messages::{CargarCombustible, Detenerme};
+use actix::{Actor, Addr, AsyncContext, Context};
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::net::tcp::OwnedReadHalf;
+use tokio::net::TcpStream;
 use tokio::sync::mpsc::UnboundedSender;
+use util::structs::venta::{EstadoVenta, Venta};
 
 pub struct Surtidor {
     pub(crate) id: usize,
@@ -19,7 +16,12 @@ pub struct Surtidor {
 }
 
 impl Surtidor {
-    pub fn new(id: usize, estacion: Addr<Estacion>, cliente: TcpStream, estacion_id: usize) -> Self {
+    pub fn new(
+        id: usize,
+        estacion: Addr<Estacion>,
+        cliente: TcpStream,
+        estacion_id: usize,
+    ) -> Self {
         let (reader, writer) = cliente.into_split();
 
         let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel::<Vec<u8>>();
@@ -28,7 +30,8 @@ impl Surtidor {
         tokio::spawn(async move {
             let mut writer = writer;
             while let Some(buf) = rx.recv().await {
-                if buf.is_empty() { // señal de cierre
+                if buf.is_empty() {
+                    // señal de cierre
                     break;
                 }
                 if let Err(e) = writer.write_all(&buf).await {
@@ -47,9 +50,9 @@ impl Surtidor {
         }
     }
     // Ejemplo de envío
-    pub fn enviar_al_cliente(&self, data: &[u8]) {
-        let _ = self.writer_tx.send(data.to_vec());
-    }
+    // pub fn enviar_al_cliente(&self, data: &[u8]) {
+    //     let _ = self.writer_tx.send(data.to_vec());
+    // }
 }
 
 impl Actor for Surtidor {
@@ -57,7 +60,6 @@ impl Actor for Surtidor {
 
     fn started(&mut self, ctx: &mut Self::Context) {
         println!("[{}] Surtidor conectado a la estación", self.estacion_id);
-
 
         // Enviar mensaje inicial al cliente
         let _ = self.writer_tx.send(b"Ingrese tarjeta=monto\n".to_vec());
@@ -115,13 +117,15 @@ impl Actor for Surtidor {
                                 id_estacion: estacion_id,
                             };
 
-                            surtidor_addr.do_send(CargarCombustible {
-                                venta,
-                            });
+                            surtidor_addr.do_send(CargarCombustible { venta });
                             continuar = false;
                         } else {
-                            let _ = writer_tx.send(b"Formato invalido, use tarjeta=monto\n".to_vec());
-                            println!("[{}] ({}) Formato inválido: {}", estacion_id, id_surtidor, mensaje);
+                            let _ =
+                                writer_tx.send(b"Formato invalido, use tarjeta=monto\n".to_vec());
+                            println!(
+                                "[{}] ({}) Formato inválido: {}",
+                                estacion_id, id_surtidor, mensaje
+                            );
                         }
                     }
                     Ok(_) => {
@@ -137,7 +141,6 @@ impl Actor for Surtidor {
                 }
             }
         });
-
 
         /*Versión anterior la dejo por las dudas
         let estacion_addr = self.estacion.clone();
@@ -199,6 +202,5 @@ impl Actor for Surtidor {
                 Err(e) => println!("[{}] ({}) Error al leer: {:?}", estacion_id, id_surtidor, e),
             }
         });*/
-
     }
 }

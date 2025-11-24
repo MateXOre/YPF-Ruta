@@ -1,6 +1,6 @@
-use actix::{Context, Handler};
 use crate::actores::peer::messages::VentaRegistrada;
 use crate::actores::peer::ypf_peer::YpfPeer;
+use actix::{Context, Handler};
 
 impl Handler<VentaRegistrada> for YpfPeer {
     type Result = ();
@@ -9,11 +9,12 @@ impl Handler<VentaRegistrada> for YpfPeer {
         let mensaje = if let Ok(m) = msg.to_bytes() {
             m
         } else {
-            return
+            return;
         };
         println!("YpfPeer: encolando venta registrada");
         self.cola_envio.as_mut().map(|tx| {
-            tx.send(mensaje).expect("Fallo al enviar VentaRegistrada a la cola de envio");
+            tx.send(mensaje)
+                .expect("Fallo al enviar VentaRegistrada a la cola de envio");
         });
     }
 }

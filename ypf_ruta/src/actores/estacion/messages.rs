@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
+use crate::actores::estacion::estacion_actor::Estacion;
 use actix::{Addr, Message};
 use util::structs::venta::Venta;
-use crate::actores::estacion::estacion_actor::Estacion;
 
 pub type Solicitud = HashMap<usize, HashMap<usize, Vec<Venta>>>;
 pub type Resultado = HashMap<usize, HashMap<usize, Vec<(usize, bool)>>>;

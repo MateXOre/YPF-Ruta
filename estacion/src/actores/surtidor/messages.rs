@@ -11,7 +11,6 @@ pub struct ResultadoVenta {
 #[rtype(result = "()")]
 pub struct Detenerme;
 
-
 #[derive(Message, Clone)]
 #[rtype(result = "()")]
 pub struct CargarCombustible {

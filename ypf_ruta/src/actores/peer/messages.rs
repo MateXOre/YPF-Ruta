@@ -20,7 +20,7 @@ impl Eleccion {
             println!("Error: formato incorrecto para Eleccion");
             return Eleccion(0);
         }
-        
+
         // Extraer los bytes del ID (desde posición 2 hasta el final, sin el \n)
         let id_bytes = if bytes[bytes.len() - 1] == b'\n' {
             &bytes[2..bytes.len() - 1]
@@ -32,7 +32,10 @@ impl Eleccion {
             if let Ok(id) = id_str.trim().parse::<usize>() {
                 id
             } else {
-                println!("Error: no se pudo parsear el id para Eleccion: '{}'", id_str);
+                println!(
+                    "Error: no se pudo parsear el id para Eleccion: '{}'",
+                    id_str
+                );
                 0
             }
         } else {
@@ -65,7 +68,7 @@ impl EleccionOk {
             println!("Error: formato incorrecto para EleccionOk");
             return EleccionOk(0);
         }
-        
+
         // Extraer los bytes del ID (desde posición 2 hasta el final, sin el \n)
         let id_bytes = if bytes[bytes.len() - 1] == b'\n' {
             &bytes[2..bytes.len() - 1]
@@ -77,7 +80,10 @@ impl EleccionOk {
             if let Ok(id) = id_str.trim().parse::<usize>() {
                 id
             } else {
-                println!("Error: no se pudo parsear el id para EleccionOk: '{}'", id_str);
+                println!(
+                    "Error: no se pudo parsear el id para EleccionOk: '{}'",
+                    id_str
+                );
                 0
             }
         } else {
@@ -106,15 +112,15 @@ impl VentaRegistrada {
         // Formato: b'5' + JSON de Venta + b'\n'
         if bytes.len() < 3 || bytes[0] != b'5' {
             println!("Error: formato incorrecto para VentaRegistrada (falta prefijo b'5')");
-            return VentaRegistrada { 
+            return VentaRegistrada {
                 venta: Venta {
                     id_venta: 0,
                     id_estacion: 0,
                     id_tarjeta: 0,
                     monto: 0.0,
                     offline: false,
-                    estado: util::structs::venta::EstadoVenta::Fallida
-                } 
+                    estado: util::structs::venta::EstadoVenta::Fallida,
+                },
             };
         }
 
@@ -131,15 +137,15 @@ impl VentaRegistrada {
             Err(e) => {
                 eprintln!("Error deserializando VentaRegistrada: {:?}", e);
                 eprintln!("Bytes recibidos: {:?}", String::from_utf8_lossy(json_bytes));
-                VentaRegistrada { 
+                VentaRegistrada {
                     venta: Venta {
                         id_venta: 0,
                         id_estacion: 0,
                         id_tarjeta: 0,
                         monto: 0.0,
                         offline: false,
-                        estado: util::structs::venta::EstadoVenta::Fallida
-                    } 
+                        estado: util::structs::venta::EstadoVenta::Fallida,
+                    },
                 }
             }
         }
@@ -158,5 +164,5 @@ impl VentaRegistrada {
 #[derive(Message)]
 #[rtype(result = "()")]
 pub struct ProcesarMensaje {
-    pub bytes: Vec<u8>
+    pub bytes: Vec<u8>,
 }

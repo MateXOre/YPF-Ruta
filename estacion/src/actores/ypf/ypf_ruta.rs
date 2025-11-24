@@ -1,8 +1,8 @@
-use std::collections::HashMap;
+use crate::actores::estacion::{Estacion, TransaccionesPorEstacion};
 use actix::{Actor, Addr, Context};
+use std::collections::HashMap;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::tcp::{OwnedReadHalf, OwnedWriteHalf};
-use crate::actores::estacion::{Estacion, TransaccionesPorEstacion};
 
 const YPF_ADDRS: [&str; 3] = ["127.0.0.1:18080", "127.0.0.1:18081", "127.0.0.1:18082"];
 
@@ -13,9 +13,7 @@ pub struct Ypf {
 }
 
 impl Ypf {
-    pub async fn new(
-        estacion_addr: Addr<Estacion>,
-    ) -> Result<Self, ()> {
+    pub async fn new(estacion_addr: Addr<Estacion>) -> Result<Self, ()> {
         for addr in YPF_ADDRS.iter() {
             println!("Intentando conectarnos a YPF en {}", addr);
             if let Ok(socket) = tokio::net::TcpStream::connect(addr).await {
@@ -27,7 +25,7 @@ impl Ypf {
                     writer: Some(writer),
                     reader: Some(reader),
                     estacion_addr,
-                })
+                });
             } else {
                 println!("No se pudo conectar a YPF en {}", addr);
             }
@@ -63,12 +61,10 @@ impl Ypf {
 
             loop {
                 match reader.read(&mut buf).await {
-                    Ok(bytes) => {
-                        
-                        
-                        
-                        let transacciones: HashMap<usize, HashMap<usize, Vec<(usize, bool)>>> = HashMap::new(); // Reemplazar con el parseo real
-                        estacion.do_send(TransaccionesPorEstacion{transacciones});
+                    Ok(_) => {
+                        let transacciones: HashMap<usize, HashMap<usize, Vec<(usize, bool)>>> =
+                            HashMap::new(); // Reemplazar con el parseo real
+                        estacion.do_send(TransaccionesPorEstacion { transacciones });
                         break; // Salir del loop después de una lectura para este ejemplo
                     }
                     Err(e) => {
@@ -84,7 +80,7 @@ impl Ypf {
 impl Actor for Ypf {
     type Context = Context<Self>;
 
-    fn started(&mut self, ctx: &mut Self::Context) {
+    fn started(&mut self, _ctx: &mut Self::Context) {
         println!("Actor Ypf iniciado.");
         self.leer_de_socket();
     }
@@ -93,7 +89,3 @@ impl Actor for Ypf {
         println!("Actor Ypf detenido.");
     }
 }
-
-
-
-

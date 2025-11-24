@@ -1,15 +1,17 @@
-use actix::{Handler, Context, AsyncContext, WrapFuture};
-use crate::actores::estacion::Estacion;
 use crate::actores::estacion::messages::*;
-use tokio::time::sleep;
+use crate::actores::estacion::Estacion;
+use actix::{AsyncContext, Context, Handler, WrapFuture};
 use std::time::Duration;
-
+use tokio::time::sleep;
 
 impl Handler<InformarVentasOffline> for Estacion {
     type Result = ();
 
     fn handle(&mut self, msg: InformarVentasOffline, ctx: &mut Context<Self>) {
-        println!("[{}] Informar ventas offline a lider: {}", self.id, msg.id_lider);
+        println!(
+            "[{}] Informar ventas offline a lider: {}",
+            self.id, msg.id_lider
+        );
         if !self.estoy_conectada {
             self.estoy_conectada = true;
             self.lider_actual = Some(msg.id_lider);
@@ -21,21 +23,24 @@ impl Handler<InformarVentasOffline> for Estacion {
                 // iniciar temporizador
                 if !self.temporizador_activo {
                     self.temporizador_activo = true;
-    
+
                     let addr = ctx.address();
                     ctx.spawn(
                         async move {
                             sleep(Duration::from_secs(10)).await;
                             addr.do_send(EnviarVentasAgrupadas);
                         }
-                            .into_actor(self)
+                        .into_actor(self),
                     );
                 }
             }
             self.ventas_por_informar = self.agregar_ventas_acumuladas(msg.ventas);
         } else {
-            println!("[{}] Soy no lider, y sigo ronda de informar ventas offline", self.id);
-            
+            println!(
+                "[{}] Soy no lider, y sigo ronda de informar ventas offline",
+                self.id
+            );
+
             // Combinar las ventas de esta estación con las acumuladas
             let ventas_acumuladas = self.agregar_ventas_acumuladas(msg.ventas);
             if self.ventas_por_informar.is_empty() {
@@ -44,10 +49,13 @@ impl Handler<InformarVentasOffline> for Estacion {
                 self.ventas_por_informar.clear();
                 println!("[{}] Tengo ventas acumuladas offline", self.id);
             }
-            
-            let mensaje_bytes = InformarVentasOffline{id_lider: msg.id_lider, ventas: ventas_acumuladas}.to_bytes();
+
+            let mensaje_bytes = InformarVentasOffline {
+                id_lider: msg.id_lider,
+                ventas: ventas_acumuladas,
+            }
+            .to_bytes();
             self.enviar_a_siguiente(ctx, mensaje_bytes);
         }
-        
     }
 }

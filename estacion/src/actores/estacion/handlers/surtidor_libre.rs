@@ -1,5 +1,5 @@
-use actix::{AsyncContext, Handler};
 use crate::actores::estacion::{AceptarCliente, Estacion, SurtidorLibre};
+use actix::{AsyncContext, Handler};
 
 impl Handler<SurtidorLibre> for Estacion {
     type Result = ();

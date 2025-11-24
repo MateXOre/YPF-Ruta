@@ -1,11 +1,10 @@
-use actix::{Handler, Context};
-use crate::actores::surtidor::surtidor::Surtidor;
-use crate::actores::surtidor::messages::*;
-use actix::prelude::*;
 use crate::actores::estacion::SurtidorLibre;
+use crate::actores::surtidor::messages::*;
+use crate::actores::surtidor::surtidor::Surtidor;
+use actix::prelude::*;
+use actix::{Context, Handler};
 
 impl Handler<Detenerme> for Surtidor {
-
     type Result = ();
 
     fn handle(&mut self, _msg: Detenerme, ctx: &mut Context<Self>) {

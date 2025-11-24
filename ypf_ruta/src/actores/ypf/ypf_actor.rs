@@ -62,14 +62,15 @@ impl YpfRuta {
         let self_id = self.id;
         let self_addr = ctx.address();
 
-        let fut = async move {
-            YpfPeer::new(peer_id, self_id, socket, addr_opt, self_addr).await
-        };
+        let fut = async move { YpfPeer::new(peer_id, self_id, socket, addr_opt, self_addr).await };
 
         let fut = fut.into_actor(self).map(move |peer, act, _ctx| {
             let addr = peer.start();
             act.ypf_peers.insert(peer_id, addr);
-            println!("YpfRuta {}: Peer {} registrado desde conexión entrante", act.id, peer_id);
+            println!(
+                "YpfRuta {}: Peer {} registrado desde conexión entrante",
+                act.id, peer_id
+            );
         });
 
         ctx.spawn(fut);
@@ -119,7 +120,8 @@ impl YpfRuta {
                             Ok(_) => {
                                 println!(
                                     "YpfRuta {}: Línea recibida del socket entrante: {}",
-                                    self_id, line.trim_end()
+                                    self_id,
+                                    line.trim_end()
                                 );
                                 // parsear "ID_LOCAL:123\n"
                                 if let Some(id_str) = line.strip_prefix("ID_LOCAL:") {
@@ -160,7 +162,9 @@ impl YpfRuta {
     }
 
     pub fn escuchar_estaciones(&mut self, ctx: &mut actix::Context<Self>) {
-        if let Some(lider) = self.lider && lider == self.id {
+        if let Some(lider) = self.lider
+            && lider == self.id
+        {
             println!(
                 "YpfRuta {}: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...",
                 self.id
@@ -168,7 +172,7 @@ impl YpfRuta {
         } else {
             return;
         }
-        
+
         let puerto = (self.puerto + OFFSET_ESTACIONES) as u16;
         let self_id = self.id;
         let self_addr = ctx.address();
@@ -197,7 +201,7 @@ impl YpfRuta {
 
                         match Estacion::new(socket, self_addr.clone()).await {
                             Ok(estacion_addr) => estacion_addr.start(),
-                            Err(_) => continue
+                            Err(_) => continue,
                         };
 
                         println!(
@@ -226,10 +230,10 @@ impl YpfRuta {
                 let gestor = act.gestor_addr.clone();
                 let ypf_id = act.id;
                 let ypfs_addr: Vec<Addr<YpfPeer>> = act.ypf_peers.values().cloned().collect();
-                
+
                 // procesar todas las ventas
                 actix::spawn(async move {
-                    let mut ventas_aprobadas = Vec::new(); 
+                    let mut ventas_aprobadas = Vec::new();
                     let mut resultados_por_estacion = HashMap::new();
                     for (estacion, ventas_por_surtidor) in ventas {
                         let mut resultado_por_surtidor = HashMap::new();
@@ -252,7 +256,7 @@ impl YpfRuta {
                                         if aprobada {
                                             ventas_aprobadas.push(venta.clone());
                                         }
-                                        
+
                                         resultado_ventas.push((venta.id_venta.clone(), aprobada));
                                     }
                                     Err(e) => {
@@ -264,9 +268,9 @@ impl YpfRuta {
                                 }
                             }
                             resultado_por_surtidor.insert(surtidor, resultado_ventas);
-                        } 
+                        }
 
-                        resultados_por_estacion.insert(estacion, resultado_por_surtidor);                           
+                        resultados_por_estacion.insert(estacion, resultado_por_surtidor);
                     }
 
                     estacion_addr.do_send(ResultadoVentas {
@@ -277,15 +281,16 @@ impl YpfRuta {
                     for venta in ventas_aprobadas {
                         println!(
                             "YpfRuta {}: Replicando venta {} a {} peers",
-                            ypf_id, venta.id_venta, ypfs_addr.len()
+                            ypf_id,
+                            venta.id_venta,
+                            ypfs_addr.len()
                         );
                         for peer in &ypfs_addr {
                             peer.do_send(VentaRegistrada {
-                                venta: venta.clone()
+                                venta: venta.clone(),
                             });
                         }
                     }
-                    
                 });
             }
         });

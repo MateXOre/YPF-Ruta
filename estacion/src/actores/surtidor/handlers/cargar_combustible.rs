@@ -1,6 +1,6 @@
-use actix::{AsyncContext, Context, Handler, WrapFuture};
 use crate::actores::estacion::CobrarACliente;
-use crate::actores::surtidor::{surtidor::Surtidor, messages::CargarCombustible};
+use crate::actores::surtidor::{messages::CargarCombustible, surtidor::Surtidor};
+use actix::{AsyncContext, Context, Handler, WrapFuture};
 
 impl Handler<CargarCombustible> for Surtidor {
     type Result = ();
@@ -14,18 +14,18 @@ impl Handler<CargarCombustible> for Surtidor {
         // simulación de carga
         ctx.spawn(
             async move {
-                println!("[{}] ({}) Cargando combustible...", estacion_id, surtidor_id);
+                println!(
+                    "[{}] ({}) Cargando combustible...",
+                    estacion_id, surtidor_id
+                );
 
                 tokio::time::sleep(std::time::Duration::from_secs(5)).await;
 
                 println!("[{}] ({}) Carga terminada", estacion_id, surtidor_id);
 
-                estacion.do_send(CobrarACliente {
-                    venta,
-                    surtidor_id,
-                });
+                estacion.do_send(CobrarACliente { venta, surtidor_id });
             }
-                .into_actor(self),
+            .into_actor(self),
         );
     }
 }

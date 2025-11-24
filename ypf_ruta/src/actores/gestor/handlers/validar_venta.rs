@@ -1,6 +1,6 @@
-use actix::{Context, Handler};
 use crate::actores::gestor::gestor_actor::Gestor;
 use crate::actores::gestor::messages::ValidarVenta;
+use actix::{Context, Handler};
 
 impl Handler<ValidarVenta> for Gestor {
     type Result = bool;
@@ -9,4 +9,3 @@ impl Handler<ValidarVenta> for Gestor {
         self.procesar_venta_internal(&msg.0)
     }
 }
-

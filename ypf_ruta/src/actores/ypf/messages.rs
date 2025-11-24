@@ -31,19 +31,22 @@ impl NuevoLider {
             println!("Error: formato incorrecto para NuevoLider");
             return NuevoLider { id: 0 };
         }
-        
+
         // Extraer los bytes del ID (desde posición 2 hasta el final, sin el \n)
         let id_bytes = if bytes[bytes.len() - 1] == b'\n' {
             &bytes[2..bytes.len() - 1]
         } else {
             &bytes[2..]
         };
-        
+
         let id = if let Ok(id_str) = std::str::from_utf8(id_bytes) {
             if let Ok(parsed_id) = id_str.trim().parse::<usize>() {
                 parsed_id
             } else {
-                println!("Error: no se pudo parsear el id para NuevoLider: '{}'", id_str);
+                println!(
+                    "Error: no se pudo parsear el id para NuevoLider: '{}'",
+                    id_str
+                );
                 0
             }
         } else {
@@ -75,4 +78,3 @@ pub struct ConexionEntrante {
 pub struct SocketListo {
     pub peer_id: usize,
 }
-

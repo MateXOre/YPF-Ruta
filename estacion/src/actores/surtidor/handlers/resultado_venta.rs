@@ -1,8 +1,6 @@
-use actix::{AsyncContext, Context, Handler};
-use tokio::io::AsyncWriteExt;
-use crate::actores::estacion::SurtidorLibre;
-use crate::actores::surtidor::{surtidor::Surtidor, messages::ResultadoVenta};
 use crate::actores::surtidor::messages::Detenerme;
+use crate::actores::surtidor::{messages::ResultadoVenta, surtidor::Surtidor};
+use actix::{AsyncContext, Context, Handler};
 
 impl Handler<ResultadoVenta> for Surtidor {
     type Result = ();
@@ -26,5 +24,4 @@ impl Handler<ResultadoVenta> for Surtidor {
             ctx.address().do_send(Detenerme);
         }
     }
-    
 }

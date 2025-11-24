@@ -14,7 +14,7 @@ pub struct Venta {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 #[derive(Serialize, Deserialize)]
 pub enum EstadoVenta {
     Pendiente,
@@ -22,12 +22,3 @@ pub enum EstadoVenta {
     Fallida,
 }
 
-impl PartialEq for EstadoVenta {
-    fn eq(&self, other: &Self) -> bool {
-        *self == *other
-    }
-
-    fn ne(&self, other: &Self) -> bool {
-        !self.eq(other)
-    }
-}

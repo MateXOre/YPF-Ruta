@@ -1,4 +1,4 @@
 pub(crate) mod gestor_actor;
-pub(crate) mod structs;
-pub mod messages;
 mod handlers;
+pub mod messages;
+pub(crate) mod structs;

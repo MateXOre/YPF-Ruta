@@ -1,9 +1,9 @@
-use std::collections::HashMap;
-use actix::{Message, Addr};
-use std::net::SocketAddr;
 use crate::actores::{estacion_cercana::EstacionCercana, surtidor::surtidor::Surtidor};
-use util::structs::venta::Venta;
+use actix::{Addr, Message};
+use std::collections::HashMap;
+use std::net::SocketAddr;
 use tokio::net::TcpStream;
+use util::structs::venta::Venta;
 
 // ===== Opcodes del protocolo =====
 const OPCODE_REENVIAR: u8 = 0x01;
@@ -12,12 +12,12 @@ const OPCODE_NOTIFICAR_LIDER: u8 = 0x03;
 const OPCODE_INFORMAR_VENTA: u8 = 0x04;
 const OPCODE_CONFIRMAR_TRANSACCIONES: u8 = 0x05;
 pub const OPCODE_IDENTIFICAR: u8 = 0x06;
-pub const OPCODE_RESULTADO_VENTAS: u8 = 0x07;
+//pub const OPCODE_RESULTADO_VENTAS: u8 = 0x07;
 pub const OPCODE_INFORMAR_VENTAS_OFFLINE: u8 = 0x08;
 const OPCODE_TRANSACCIONES_POR_ESTACION: u8 = 0x09;
-const OPCODE_ENVIAR_A_SIGUIENTE: u8 = 0x10;
-const OPCODE_LIDER_CAIDO: u8 = 0x11;
-const OPCODE_NUEVO_LIDER_CONECTADO: u8 = 0x12;
+// const OPCODE_ENVIAR_A_SIGUIENTE: u8 = 0x10;
+// const OPCODE_LIDER_CAIDO: u8 = 0x11;
+// const OPCODE_NUEVO_LIDER_CONECTADO: u8 = 0x12;
 
 // ===== Funciones helper para serialización binaria =====
 fn write_u64(buf: &mut Vec<u8>, value: u64) {
@@ -31,8 +31,7 @@ fn read_u64(buf: &[u8], offset: &mut usize) -> Result<u64, String> {
     let bytes = &buf[*offset..*offset + 8];
     *offset += 8;
     Ok(u64::from_le_bytes([
-        bytes[0], bytes[1], bytes[2], bytes[3],
-        bytes[4], bytes[5], bytes[6], bytes[7],
+        bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7],
     ]))
 }
 
@@ -83,22 +82,22 @@ fn read_bool(buf: &[u8], offset: &mut usize) -> Result<bool, String> {
     Ok(value != 0)
 }
 
-fn write_string(buf: &mut Vec<u8>, value: &str) {
-    let bytes = value.as_bytes();
-    write_u32(buf, bytes.len() as u32);
-    buf.extend_from_slice(bytes);
-}
+// fn write_string(buf: &mut Vec<u8>, value: &str) {
+//     let bytes = value.as_bytes();
+//     write_u32(buf, bytes.len() as u32);
+//     buf.extend_from_slice(bytes);
+// }
 
-fn read_string(buf: &[u8], offset: &mut usize) -> Result<String, String> {
-    let len = read_u32(buf, offset)? as usize;
-    if *offset + len > buf.len() {
-        return Err("Buffer insuficiente para leer string".to_string());
-    }
-    let bytes = &buf[*offset..*offset + len];
-    *offset += len;
-    String::from_utf8(bytes.to_vec())
-        .map_err(|e| format!("Error decodificando UTF-8: {}", e))
-}
+// fn read_string(buf: &[u8], offset: &mut usize) -> Result<String, String> {
+//     let len = read_u32(buf, offset)? as usize;
+//     if *offset + len > buf.len() {
+//         return Err("Buffer insuficiente para leer string".to_string());
+//     }
+//     let bytes = &buf[*offset..*offset + len];
+//     *offset += len;
+//     String::from_utf8(bytes.to_vec())
+//         .map_err(|e| format!("Error decodificando UTF-8: {}", e))
+// }
 
 fn write_venta(buf: &mut Vec<u8>, venta: &Venta) {
     write_usize(buf, venta.id_venta);
@@ -193,10 +192,6 @@ impl Reenviar {
             bytes: bytes.to_vec(),
         })
     }
-
-    pub fn to_bytes(&self) -> Vec<u8> {
-        self.bytes.clone()
-    }
 }
 
 #[derive(Message, Clone)]
@@ -233,7 +228,6 @@ impl Eleccion {
     }
 }
 
-
 #[derive(Message, Clone)]
 #[rtype(result = "()")]
 pub struct NotificarLider {
@@ -252,7 +246,10 @@ impl NotificarLider {
         let mut offset = 1;
         let id_lider = read_usize(bytes, &mut offset)?;
         let id_iniciador = read_usize(bytes, &mut offset)?;
-        Ok(NotificarLider { id_lider, id_iniciador })
+        Ok(NotificarLider {
+            id_lider,
+            id_iniciador,
+        })
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
@@ -283,7 +280,6 @@ pub struct HabilitarSurtidor {
     pub surtidor_id: usize,
     pub surtidor_addr: Addr<Surtidor>,
 }
-
 
 #[derive(Message, Clone)]
 #[rtype(result = "()")]
@@ -364,54 +360,54 @@ impl TransaccionesPorEstacion {
         let mut offset = 1;
         let cant_estaciones = read_usize(bytes, &mut offset)?;
         let mut transacciones = HashMap::new();
-        
+
         for _ in 0..cant_estaciones {
             let id_estacion = read_usize(bytes, &mut offset)?;
             let cant_surtidores = read_usize(bytes, &mut offset)?;
             let mut surtidores = HashMap::new();
-            
+
             for _ in 0..cant_surtidores {
                 let id_surtidor = read_usize(bytes, &mut offset)?;
                 let cant_transacciones = read_usize(bytes, &mut offset)?;
                 let mut transacciones_vec = Vec::new();
-                
+
                 for _ in 0..cant_transacciones {
                     let id_venta = read_usize(bytes, &mut offset)?;
                     let ok = read_bool(bytes, &mut offset)?;
                     transacciones_vec.push((id_venta, ok));
                 }
-                
+
                 surtidores.insert(id_surtidor, transacciones_vec);
             }
-            
+
             transacciones.insert(id_estacion, surtidores);
         }
-        
+
         Ok(TransaccionesPorEstacion { transacciones })
     }
 
-    pub fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = Vec::new();
-        buf.push(OPCODE_TRANSACCIONES_POR_ESTACION);
-        write_usize(&mut buf, self.transacciones.len());
-        
-        for (id_estacion, surtidores) in &self.transacciones {
-            write_usize(&mut buf, *id_estacion);
-            write_usize(&mut buf, surtidores.len());
-            
-            for (id_surtidor, transacciones_vec) in surtidores {
-                write_usize(&mut buf, *id_surtidor);
-                write_usize(&mut buf, transacciones_vec.len());
-                
-                for (id_venta, ok) in transacciones_vec {
-                    write_usize(&mut buf, *id_venta);
-                    write_bool(&mut buf, *ok);
-                }
-            }
-        }
-        
-        buf
-    }
+    // pub fn to_bytes(&self) -> Vec<u8> {
+    //     let mut buf = Vec::new();
+    //     buf.push(OPCODE_TRANSACCIONES_POR_ESTACION);
+    //     write_usize(&mut buf, self.transacciones.len());
+
+    //     for (id_estacion, surtidores) in &self.transacciones {
+    //         write_usize(&mut buf, *id_estacion);
+    //         write_usize(&mut buf, surtidores.len());
+
+    //         for (id_surtidor, transacciones_vec) in surtidores {
+    //             write_usize(&mut buf, *id_surtidor);
+    //             write_usize(&mut buf, transacciones_vec.len());
+
+    //             for (id_venta, ok) in transacciones_vec {
+    //                 write_usize(&mut buf, *id_venta);
+    //                 write_bool(&mut buf, *ok);
+    //             }
+    //         }
+    //     }
+
+    //     buf
+    // }
 }
 
 #[derive(Message, Clone)]
@@ -421,31 +417,31 @@ pub struct EnviarASiguiente {
     pub msg: Vec<u8>,
 }
 
-impl EnviarASiguiente {
-    pub fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = Vec::new();
-        buf.push(OPCODE_ENVIAR_A_SIGUIENTE);
-        write_usize(&mut buf, self.estacion_cercana_id);
-        buf.extend_from_slice(&self.msg);
-        buf
-    }
+// impl EnviarASiguiente {
+//     pub fn to_bytes(&self) -> Vec<u8> {
+//         let mut buf = Vec::new();
+//         buf.push(OPCODE_ENVIAR_A_SIGUIENTE);
+//         write_usize(&mut buf, self.estacion_cercana_id);
+//         buf.extend_from_slice(&self.msg);
+//         buf
+//     }
 
-    pub fn from_bytes(bytes: &[u8]) -> Result<Self, String> {
-        if bytes.is_empty() {
-            return Err("Buffer vacío".to_string());
-        }
-        if bytes[0] != OPCODE_ENVIAR_A_SIGUIENTE {
-            return Err("Opcode incorrecto para EnviarASiguiente".to_string());
-        }
-        let mut offset = 1;
-        let estacion_cercana_id = read_usize(bytes, &mut offset)?;
-        let msg = bytes[offset..].to_vec();
-        Ok(EnviarASiguiente {
-            estacion_cercana_id,
-            msg,
-        })
-    }
-}
+//     pub fn from_bytes(bytes: &[u8]) -> Result<Self, String> {
+//         if bytes.is_empty() {
+//             return Err("Buffer vacío".to_string());
+//         }
+//         if bytes[0] != OPCODE_ENVIAR_A_SIGUIENTE {
+//             return Err("Opcode incorrecto para EnviarASiguiente".to_string());
+//         }
+//         let mut offset = 1;
+//         let estacion_cercana_id = read_usize(bytes, &mut offset)?;
+//         let msg = bytes[offset..].to_vec();
+//         Ok(EnviarASiguiente {
+//             estacion_cercana_id,
+//             msg,
+//         })
+//     }
+// }
 
 #[derive(Message, Clone)]
 #[rtype(result = "()")]
@@ -453,49 +449,47 @@ pub struct LiderCaido {
     pub mensaje: InformarVenta,
 }
 
-impl LiderCaido {
-    pub fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = Vec::new();
-        buf.push(OPCODE_LIDER_CAIDO);
-        buf.extend_from_slice(&self.mensaje.to_bytes());
-        buf
-    }
+// impl LiderCaido {
+//     pub fn to_bytes(&self) -> Vec<u8> {
+//         let mut buf = Vec::new();
+//         buf.push(OPCODE_LIDER_CAIDO);
+//         buf.extend_from_slice(&self.mensaje.to_bytes());
+//         buf
+//     }
 
-    pub fn from_bytes(bytes: &[u8]) -> Result<Self, String> {
-        if bytes.is_empty() {
-            return Err("Buffer vacío".to_string());
-        }
-        if bytes[0] != OPCODE_LIDER_CAIDO {
-            return Err("Opcode incorrecto para LiderCaido".to_string());
-        }
-        let mensaje = InformarVenta::from_bytes(&bytes[1..])?;
-        Ok(LiderCaido { mensaje })
-    }
-}
-
+//     pub fn from_bytes(bytes: &[u8]) -> Result<Self, String> {
+//         if bytes.is_empty() {
+//             return Err("Buffer vacío".to_string());
+//         }
+//         if bytes[0] != OPCODE_LIDER_CAIDO {
+//             return Err("Opcode incorrecto para LiderCaido".to_string());
+//         }
+//         let mensaje = InformarVenta::from_bytes(&bytes[1..])?;
+//         Ok(LiderCaido { mensaje })
+//     }
+// }
 
 #[derive(Message, Clone)]
 #[rtype(result = "()")]
 pub struct NuevoLiderConectado;
 
-impl NuevoLiderConectado {
-    pub fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = Vec::new();
-        buf.push(OPCODE_NUEVO_LIDER_CONECTADO);
-        buf
-    }
+// impl NuevoLiderConectado {
+//     pub fn to_bytes(&self) -> Vec<u8> {
+//         let mut buf = Vec::new();
+//         buf.push(OPCODE_NUEVO_LIDER_CONECTADO);
+//         buf
+//     }
 
-    pub fn from_bytes(bytes: &[u8]) -> Result<Self, String> {
-        if bytes.is_empty() {
-            return Err("Buffer vacío".to_string());
-        }
-        if bytes[0] != OPCODE_NUEVO_LIDER_CONECTADO {
-            return Err("Opcode incorrecto para NuevoLiderConectado".to_string());
-        }
-        Ok(NuevoLiderConectado {})
-    }
-}
-
+//     pub fn from_bytes(bytes: &[u8]) -> Result<Self, String> {
+//         if bytes.is_empty() {
+//             return Err("Buffer vacío".to_string());
+//         }
+//         if bytes[0] != OPCODE_NUEVO_LIDER_CONECTADO {
+//             return Err("Opcode incorrecto para NuevoLiderConectado".to_string());
+//         }
+//         Ok(NuevoLiderConectado {})
+//     }
+// }
 
 #[derive(Message, Clone)]
 #[rtype(result = "()")]
@@ -563,7 +557,6 @@ pub struct EstacionDesconectada {
     pub mensaje: Vec<u8>,
 }
 
-
 #[derive(Message, Clone)]
 #[rtype(result = "()")]
 pub struct CobrarACliente {
@@ -575,7 +568,7 @@ pub struct CobrarACliente {
 #[rtype(result = "()")]
 pub struct ProcesarMensaje {
     pub bytes: Vec<u8>,
-    pub estacion_remota: usize,   // opcional
+    pub _estacion_remota: usize, // opcional
 }
 
 // ===== Función helper para deserializar cualquier mensaje =====
@@ -588,11 +581,19 @@ pub fn deserialize_message(bytes: &[u8]) -> Result<MessageType, String> {
     match opcode {
         OPCODE_REENVIAR => Reenviar::from_bytes(bytes).map(MessageType::Reenviar),
         OPCODE_ELECCION => Eleccion::from_bytes(bytes).map(MessageType::Eleccion),
-        OPCODE_NOTIFICAR_LIDER => NotificarLider::from_bytes(bytes).map(MessageType::NotificarLider),
+        OPCODE_NOTIFICAR_LIDER => {
+            NotificarLider::from_bytes(bytes).map(MessageType::NotificarLider)
+        }
         OPCODE_INFORMAR_VENTA => InformarVenta::from_bytes(bytes).map(MessageType::InformarVenta),
-        OPCODE_CONFIRMAR_TRANSACCIONES => ConfirmarTransacciones::from_bytes(bytes).map(MessageType::ConfirmarTransacciones),
-        OPCODE_INFORMAR_VENTAS_OFFLINE => InformarVentasOffline::from_bytes(bytes).map(MessageType::InformarVentasOffline),
-        OPCODE_TRANSACCIONES_POR_ESTACION => TransaccionesPorEstacion::from_bytes(bytes).map(MessageType::TransaccionesPorEstacion),
+        OPCODE_CONFIRMAR_TRANSACCIONES => {
+            ConfirmarTransacciones::from_bytes(bytes).map(MessageType::ConfirmarTransacciones)
+        }
+        OPCODE_INFORMAR_VENTAS_OFFLINE => {
+            InformarVentasOffline::from_bytes(bytes).map(MessageType::InformarVentasOffline)
+        }
+        OPCODE_TRANSACCIONES_POR_ESTACION => {
+            TransaccionesPorEstacion::from_bytes(bytes).map(MessageType::TransaccionesPorEstacion)
+        }
         _ => Err(format!("Opcode desconocido: 0x{:02x}", opcode)),
     }
 }
@@ -609,14 +610,13 @@ pub enum MessageType {
     TransaccionesPorEstacion(TransaccionesPorEstacion),
 }
 
+#[derive(Message, Clone)]
+#[rtype(result = "()")]
+pub struct EmpezarInformarVentasOffline {}
 
 #[derive(Message, Clone)]
 #[rtype(result = "()")]
-pub struct EmpezarInformarVentasOffline{}
-
-#[derive(Message, Clone)]
-#[rtype(result = "()")]
-pub struct InformarVentasOffline{
+pub struct InformarVentasOffline {
     pub id_lider: usize,
     pub ventas: HashMap<usize, HashMap<usize, Vec<Venta>>>,
 }
@@ -633,27 +633,27 @@ impl InformarVentasOffline {
         let id_lider = read_usize(bytes, &mut offset)?;
         let cant_estaciones = read_usize(bytes, &mut offset)?;
         let mut ventas = HashMap::new();
-        
+
         for _ in 0..cant_estaciones {
             let id_estacion = read_usize(bytes, &mut offset)?;
             let cant_surtidores = read_usize(bytes, &mut offset)?;
             let mut surtidores = HashMap::new();
-            
+
             for _ in 0..cant_surtidores {
                 let id_surtidor = read_usize(bytes, &mut offset)?;
                 let cant_ventas = read_usize(bytes, &mut offset)?;
                 let mut ventas_vec = Vec::new();
-                
+
                 for _ in 0..cant_ventas {
                     ventas_vec.push(read_venta(bytes, &mut offset)?);
                 }
-                
+
                 surtidores.insert(id_surtidor, ventas_vec);
             }
-            
+
             ventas.insert(id_estacion, surtidores);
         }
-        
+
         Ok(InformarVentasOffline { id_lider, ventas })
     }
 
@@ -662,21 +662,21 @@ impl InformarVentasOffline {
         buf.push(OPCODE_INFORMAR_VENTAS_OFFLINE);
         write_usize(&mut buf, self.id_lider);
         write_usize(&mut buf, self.ventas.len());
-        
+
         for (id_estacion, surtidores) in &self.ventas {
             write_usize(&mut buf, *id_estacion);
             write_usize(&mut buf, surtidores.len());
-            
+
             for (id_surtidor, ventas_vec) in surtidores {
                 write_usize(&mut buf, *id_surtidor);
                 write_usize(&mut buf, ventas_vec.len());
-                
+
                 for venta in ventas_vec {
                     write_venta(&mut buf, venta);
                 }
             }
         }
-        
+
         buf
     }
 }

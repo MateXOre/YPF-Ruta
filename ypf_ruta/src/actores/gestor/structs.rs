@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-
 // #[derive(Debug, Clone, Deserialize, Serialize)]
 // pub struct Venta {
 //     #[serde(alias = "id_venta")]
@@ -13,8 +12,6 @@ use serde::{Deserialize, Serialize};
 //     #[serde(default)]
 //     pub fecha: String,
 // }
-
-
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Tarjeta {

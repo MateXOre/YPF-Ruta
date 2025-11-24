@@ -1,8 +1,8 @@
+use crate::actores::gestor::gestor_actor::Gestor;
+use actix::prelude::*;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufRead;
-use actix::prelude::*;
-use crate::actores::gestor::gestor_actor::Gestor;
 mod actores;
 use crate::actores::ypf::ypf_actor::YpfRuta;
 
@@ -16,17 +16,22 @@ async fn main() {
     }
 
     println!("Loading file {}", args[1]);
-    let index: usize = args[1].parse().expect("El índice debe ser un número válido.");
+    let index: usize = args[1]
+        .parse()
+        .expect("El índice debe ser un número válido.");
     let file_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("src")
         .join("data")
         .join("ypfs.config");
-    
+
     let f = File::open(&file_path).unwrap_or_else(|e| {
-        eprintln!("Error al abrir archivo de configuración {:?}: {}", file_path, e);
+        eprintln!(
+            "Error al abrir archivo de configuración {:?}: {}",
+            file_path, e
+        );
         std::process::exit(1);
     });
-    
+
     let mut peers = HashMap::new();
     let mut local = (0, 0);
     let lider = if args.len() >= 3 {
@@ -63,14 +68,7 @@ async fn main() {
 
     let gestor = Gestor::new(index).start();
 
-    let _ypf_server = YpfRuta::new(
-        local.0,
-        local.1,
-        lider,
-        peers,
-        gestor
-    ).start();
-
+    let _ypf_server = YpfRuta::new(local.0, local.1, lider, peers, gestor).start();
 
     std::future::pending::<()>().await;
 }

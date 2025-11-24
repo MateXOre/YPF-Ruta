@@ -1,8 +1,8 @@
-use std::time::Duration;
-use actix::{AsyncContext, Context, Handler};
 use crate::actores::peer::messages::Eleccion;
 use crate::actores::ypf::messages::{EleccionTimeout, IniciarEleccion};
 use crate::actores::ypf::ypf_actor::YpfRuta;
+use actix::{AsyncContext, Context, Handler};
+use std::time::Duration;
 
 impl Handler<IniciarEleccion> for YpfRuta {
     type Result = ();
@@ -29,7 +29,10 @@ impl Handler<IniciarEleccion> for YpfRuta {
 
         if !envio_a_mayores {
             // No hay nodos con ID mayor, me declaro líder
-            println!("YpfRuta {}: No hay nodos con ID mayor. Me declaro líder.", self.id);
+            println!(
+                "YpfRuta {}: No hay nodos con ID mayor. Me declaro líder.",
+                self.id
+            );
             self.declarar_lider(ctx);
         } else {
             // Esperar timeout para respuestas (2 segundos)

@@ -1,7 +1,7 @@
-use std::time::Duration;
-use actix::{Handler, Context, AsyncContext, ActorFutureExt};
-use crate::actores::estacion::Estacion;
 use crate::actores::estacion::messages::{EstacionDesconectada, Reenviar};
+use crate::actores::estacion::Estacion;
+use actix::{ActorFutureExt, AsyncContext, Context, Handler};
+use std::time::Duration;
 
 impl Handler<EstacionDesconectada> for Estacion {
     type Result = ();
@@ -16,9 +16,17 @@ impl Handler<EstacionDesconectada> for Estacion {
         println!("La estación {} se ha desconectado.", msg.estacion_id);
         self.estaciones_cercanas.remove(&msg.estacion_id);
 
-        println!("[{}] ❌ sin conexión a {}, intentando reconectar...", self.id, msg.estacion_id);
+        println!(
+            "[{}] ❌ sin conexión a {}, intentando reconectar...",
+            self.id, msg.estacion_id
+        );
 
-        println!("[{}] ❌ sin conexión a {}, hay {} estaciones cercanas...", self.id, msg.estacion_id, self.todas_las_estaciones.len());
+        println!(
+            "[{}] ❌ sin conexión a {}, hay {} estaciones cercanas...",
+            self.id,
+            msg.estacion_id,
+            self.todas_las_estaciones.len()
+        );
 
         //primer reintento
         self.siguiente_estacion = if self.id + 1 >= self.todas_las_estaciones.len() {
@@ -27,7 +35,11 @@ impl Handler<EstacionDesconectada> for Estacion {
             self.id + 1
         };
 
-        let proxima = self.todas_las_estaciones.get(&msg.estacion_id).unwrap().clone();
+        let proxima = self
+            .todas_las_estaciones
+            .get(&msg.estacion_id)
+            .unwrap()
+            .clone();
         let addr_self = ctx.address();
         let self_id = self.id;
         let mensaje_clone = msg.mensaje.clone();
@@ -58,7 +70,7 @@ impl Handler<EstacionDesconectada> for Estacion {
                     } else {
                         println!("Reconexion fallida, reintentaremos con {} en 500 ms", prox_id);
                         tokio::time::sleep(Duration::from_millis(500)).await;
-                        if(prox_id == self_id){
+                        if prox_id == self_id {
                             println!("No hay más estaciones para reconectar, quedando desconectada la estación {}", self_id);
                             return None;
                         }

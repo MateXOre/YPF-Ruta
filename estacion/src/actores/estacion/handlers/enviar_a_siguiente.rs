@@ -1,20 +1,27 @@
-use crate::actores::estacion::{deserialize_message};
-use actix::{AsyncContext, Handler};
-use crate::actores::estacion::{EnviarASiguiente, Estacion, OPCODE_INFORMAR_VENTAS_OFFLINE};
+use crate::actores::estacion::deserialize_message;
 use crate::actores::estacion::MessageType::InformarVentasOffline;
+use crate::actores::estacion::{EnviarASiguiente, Estacion};
 use crate::actores::estacion_cercana::{CerrarConexion, Enviar};
+use actix::{AsyncContext, Handler};
 
 impl Handler<EnviarASiguiente> for Estacion {
     type Result = ();
 
     fn handle(&mut self, msg: EnviarASiguiente, ctx: &mut actix::Context<Self>) {
-        println!("[{}] Estacion {} no responde, eliminando de estaciones cercanas", self.id, msg.estacion_cercana_id);
-        if let Some(estacion_desconectada) = self.estaciones_cercanas.get(&msg.estacion_cercana_id) {
-            estacion_desconectada.do_send(CerrarConexion{});
+        println!(
+            "[{}] Estacion {} no responde, eliminando de estaciones cercanas",
+            self.id, msg.estacion_cercana_id
+        );
+        if let Some(estacion_desconectada) = self.estaciones_cercanas.get(&msg.estacion_cercana_id)
+        {
+            estacion_desconectada.do_send(CerrarConexion {});
         }
         self.estaciones_cercanas.remove(&msg.estacion_cercana_id);
         let siguiente_estacion = (msg.estacion_cercana_id + 1) % (self.todas_las_estaciones.len());
-        println!("[{}] Error enviando mensaje de anillo a {}: Conectando con siguiente estacion: {}", self.id, msg.estacion_cercana_id, siguiente_estacion);
+        println!(
+            "[{}] Error enviando mensaje de anillo a {}: Conectando con siguiente estacion: {}",
+            self.id, msg.estacion_cercana_id, siguiente_estacion
+        );
 
         // reviso que el mensaje no sea para el lider actual que se desdonectó, si es un levantar ventas offline no lo reenvio para que deje de circular sin parar. La eleccion ya va a dejar de circular si lo corta un nuevo lider elegido (no prestarle mucha atencion a este caso de uso, las chances son mínimas
         if self.lider_actual == Some(msg.estacion_cercana_id) {
@@ -26,25 +33,30 @@ impl Handler<EnviarASiguiente> for Estacion {
                 }
             };
             if let InformarVentasOffline(mensaje) = mensaje {
-                println!("[{}] El mensaje era para el lider actual {}, no lo reenvio para evitar loops", self.id, msg.estacion_cercana_id);
+                println!(
+                    "[{}] El mensaje era para el lider actual {}, no lo reenvio para evitar loops",
+                    self.id, msg.estacion_cercana_id
+                );
                 let ventas_acumuladas = mensaje.ventas;
                 self.ventas_por_informar = self.agregar_ventas_acumuladas(ventas_acumuladas);
                 return;
             }
         }
         if let Some(siguiente_addr) = self.estaciones_cercanas.get(&siguiente_estacion) {
-            siguiente_addr.do_send(Enviar{
-                bytes: msg.msg,
-            });
+            siguiente_addr.do_send(Enviar { bytes: msg.msg });
         } else {
             println!("[{}] No se encontró la estacion cercana para la siguiente estación {}, intentando reconectar, ", self.id, siguiente_estacion);
-            if let Some(sig_addr) = self.todas_las_estaciones.get(&siguiente_estacion){
-                ctx.address().do_send(crate::actores::estacion::messages::EstacionDesconectada {
-                    estacion_id: siguiente_estacion,
-                    mensaje: msg.msg.clone(),
-                });
+            if let Some(_sig_addr) = self.todas_las_estaciones.get(&siguiente_estacion) {
+                ctx.address()
+                    .do_send(crate::actores::estacion::messages::EstacionDesconectada {
+                        estacion_id: siguiente_estacion,
+                        mensaje: msg.msg.clone(),
+                    });
             } else {
-                println!("[{}] No se encontró la dirección de la siguiente estación {}", self.id, siguiente_estacion);
+                println!(
+                    "[{}] No se encontró la dirección de la siguiente estación {}",
+                    self.id, siguiente_estacion
+                );
             }
         }
     }

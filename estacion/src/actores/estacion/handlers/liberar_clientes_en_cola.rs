@@ -1,7 +1,7 @@
-use actix::{Context, Handler};
-use crate::actores::estacion::{Estacion};
-use crate::actores::surtidor::messages::ResultadoVenta;
 use crate::actores::estacion::messages::LiberarClientesEnCola;
+use crate::actores::estacion::Estacion;
+use crate::actores::surtidor::messages::ResultadoVenta;
+use actix::{Context, Handler};
 use std::collections::HashMap;
 
 impl Handler<LiberarClientesEnCola> for Estacion {
@@ -9,7 +9,8 @@ impl Handler<LiberarClientesEnCola> for Estacion {
 
     fn handle(&mut self, _msg: LiberarClientesEnCola, _ctx: &mut Context<Self>) {
         println!("[{}] Liberando clientes en cola", self.id);
-        for (surtidor_id, venta) in self.ventas_a_confirmar.iter() { // pasamos las ventas online a offline
+        for (surtidor_id, venta) in self.ventas_a_confirmar.iter() {
+            // pasamos las ventas online a offline
             let mut venta = venta.clone();
             venta.offline = true;
             self.ventas_por_informar
@@ -20,10 +21,9 @@ impl Handler<LiberarClientesEnCola> for Estacion {
                 .push(venta);
         }
         self.ventas_a_confirmar.clear();
-        for surtidor in self.surtidores.values() { // avisamos a los surtidores que liberamos a los clientes
-            surtidor.do_send(ResultadoVenta {
-                exito: true,
-            });
+        for surtidor in self.surtidores.values() {
+            // avisamos a los surtidores que liberamos a los clientes
+            surtidor.do_send(ResultadoVenta { exito: true });
         }
     }
 }

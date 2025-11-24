@@ -1,15 +1,15 @@
-use std::fs;
-use std::net::SocketAddr;
 use crate::errors::error::Error;
-use std::net::IpAddr;
-use std::io::BufReader;
+use std::fs;
 use std::io::BufRead;
+use std::io::BufReader;
+use std::net::IpAddr;
+use std::net::SocketAddr;
 
 const ARCHIVO_NOMBRE: &str = "estaciones.csv";
 
-pub struct AddrLoader {
-}
+pub struct AddrLoader {}
 
+#[allow(dead_code)]
 impl AddrLoader {
     pub fn new() -> Self {
         Self {}
@@ -39,7 +39,7 @@ impl AddrLoader {
             Err(e) => return Err(Error::ErrorString(e.to_string())),
         };
         let reader = BufReader::new(file);
-        let line  = match reader.lines().skip(1).nth(line_number) {
+        let line = match reader.lines().skip(1).nth(line_number) {
             Some(line) => line,
             None => return Err(Error::ErrorString("Linea invalida".to_string())),
         };
@@ -64,7 +64,6 @@ impl AddrLoader {
         Ok(addr)
     }
 
-
     fn get_ip_from_string(&self, ip_str: &str) -> Result<IpAddr, Error> {
         let ip = match ip_str.parse::<IpAddr>() {
             Ok(ip) => ip,
@@ -88,7 +87,4 @@ impl AddrLoader {
         };
         Ok(addr)
     }
-
-
-
 }

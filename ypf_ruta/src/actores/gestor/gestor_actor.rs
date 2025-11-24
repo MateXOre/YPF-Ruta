@@ -1,12 +1,12 @@
+use serde_json;
 use std::collections::HashMap;
 use std::fs::File;
 use std::path::Path;
 use std::time::Duration;
-use serde_json;
 
+use crate::actores::gestor::structs::{Empresa, Tarjeta};
 use actix::prelude::*;
 use util::structs::venta::Venta;
-use crate::actores::gestor::structs::{Empresa, Tarjeta};
 
 const PERSISTENCE_INTERVAL_SECS: u64 = 30;
 
@@ -46,7 +46,9 @@ fn load_json_vec<T: for<'de> serde::Deserialize<'de>>(path: &Path) -> Vec<T> {
 
 impl Gestor {
     pub fn new(index: usize) -> Gestor {
-        let data_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("src").join("data");
+        let data_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("src")
+            .join("data");
 
         let empresas_path = data_dir.join(format!("empresas_{}.json", index));
         let tarjetas_path = data_dir.join(format!("tarjetas_{}.json", index));
@@ -74,7 +76,11 @@ impl Gestor {
         }
     }
 
-    pub fn modificar_limite_general_empresa(&mut self, id_empresa: usize, nuevo_limite: f32) -> Result<(), String> {
+    pub fn modificar_limite_general_empresa(
+        &mut self,
+        id_empresa: usize,
+        nuevo_limite: f32,
+    ) -> Result<(), String> {
         if let Some(empresa) = self.empresas.get_mut(&id_empresa) {
             if empresa.consumo_actual > nuevo_limite {
                 let msg = format!(
@@ -93,7 +99,11 @@ impl Gestor {
         }
     }
 
-    pub fn modificar_limite_particular_tarjeta(&mut self, id_tarjeta: usize, nuevo_limite: f32) -> Result<(), String> {
+    pub fn modificar_limite_particular_tarjeta(
+        &mut self,
+        id_tarjeta: usize,
+        nuevo_limite: f32,
+    ) -> Result<(), String> {
         if let Some(tarjeta) = self.tarjetas.get_mut(&id_tarjeta) {
             if tarjeta.consumo_actual > nuevo_limite {
                 let msg = format!(
@@ -112,7 +122,10 @@ impl Gestor {
         }
     }
 
-    pub fn consultar_estado_empresa_internal(&self, id_empresa: usize) -> Option<(Empresa, Vec<Tarjeta>)> {
+    pub fn consultar_estado_empresa_internal(
+        &self,
+        id_empresa: usize,
+    ) -> Option<(Empresa, Vec<Tarjeta>)> {
         self.empresas.get(&id_empresa).map(|empresa| {
             let tarjetas: Vec<Tarjeta> = self
                 .tarjetas
@@ -173,7 +186,9 @@ impl Gestor {
     }
 
     pub fn persistir_estado_actual(&self) {
-        let data_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("src").join("data");
+        let data_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("src")
+            .join("data");
 
         let empresas_path = data_dir.join(format!("empresas_{}.json", self.index));
         let tarjetas_path = data_dir.join(format!("tarjetas_{}.json", self.index));
@@ -181,8 +196,15 @@ impl Gestor {
 
         // Persistir empresas
         if let Ok(file) = File::create(&empresas_path) {
-            if let Err(e) = serde_json::to_writer_pretty(file, &self.empresas.values().collect::<Vec<&Empresa>>()) {
-                eprintln!("Error al guardar empresas en {}: {}", empresas_path.display(), e);
+            if let Err(e) = serde_json::to_writer_pretty(
+                file,
+                &self.empresas.values().collect::<Vec<&Empresa>>(),
+            ) {
+                eprintln!(
+                    "Error al guardar empresas en {}: {}",
+                    empresas_path.display(),
+                    e
+                );
             }
         } else {
             eprintln!("No se pudo crear el archivo {}", empresas_path.display());
@@ -190,8 +212,15 @@ impl Gestor {
 
         // Persistir tarjetas
         if let Ok(file) = File::create(&tarjetas_path) {
-            if let Err(e) = serde_json::to_writer_pretty(file, &self.tarjetas.values().collect::<Vec<&Tarjeta>>()) {
-                eprintln!("Error al guardar tarjetas en {}: {}", tarjetas_path.display(), e);
+            if let Err(e) = serde_json::to_writer_pretty(
+                file,
+                &self.tarjetas.values().collect::<Vec<&Tarjeta>>(),
+            ) {
+                eprintln!(
+                    "Error al guardar tarjetas en {}: {}",
+                    tarjetas_path.display(),
+                    e
+                );
             }
         } else {
             eprintln!("No se pudo crear el archivo {}", tarjetas_path.display());
@@ -200,7 +229,11 @@ impl Gestor {
         // Persistir ventas
         if let Ok(file) = File::create(&ventas_path) {
             if let Err(e) = serde_json::to_writer_pretty(file, &self.ventas) {
-                eprintln!("Error al guardar ventas en {}: {}", ventas_path.display(), e);
+                eprintln!(
+                    "Error al guardar ventas en {}: {}",
+                    ventas_path.display(),
+                    e
+                );
             }
         } else {
             eprintln!("No se pudo crear el archivo {}", ventas_path.display());
@@ -212,11 +245,14 @@ impl Actor for Gestor {
     type Context = Context<Self>;
 
     fn started(&mut self, ctx: &mut Self::Context) {
-        // Persistir regularmente cada 30 segundos 
-        ctx.run_interval(Duration::from_secs(PERSISTENCE_INTERVAL_SECS), |act, _ctx| {
-            act.persistir_estado_actual();
-            println!("Gestor: estado persistido periódicamente");
-        });
+        // Persistir regularmente cada 30 segundos
+        ctx.run_interval(
+            Duration::from_secs(PERSISTENCE_INTERVAL_SECS),
+            |act, _ctx| {
+                act.persistir_estado_actual();
+                println!("Gestor: estado persistido periódicamente");
+            },
+        );
 
         println!("Gestor actor iniciado");
     }

@@ -1,7 +1,7 @@
 use actix::prelude::*;
 
-mod errors;
 mod actores;
+mod errors;
 mod loader;
 use actores::estacion::*;
 use loader::addr_loader::AddrLoader;
@@ -18,11 +18,11 @@ async fn main() {
         }
     };
 
-    let estacion = Estacion::new(index_estacion, estaciones).start();
+    let _estacion = Estacion::new(index_estacion, estaciones).start();
 
     tokio::signal::ctrl_c()
         .await
         .expect("Error esperando señal de terminación");
-    
+
     println!("Se apaga la estacion {}", index_estacion);
 }

@@ -1,5 +1,5 @@
-use actix::{Context, Handler};
 use crate::actores::estacion::{Estacion, HabilitarSurtidor};
+use actix::{Context, Handler};
 
 impl Handler<HabilitarSurtidor> for Estacion {
     type Result = ();

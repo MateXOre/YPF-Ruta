@@ -1,7 +1,7 @@
-use actix::{AsyncContext, Context, Handler};
 use crate::actores::peer::messages::{Eleccion, EleccionOk};
-use crate::actores::ypf::messages::{NuevoLider, IniciarEleccion};
+use crate::actores::ypf::messages::{IniciarEleccion, NuevoLider};
 use crate::actores::ypf::ypf_actor::YpfRuta;
+use actix::{AsyncContext, Context, Handler};
 
 // Handler cuando recibo un mensaje ELECTION de otro nodo
 impl Handler<Eleccion> for YpfRuta {
@@ -9,12 +9,18 @@ impl Handler<Eleccion> for YpfRuta {
 
     fn handle(&mut self, msg: Eleccion, ctx: &mut Context<Self>) -> Self::Result {
         let sender_id = msg.0;
-        println!("YpfRuta {}: Recibido ELECTION del nodo {}", self.id, sender_id);
+        println!(
+            "YpfRuta {}: Recibido ELECTION del nodo {}",
+            self.id, sender_id
+        );
 
         if sender_id < self.id {
             // Responder OK al nodo con ID menor
-            println!("YpfRuta {}: Enviando OK al nodo {} e iniciando mi propia elección", self.id, sender_id);
-            
+            println!(
+                "YpfRuta {}: Enviando OK al nodo {} e iniciando mi propia elección",
+                self.id, sender_id
+            );
+
             if let Some(peer_addr) = self.ypf_peers.get(&sender_id) {
                 peer_addr.do_send(EleccionOk(self.id));
             }
@@ -24,7 +30,10 @@ impl Handler<Eleccion> for YpfRuta {
                 ctx.address().do_send(IniciarEleccion);
             }
         } else {
-            println!("YpfRuta {}: Recibido ELECTION de nodo con ID mayor o igual ({}), ignorando", self.id, sender_id);
+            println!(
+                "YpfRuta {}: Recibido ELECTION de nodo con ID mayor o igual ({}), ignorando",
+                self.id, sender_id
+            );
         }
     }
 }
@@ -37,20 +46,11 @@ impl YpfRuta {
 
         // Enviar COORDINATOR a todos los nodos
         for (peer_id, peer_addr) in self.ypf_peers.iter() {
-            println!("YpfRuta {}: Enviando COORDINATOR al peer {}", self.id, peer_id);
+            println!(
+                "YpfRuta {}: Enviando COORDINATOR al peer {}",
+                self.id, peer_id
+            );
             peer_addr.do_send(NuevoLider { id: self.id });
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

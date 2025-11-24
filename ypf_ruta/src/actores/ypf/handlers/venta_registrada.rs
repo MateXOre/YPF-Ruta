@@ -1,7 +1,7 @@
-use actix::{Context, Handler};
 use crate::actores::gestor::messages::RegistrarVenta;
 use crate::actores::peer::messages::VentaRegistrada;
 use crate::actores::ypf::ypf_actor::YpfRuta;
+use actix::{Context, Handler};
 
 impl Handler<VentaRegistrada> for YpfRuta {
     type Result = ();
@@ -10,32 +10,3 @@ impl Handler<VentaRegistrada> for YpfRuta {
         self.gestor_addr.do_send(RegistrarVenta(msg.venta));
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,6 +1,6 @@
-use actix::{Context, Handler};
 use crate::actores::gestor::gestor_actor::Gestor;
 use crate::actores::gestor::messages::RegistrarVenta;
+use actix::{Context, Handler};
 
 impl Handler<RegistrarVenta> for Gestor {
     type Result = ();
@@ -9,24 +9,3 @@ impl Handler<RegistrarVenta> for Gestor {
         self.crear_venta(msg.0)
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,6 +1,6 @@
+use crate::actores::gestor::structs::{Empresa, Tarjeta};
 use actix::Message;
 use util::structs::venta::Venta;
-use crate::actores::gestor::structs::{Empresa, Tarjeta};
 
 #[derive(Message)]
 #[rtype(result = "bool")]

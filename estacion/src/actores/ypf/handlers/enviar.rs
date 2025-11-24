@@ -1,6 +1,6 @@
-use actix::prelude::*;
-use crate::actores::ypf::ypf_ruta::Ypf;
 use crate::actores::ypf::messages::EnviarYpf;
+use crate::actores::ypf::ypf_ruta::Ypf;
+use actix::prelude::*;
 
 impl Handler<EnviarYpf> for Ypf {
     type Result = ();

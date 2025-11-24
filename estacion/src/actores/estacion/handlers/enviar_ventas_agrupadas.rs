@@ -1,13 +1,14 @@
-use std::collections::HashMap;
-use actix::{Context, Handler, AsyncContext, Actor, WrapFuture};
-use util::structs::venta::Venta;
 use crate::actores::estacion::{EnviarVentasAgrupadas, Estacion};
 use crate::actores::ypf::messages::EnviarYpf;
 use crate::actores::ypf::ypf_ruta::Ypf;
+use actix::{Actor, AsyncContext, Context, Handler, WrapFuture};
+use std::collections::HashMap;
+use util::structs::venta::Venta;
 
-fn serializar_ventas(ventas: &HashMap<usize, HashMap<usize, Vec<Venta>>>) -> Result<Vec<u8>, String> {
-    serde_json::to_vec(ventas)
-        .map_err(|e| format!("Error serializando ventas: {}", e))
+fn serializar_ventas(
+    ventas: &HashMap<usize, HashMap<usize, Vec<Venta>>>,
+) -> Result<Vec<u8>, String> {
+    serde_json::to_vec(ventas).map_err(|e| format!("Error serializando ventas: {}", e))
 }
 
 fn generar_mensaje(
@@ -20,7 +21,7 @@ fn generar_mensaje(
     bytes.extend_from_slice(&len.to_be_bytes());
     bytes.extend_from_slice(&payload);
 
-    Ok(EnviarYpf{ bytes })
+    Ok(EnviarYpf { bytes })
 }
 
 impl Handler<EnviarVentasAgrupadas> for Estacion {

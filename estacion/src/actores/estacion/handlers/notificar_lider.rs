@@ -1,16 +1,16 @@
-use actix::{Handler, Context};
-use crate::actores::estacion::Estacion;
 use crate::actores::estacion::messages::*;
-use actix::prelude::*; 
+use crate::actores::estacion::Estacion;
+use actix::prelude::*;
 use actix::ActorFutureExt;
-use tokio::time::sleep;
+use actix::{Context, Handler};
 use std::time::Duration;
+use tokio::time::sleep;
 
 impl Handler<NotificarLider> for Estacion {
     type Result = ();
 
     fn handle(&mut self, msg: NotificarLider, ctx: &mut Context<Self>) {
-        if self.id == msg.id_iniciador && self.lider_actual == Some(msg.id_lider){
+        if self.id == msg.id_iniciador && self.lider_actual == Some(msg.id_lider) {
             println!(
                 "[{}] 🔁 Mensaje de líder {} completó el ciclo, fin de propagación.",
                 self.id, msg.id_lider
@@ -18,17 +18,11 @@ impl Handler<NotificarLider> for Estacion {
             return;
         }
 
-
-
         self.lider_actual = Some(msg.id_lider);
 
-        println!(
-            "[{}] Mi nuevo lider es : {} ",
-            self.id, msg.id_lider
-        );
+        println!("[{}] Mi nuevo lider es : {} ", self.id, msg.id_lider);
 
         if self.id != msg.id_lider {
-
             // ✔️ PRIMERO verificamos si ya existe conexión
             if self.estaciones_cercanas.contains_key(&msg.id_lider) {
                 println!(
@@ -38,7 +32,6 @@ impl Handler<NotificarLider> for Estacion {
 
                 ctx.address().do_send(NuevoLiderConectado);
             } else if let Some(lider_addr) = self.todas_las_estaciones.get(&msg.id_lider).copied() {
-
                 // ❗ Solo si NO existe conexión → intento conectar
                 println!(
                     "[{}] intentando conectarme al nuevo líder en {}...",
@@ -55,19 +48,26 @@ impl Handler<NotificarLider> for Estacion {
                             lider_addr,
                             addr_self.clone(),
                             self_id,
-                            nuevo_lider
-                        ).await {
+                            nuevo_lider,
+                        )
+                        .await
+                        {
                             Ok(_) => {
-                                println!("[{}] ✅ conexión establecida con el líder {}", self_id, nuevo_lider);
+                                println!(
+                                    "[{}] ✅ conexión establecida con el líder {}",
+                                    self_id, nuevo_lider
+                                );
                                 addr_self.do_send(NuevoLiderConectado);
-                            },
-                            Err(_) => println!("[{}] ❌ no se pudo conectar con el líder {}", self_id, nuevo_lider),
+                            }
+                            Err(_) => println!(
+                                "[{}] ❌ no se pudo conectar con el líder {}",
+                                self_id, nuevo_lider
+                            ),
                         }
                     })
-                        .map(|_, _, _| ())
+                    .map(|_, _, _| ()),
                 );
             }
-
         } else {
             println!(
                 "[{}] Soy el nuevo líder, no necesito conectarme a mí mismo.",
@@ -77,15 +77,22 @@ impl Handler<NotificarLider> for Estacion {
             let addr = ctx.address();
             ctx.spawn(
                 async move {
-                    sleep(Duration::from_secs(Estacion::TIEMPO_INFORMAR_VENTAS_OFFLINE)).await;
-                    addr.do_send(EmpezarInformarVentasOffline{});
+                    sleep(Duration::from_secs(
+                        Estacion::TIEMPO_INFORMAR_VENTAS_OFFLINE,
+                    ))
+                    .await;
+                    addr.do_send(EmpezarInformarVentasOffline {});
                 }
-                    .into_actor(self)
+                .into_actor(self),
             );
         }
 
         // Reenviamos el mensaje al siguiente en el anillo
-        let mensaje_serializado = NotificarLider {id_lider: msg.id_lider.clone(), id_iniciador: msg.id_iniciador}.to_bytes();
+        let mensaje_serializado = NotificarLider {
+            id_lider: msg.id_lider.clone(),
+            id_iniciador: msg.id_iniciador,
+        }
+        .to_bytes();
         self.enviar_a_siguiente(ctx, mensaje_serializado);
     }
 }

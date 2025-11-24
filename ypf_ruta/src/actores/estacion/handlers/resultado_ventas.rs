@@ -1,8 +1,8 @@
+use crate::actores::estacion::estacion_actor::Estacion;
+use crate::actores::estacion::messages::{Resultado, ResultadoVentas};
 use actix::{ActorContext, ActorFutureExt};
 use actix::{AsyncContext, Context, Handler, WrapFuture};
 use tokio::io::AsyncWriteExt;
-use crate::actores::estacion::estacion_actor::Estacion;
-use crate::actores::estacion::messages::{Resultado, ResultadoVentas};
 
 fn parse_to_json(ventas: Resultado) -> Vec<u8> {
     match serde_json::to_vec(&ventas) {
@@ -31,12 +31,9 @@ impl Handler<ResultadoVentas> for Estacion {
                 }
             };
 
-            ctx.spawn(
-                fut.into_actor(self)
-                    .map(|_, _act, ctx| {
-                        ctx.stop();
-                    }),
-            );
+            ctx.spawn(fut.into_actor(self).map(|_, _act, ctx| {
+                ctx.stop();
+            }));
         } else {
             println!("Estacion: no hay socket para enviar ResultadoVentas, finalizando actor.");
             ctx.stop();

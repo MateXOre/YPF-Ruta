@@ -35,11 +35,7 @@ impl Handler<EstacionDesconectada> for Estacion {
             self.id + 1
         };
 
-        let proxima = self
-            .todas_las_estaciones
-            .get(&msg.estacion_id)
-            .unwrap()
-            .clone();
+        let proxima = *self.todas_las_estaciones.get(&msg.estacion_id).unwrap();
         let addr_self = ctx.address();
         let self_id = self.id;
         let mensaje_clone = msg.mensaje.clone();
@@ -54,7 +50,6 @@ impl Handler<EstacionDesconectada> for Estacion {
 
         ctx.spawn(
             actix::fut::wrap_future({
-                let proxima = proxima.clone();
                 let addr_self2 = addr_self.clone();
                 let mensaje2 = mensaje_clone.clone();
 

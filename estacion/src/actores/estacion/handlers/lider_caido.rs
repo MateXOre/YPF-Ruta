@@ -1,7 +1,6 @@
 use crate::actores::estacion::{Eleccion, Estacion, EstacionDesconectada, LiderCaido};
 use crate::actores::estacion_cercana::Enviar;
 use actix::{AsyncContext, Handler};
-use std::collections::HashMap;
 
 impl Handler<LiderCaido> for Estacion {
     type Result = ();
@@ -24,9 +23,9 @@ impl Handler<LiderCaido> for Estacion {
 
         self.ventas_por_informar
             .entry(self.id)
-            .or_insert_with(HashMap::new)
+            .or_default()
             .entry(msg.mensaje.id_surtidor)
-            .or_insert_with(Vec::new)
+            .or_default()
             .push(msg.mensaje.venta);
 
         println!("[{}] Iniciando elección de nuevo líder", self.id);

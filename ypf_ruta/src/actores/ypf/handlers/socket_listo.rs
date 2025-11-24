@@ -15,14 +15,13 @@ impl Handler<SocketListo> for YpfRuta {
         // Si somos líderes, enviar información de líder ahora que el socket está listo
         if let Some(lider_id) = self.lider
             && lider_id == self.id
+            && let Some(peer_addr) = self.ypf_peers.get(&peer_id)
         {
-            if let Some(peer_addr) = self.ypf_peers.get(&peer_id) {
-                println!(
-                    "YpfRuta {}: Enviando NuevoLider al peer {} (socket listo)",
-                    self.id, peer_id
-                );
-                peer_addr.do_send(NuevoLider { id: lider_id });
-            }
+            println!(
+                "YpfRuta {}: Enviando NuevoLider al peer {} (socket listo)",
+                self.id, peer_id
+            );
+            peer_addr.do_send(NuevoLider { id: lider_id });
         }
     }
 }

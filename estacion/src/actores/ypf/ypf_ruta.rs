@@ -59,6 +59,7 @@ impl Ypf {
         tokio::spawn(async move {
             let mut buf = vec![0; 1024];
 
+            #[allow(clippy::never_loop)]
             loop {
                 match reader.read(&mut buf).await {
                     Ok(_) => {

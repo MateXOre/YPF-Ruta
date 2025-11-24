@@ -4,7 +4,6 @@ use crate::actores::estacion::Estacion;
 use crate::actores::estacion_cercana::Enviar;
 use crate::actores::surtidor::messages::ResultadoVenta;
 use actix::{AsyncContext, Context, Handler};
-use std::collections::HashMap;
 
 impl Handler<CobrarACliente> for Estacion {
     type Result = ();
@@ -53,9 +52,9 @@ impl Handler<CobrarACliente> for Estacion {
                 venta.offline = true;
                 self.ventas_por_informar
                     .entry(self.id)
-                    .or_insert_with(HashMap::new)
+                    .or_default()
                     .entry(msg.surtidor_id)
-                    .or_insert_with(Vec::new)
+                    .or_default()
                     .push(venta);
             }
         }

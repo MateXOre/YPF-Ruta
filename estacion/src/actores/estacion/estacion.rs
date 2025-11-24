@@ -116,12 +116,10 @@ impl Estacion {
         }
     }
 
-    ///
     pub(crate) fn enviar_a_siguiente(&self, ctx: &mut Context<Self>, mensaje: Vec<u8>) {
         let siguiente = if self
             .estaciones_cercanas
-            .get(&self.siguiente_estacion)
-            .is_some()
+            .contains_key(&self.siguiente_estacion)
         {
             self.estaciones_cercanas
                 .get(&self.siguiente_estacion)
@@ -133,7 +131,7 @@ impl Estacion {
                 self.id, self.siguiente_estacion
             );
             ctx.address().do_send(EstacionDesconectada {
-                estacion_id: self.siguiente_estacion.clone(),
+                estacion_id: self.siguiente_estacion,
                 mensaje: mensaje.clone(),
             });
             return;
@@ -171,14 +169,10 @@ impl Estacion {
         // Combinar las ventas de esta estación con las acumuladas
         let ventas_por_informar = self.ventas_por_informar.clone();
         for (id_estacion, surtidores_acumuladas) in ventas_por_informar {
-            let entry_estacion_acumulada = ventas_acumuladas
-                .entry(id_estacion)
-                .or_insert_with(HashMap::new);
+            let entry_estacion_acumulada = ventas_acumuladas.entry(id_estacion).or_default();
 
             for (id_surtidor, mut ventas_acumuladas_surtidor) in surtidores_acumuladas {
-                let entry_surtidor = entry_estacion_acumulada
-                    .entry(id_surtidor)
-                    .or_insert_with(Vec::new);
+                let entry_surtidor = entry_estacion_acumulada.entry(id_surtidor).or_default();
 
                 entry_surtidor.append(&mut ventas_acumuladas_surtidor);
             }
@@ -314,11 +308,10 @@ impl Actor for Estacion {
         // Conectar con la siguiente estación después de crear el hilo
 
         let addr_self_clone = ctx.address();
-        let sig_addr = self
+        let sig_addr = *self
             .todas_las_estaciones
             .get(&self.siguiente_estacion)
-            .unwrap()
-            .clone();
+            .unwrap();
         let sig_id = self.siguiente_estacion;
         println!("Conectando con siguiente estación {}", sig_id);
         actix_rt::spawn(async move {

@@ -26,7 +26,7 @@ impl Handler<ResultadoVentas> for Estacion {
         if let Some(mut socket) = self.socket.take() {
             let fut = async move {
                 let bytes = parse_to_json(msg.ventas);
-                if socket.write_all(&*bytes).await.is_err() {
+                if socket.write_all(&bytes).await.is_err() {
                     eprintln!("Estacion: error serializando ResultadoVentas");
                 }
             };

@@ -1,7 +1,6 @@
 use crate::actores::estacion::messages::InformarVenta;
 use crate::actores::estacion::{EnviarVentasAgrupadas, Estacion};
 use actix::{AsyncContext, Context, Handler, WrapFuture};
-use std::collections::HashMap;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -33,9 +32,9 @@ impl Handler<InformarVenta> for Estacion {
 
         self.ventas_por_informar
             .entry(msg.id_estacion)
-            .or_insert_with(HashMap::new)
+            .or_default()
             .entry(msg.id_surtidor)
-            .or_insert_with(Vec::new)
+            .or_default()
             .push(msg.venta);
     }
 }

@@ -12,9 +12,9 @@ impl Handler<VentaRegistrada> for YpfPeer {
             return;
         };
         println!("YpfPeer: encolando venta registrada");
-        self.cola_envio.as_mut().map(|tx| {
+        if let Some(tx) = self.cola_envio.as_mut() {
             tx.send(mensaje)
                 .expect("Fallo al enviar VentaRegistrada a la cola de envio");
-        });
+        }
     }
 }

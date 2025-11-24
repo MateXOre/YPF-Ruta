@@ -8,7 +8,7 @@ impl Handler<ResultadoVenta> for Surtidor {
     fn handle(&mut self, msg: ResultadoVenta, ctx: &mut Context<Self>) {
         let respuesta = if msg.exito {
             println!("Venta exitosa");
-            format!("Venta exitosa.\n")
+            "Venta exitosa.\n".to_string()
         } else {
             println!("Venta Rechazada");
             "Venta fallida.\n".to_string()
@@ -17,10 +17,8 @@ impl Handler<ResultadoVenta> for Surtidor {
         // Enviar la respuesta al cliente mediante el canal
         if let Err(e) = self.writer_tx.send(respuesta.into_bytes()) {
             println!("Error al enviar respuesta al writer: {:?}", e);
-            return;
         } else {
             println!("Respuesta enviada al cliente");
-
             ctx.address().do_send(Detenerme);
         }
     }

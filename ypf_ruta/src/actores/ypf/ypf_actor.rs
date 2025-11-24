@@ -79,18 +79,17 @@ impl YpfRuta {
     fn intentar_conectar_peers(&mut self, ctx: &mut actix::Context<Self>) {
         println!("YpfRuta {}: Intentando conectar a peers...", self.id);
         let peers = self.peer_addrs.clone();
-        let self_id = self.id.clone();
+        let self_id = self.id;
 
         for (peer_id, addr) in peers {
             let self_addr = ctx.address().clone();
-            let fut = async move {
-                YpfPeer::new(peer_id.clone(), self_id, None, Some(addr), self_addr).await
-            };
-            let id = peer_id.clone();
+            let fut =
+                async move { YpfPeer::new(peer_id, self_id, None, Some(addr), self_addr).await };
+            let id = peer_id;
 
             let fut = fut.into_actor(self).map(move |peer, act, _ctx| {
                 let addr = peer.start();
-                act.ypf_peers.insert(id.clone(), addr);
+                act.ypf_peers.insert(id, addr);
                 println!("YpfRuta {}: Peer {} iniciado.", act.id, id);
             });
 
@@ -257,7 +256,7 @@ impl YpfRuta {
                                             ventas_aprobadas.push(venta.clone());
                                         }
 
-                                        resultado_ventas.push((venta.id_venta.clone(), aprobada));
+                                        resultado_ventas.push((venta.id_venta, aprobada));
                                     }
                                     Err(e) => {
                                         eprintln!(

@@ -44,25 +44,23 @@ async fn main() {
         None
     };
 
-    for line in std::io::BufReader::new(f).lines().skip(1) {
-        if let Ok(l) = line {
-            let parts: Vec<&str> = l.split(',').collect();
-            if parts.len() != 2 {
-                eprintln!("Línea de configuración inválida: {}", l);
-                continue;
-            }
+    for l in std::io::BufReader::new(f).lines().skip(1).flatten() {
+        let parts: Vec<&str> = l.split(',').collect();
+        if parts.len() != 2 {
+            eprintln!("Línea de configuración inválida: {}", l);
+            continue;
+        }
 
-            let id: usize = parts[0].parse().expect("ID inválido en configuración.");
-            let puerto: usize = parts[1].parse().expect("Puerto inválido en configuración.");
+        let id: usize = parts[0].parse().expect("ID inválido en configuración.");
+        let puerto: usize = parts[1].parse().expect("Puerto inválido en configuración.");
 
-            if id == index {
-                local = (id, puerto);
-            } else {
-                peers.insert(
-                    id,
-                    std::net::SocketAddr::from(([127, 0, 0, 1], puerto as u16)),
-                );
-            }
+        if id == index {
+            local = (id, puerto);
+        } else {
+            peers.insert(
+                id,
+                std::net::SocketAddr::from(([127, 0, 0, 1], puerto as u16)),
+            );
         }
     }
 

@@ -102,7 +102,7 @@ impl YpfRuta {
             self.id
         );
         let peers = self.peer_addrs.clone();
-        let self_id = self.id.clone();
+        let self_id = self.id;
 
         for (peer_id, addr) in peers {
             let self_addr = ctx.address().clone();
@@ -320,7 +320,7 @@ impl YpfRuta {
                                             ventas_aprobadas.push(venta.clone());
                                         }
 
-                                        resultado_ventas.push((venta.id_venta.clone(), aprobada));
+                                        resultado_ventas.push((venta.id_venta, aprobada));
                                     }
                                     Err(e) => {
                                         log_error!(

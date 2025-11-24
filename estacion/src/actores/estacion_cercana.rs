@@ -219,7 +219,7 @@ impl EstacionCercana {
 
         //let reader_task = EstacionCercana::read_from_socket(reader, estacion_local.clone(), estacion_id);
 
-        let estacion_cercana = EstacionCercana {
+        EstacionCercana {
             estacion_id,
             estacion_local,
             socket_estacion_cercana: tx,
@@ -227,9 +227,7 @@ impl EstacionCercana {
             reader_task: None,
             reader: Some(reader),
             desconectado: false,
-        };
-
-        estacion_cercana
+        }
     }
 
     pub fn enviar_por_socket(&mut self, buf: Vec<u8>) {

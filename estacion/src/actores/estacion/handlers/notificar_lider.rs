@@ -89,7 +89,7 @@ impl Handler<NotificarLider> for Estacion {
 
         // Reenviamos el mensaje al siguiente en el anillo
         let mensaje_serializado = NotificarLider {
-            id_lider: msg.id_lider.clone(),
+            id_lider: msg.id_lider,
             id_iniciador: msg.id_iniciador,
         }
         .to_bytes();

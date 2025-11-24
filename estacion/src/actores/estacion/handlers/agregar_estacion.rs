@@ -38,7 +38,7 @@ impl Handler<AgregarEstacion> for Estacion {
                 aspirantes_ids: vec![id_estacion],
             };
             let siguiente_estacion = self.siguiente_estacion;
-            let siguiente = if self.estaciones_cercanas.get(&siguiente_estacion).is_some() {
+            let siguiente = if self.estaciones_cercanas.contains_key(&siguiente_estacion) {
                 self.estaciones_cercanas
                     .get(&siguiente_estacion)
                     .unwrap()

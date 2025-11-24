@@ -2,7 +2,6 @@ use crate::actores::estacion::messages::LiberarClientesEnCola;
 use crate::actores::estacion::Estacion;
 use crate::actores::surtidor::messages::ResultadoVenta;
 use actix::{Context, Handler};
-use std::collections::HashMap;
 
 impl Handler<LiberarClientesEnCola> for Estacion {
     type Result = ();
@@ -15,9 +14,9 @@ impl Handler<LiberarClientesEnCola> for Estacion {
             venta.offline = true;
             self.ventas_por_informar
                 .entry(venta.id_estacion)
-                .or_insert_with(HashMap::new)
+                .or_default()
                 .entry(*surtidor_id)
-                .or_insert_with(Vec::new)
+                .or_default()
                 .push(venta);
         }
         self.ventas_a_confirmar.clear();

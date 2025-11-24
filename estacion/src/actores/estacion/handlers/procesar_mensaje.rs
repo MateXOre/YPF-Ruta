@@ -14,7 +14,6 @@ impl Handler<ProcesarMensaje> for Estacion {
                 MessageType::InformarVenta(m) => ctx.address().do_send(m),
                 MessageType::ConfirmarTransacciones(m) => ctx.address().do_send(m),
                 MessageType::IdentificarEstacion(m) => ctx.address().do_send(m),
-                MessageType::ResultadoVentas(m) => ctx.address().do_send(m),
                 MessageType::InformarVentasOffline(m) => ctx.address().do_send(m),
                 MessageType::TransaccionesPorEstacion(m) => ctx.address().do_send(m),
             }

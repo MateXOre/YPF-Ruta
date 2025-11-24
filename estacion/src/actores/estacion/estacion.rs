@@ -37,6 +37,7 @@ pub struct Estacion {
     pub(crate) ventas_por_informar: HashMap<usize, HashMap<usize, Vec<Venta>>>,//id_estacion, id_surtidor, ventas es un vector porque cuando levantemos las offline puede haber más siempre podemos plantear no agruparlas en el mismo vector
     pub(crate) temporizador_activo: bool,
     pub(crate) listener_activo: Arc<AtomicBool>, // Controla si el listener debe seguir aceptando conexiones
+    pub(crate) estoy_desconectada: bool,
 }
 
 
@@ -69,6 +70,7 @@ impl Estacion {
             ventas_por_informar: HashMap::new(),
             temporizador_activo: false,
             listener_activo: Arc::new(AtomicBool::new(true)),
+            estoy_desconectada: false,
         }
     }
 
@@ -240,6 +242,7 @@ impl Actor for Estacion {
                                 eprintln!("Error manejando conexión entrante: {:?}", e);
                             }
                         });
+                        
                     }
                     Err(e) => {
                         eprintln!("Error al aceptar conexión: {:?}", e);
@@ -253,7 +256,7 @@ impl Actor for Estacion {
 
         actix_rt::spawn(async move {
             let listener = TcpListener::bind(("127.0.0.1", port + 2000)).await.unwrap();
-            loop {
+            loop {  
                 match listener.accept().await {
                     Ok((stream, peer_addr)) => {
                         println!("[{}] conexión entrante para cambiar conexión listener desde {:?}", id, peer_addr);

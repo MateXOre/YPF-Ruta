@@ -9,6 +9,9 @@ use actix::ActorFutureExt;
 use actix::{Actor, Addr, AsyncContext, WrapFuture};
 use std::collections::{HashMap, VecDeque};
 use std::net::SocketAddr;
+use std::sync::mpsc::Sender;
+use util::logs::log_info;
+use util::{log_debug, log_error};
 
 const DIRECCION_IP: &str = "127.0.0.1";
 const OFFSET_ESTACIONES: usize = 10000;
@@ -25,6 +28,7 @@ pub struct YpfRuta {
 
     pub(crate) gestor_addr: Addr<Gestor>,
     pub(crate) ventas_por_confirmar: VecDeque<(Addr<Estacion>, Solicitud)>,
+    pub(crate) logger: Sender<Vec<u8>>,
 }
 
 impl YpfRuta {
@@ -34,9 +38,10 @@ impl YpfRuta {
         lider: Option<usize>,
         peers: HashMap<usize, SocketAddr>,
         gestor_addr: Addr<Gestor>,
+        logger: Sender<Vec<u8>>,
     ) -> Self {
         let ypf_peers = HashMap::new();
-        println!("YpfRuta {}: Creando instancia.", id);
+        log_info!(logger, "YpfRuta {}: Creando instancia", id);
 
         let ventas_por_confirmar = VecDeque::new();
         YpfRuta {
@@ -49,6 +54,7 @@ impl YpfRuta {
             respuestas_recibidas: 0,
             gestor_addr,
             ventas_por_confirmar,
+            logger,
         }
     }
 
@@ -61,15 +67,28 @@ impl YpfRuta {
     ) {
         let self_id = self.id;
         let self_addr = ctx.address();
+        let logger = self.logger.clone();
+        let fut = async move {
+            YpfPeer::new(
+                peer_id,
+                self_id,
+                socket,
+                addr_opt,
+                self_addr,
+                logger.clone(),
+            )
+            .await
+        };
 
-        let fut = async move { YpfPeer::new(peer_id, self_id, socket, addr_opt, self_addr).await };
-
+        let logger_fut = self.logger.clone();
         let fut = fut.into_actor(self).map(move |peer, act, _ctx| {
             let addr = peer.start();
             act.ypf_peers.insert(peer_id, addr);
-            println!(
+            log_info!(
+                logger_fut,
                 "YpfRuta {}: Peer {} registrado desde conexión entrante",
-                act.id, peer_id
+                act.id,
+                peer_id
             );
         });
 
@@ -77,21 +96,29 @@ impl YpfRuta {
     }
 
     fn intentar_conectar_peers(&mut self, ctx: &mut actix::Context<Self>) {
-        println!("YpfRuta {}: Intentando conectar a peers...", self.id);
+        log_info!(
+            self.logger,
+            "YpfRuta {}: Intentando conectar a peers...",
+            self.id
+        );
         let peers = self.peer_addrs.clone();
         let self_id = self.id.clone();
 
         for (peer_id, addr) in peers {
             let self_addr = ctx.address().clone();
+            let logger_clone = self.logger.clone();
+            let logger_clone2 = self.logger.clone();
+            
             let fut = async move {
-                YpfPeer::new(peer_id.clone(), self_id, None, Some(addr), self_addr).await
+                YpfPeer::new(peer_id.clone(), self_id, None, Some(addr), self_addr, logger_clone).await
             };
             let id = peer_id.clone();
-
+            let self_id_clone = self_id.clone();
+            
             let fut = fut.into_actor(self).map(move |peer, act, _ctx| {
                 let addr = peer.start();
                 act.ypf_peers.insert(id.clone(), addr);
-                println!("YpfRuta {}: Peer {} iniciado.", act.id, id);
+                log_info!(logger_clone2, "YpfRuta {}: Peer {} iniciado.", self_id_clone, id);
             });
 
             ctx.spawn(fut);
@@ -99,14 +126,15 @@ impl YpfRuta {
     }
 
     fn escuchar_peers(&mut self, ctx: &mut actix::Context<Self>) {
-        println!(
+        log_info!(
+            self.logger,
             "YpfRuta {}: Escuchando conexiones entrantes de peers...",
             self.id
         );
         let puerto = self.puerto as u16;
         let self_id = self.id;
         let self_addr = ctx.address();
-
+        let logger = self.logger.clone();
         ctx.spawn(
             async move {
                 let listener = tokio::net::TcpListener::bind(("127.0.0.1", puerto))
@@ -118,7 +146,8 @@ impl YpfRuta {
                         let mut line = String::new();
                         match tokio::io::AsyncBufReadExt::read_line(&mut reader, &mut line).await {
                             Ok(_) => {
-                                println!(
+                                log_debug!(
+                                    logger,
                                     "YpfRuta {}: Línea recibida del socket entrante: {}",
                                     self_id,
                                     line.trim_end()
@@ -126,9 +155,11 @@ impl YpfRuta {
                                 // parsear "ID_LOCAL:123\n"
                                 if let Some(id_str) = line.strip_prefix("ID_LOCAL:") {
                                     if let Ok(peer_id) = id_str.trim().parse::<usize>() {
-                                        println!(
+                                        log_debug!(
+                                            logger,
                                             "YpfRuta {}: Conexión entrante del peer {}",
-                                            self_id, peer_id
+                                            self_id,
+                                            peer_id
                                         );
 
                                         // obtener el socket interno del reader
@@ -137,20 +168,29 @@ impl YpfRuta {
                                         // enviar el socket al actor YpfRuta para que lo maneje
                                         self_addr.do_send(ConexionEntrante { peer_id, socket });
                                     } else {
-                                        println!(
+                                        log_error!(
+                                            logger,
                                             "YpfRuta {}: ID inválido recibido: {}",
-                                            self_id, line
+                                            self_id,
+                                            line.trim_end()
                                         );
                                     }
                                 } else {
-                                    println!(
-                                        "YpfRuta {}: Formato de mensaje inválido: {}",
-                                        self_id, line
+                                    log_error!(
+                                        logger,
+                                        "YpfRuta {}: Formato de mensaje inválido. Se esperaba: ID_LOCAL:<ID>, recibido: {}",
+                                        self_id,
+                                        line
                                     );
                                 }
                             }
                             Err(e) => {
-                                eprintln!("YpfRuta {}: Error leyendo socket: {}", self_id, e);
+                                log_error!(
+                                    logger,
+                                    "YpfRuta {}: Error leyendo socket: {}",
+                                    self_id,
+                                    e
+                                );
                             }
                         }
                     }
@@ -165,7 +205,8 @@ impl YpfRuta {
         if let Some(lider) = self.lider
             && lider == self.id
         {
-            println!(
+            log_debug!(
+                self.logger,
                 "YpfRuta {}: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...",
                 self.id
             );
@@ -176,37 +217,46 @@ impl YpfRuta {
         let puerto = (self.puerto + OFFSET_ESTACIONES) as u16;
         let self_id = self.id;
         let self_addr = ctx.address();
-
+        let logger = self.logger.clone();
         ctx.spawn(
             async move {
                 let listener =
                     if let Ok(l) = tokio::net::TcpListener::bind((DIRECCION_IP, puerto)).await {
                         l
                     } else {
-                        println!("No se pudo crear el listener para conexión de estaciones");
+                        log_error!(
+                            logger,
+                            "YpfRuta {}: No se pudo crear el listener para conexión de estaciones",
+                            self_id
+                        );
                         return;
                     };
 
-                println!(
+                log_info!(
+                    logger,
                     "YpfRuta {}: Listener de estaciones activo en puerto {}",
-                    self_id, puerto
+                    self_id,
+                    puerto
                 );
 
                 loop {
                     if let Ok((socket, peer_addr)) = listener.accept().await {
-                        println!(
+                        log_info!(
+                            logger,
                             "YpfRuta {}: Nueva conexión de estación desde {:?}",
-                            self_id, peer_addr
+                            self_id,
+                            peer_addr
                         );
-
-                        match Estacion::new(socket, self_addr.clone()).await {
+                        let log = logger.clone();
+                        match Estacion::new(socket, self_addr.clone(), log).await {
                             Ok(estacion_addr) => estacion_addr.start(),
                             Err(_) => continue,
                         };
-
-                        println!(
+                        log_debug!(
+                            logger,
                             "YpfRuta {}: Actor de Estacion creado para {:?}",
-                            self_id, peer_addr
+                            self_id,
+                            peer_addr
                         );
                     }
                 }
@@ -218,9 +268,17 @@ impl YpfRuta {
 
     fn procesar_ventas(&mut self, ctx: &mut actix::Context<Self>) {
         // Tarea periódica que procesa la cola de ventas
-        ctx.run_interval(std::time::Duration::from_millis(100), |act, _ctx| {
+        let logger = self.logger.clone();
+
+        log_debug!(
+            logger,
+            "YpfRuta {}: Iniciando procesador de cola de ventas...",
+            self.id
+        );
+        ctx.run_interval(std::time::Duration::from_millis(100), move |act, _ctx| {
             if let Some((estacion_addr, ventas)) = act.ventas_por_confirmar.pop_front() {
-                println!(
+                log_debug!(
+                    logger,
                     "YpfRuta {}: Procesando {} ventas de la cola",
                     act.id,
                     ventas.len()
@@ -230,7 +288,7 @@ impl YpfRuta {
                 let gestor = act.gestor_addr.clone();
                 let ypf_id = act.id;
                 let ypfs_addr: Vec<Addr<YpfPeer>> = act.ypf_peers.values().cloned().collect();
-
+                let log = logger.clone();
                 // procesar todas las ventas
                 actix::spawn(async move {
                     let mut ventas_aprobadas = Vec::new();
@@ -240,17 +298,22 @@ impl YpfRuta {
                         for (surtidor, vec_ventas) in ventas_por_surtidor {
                             let mut resultado_ventas = Vec::new();
                             for venta in vec_ventas {
-                                println!(
+                                log_debug!(
+                                    log,
                                     "YpfRuta {}: Validando venta {} en el gestor",
-                                    ypf_id, venta.id_venta
+                                    ypf_id,
+                                    venta.id_venta
                                 );
 
                                 // Enviar al gestor y esperar respuesta
                                 match gestor.send(ValidarVenta(venta.clone())).await {
                                     Ok(aprobada) => {
-                                        println!(
+                                        log_debug!(
+                                            log,
                                             "YpfRuta {}: Venta {} - Resultado: {}",
-                                            ypf_id, venta.id_venta, aprobada
+                                            ypf_id,
+                                            venta.id_venta,
+                                            aprobada
                                         );
 
                                         if aprobada {
@@ -260,9 +323,12 @@ impl YpfRuta {
                                         resultado_ventas.push((venta.id_venta.clone(), aprobada));
                                     }
                                     Err(e) => {
-                                        eprintln!(
+                                        log_error!(
+                                            log,
                                             "YpfRuta {}: Error validando venta {}: {:?}",
-                                            ypf_id, venta.id_venta, e
+                                            ypf_id,
+                                            venta.id_venta,
+                                            e
                                         );
                                     }
                                 }
@@ -279,7 +345,8 @@ impl YpfRuta {
 
                     // Enviar cada venta aprobada individualmente a todos los peers
                     for venta in ventas_aprobadas {
-                        println!(
+                        log_debug!(
+                            log,
                             "YpfRuta {}: Replicando venta {} a {} peers",
                             ypf_id,
                             venta.id_venta,
@@ -301,8 +368,6 @@ impl Actor for YpfRuta {
     type Context = actix::Context<Self>;
 
     fn started(&mut self, ctx: &mut Self::Context) {
-        println!("YpfRuta {} iniciado en el puerto {}.", self.id, self.puerto);
-
         // Conexion a peers
         self.intentar_conectar_peers(ctx);
         self.escuchar_peers(ctx);

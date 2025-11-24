@@ -1,4 +1,5 @@
 use serde_json;
+use std::sync::mpsc::Sender;
 use std::collections::HashMap;
 use std::fs::File;
 use std::path::Path;
@@ -6,7 +7,7 @@ use std::time::Duration;
 
 use crate::actores::gestor::structs::{Empresa, Tarjeta};
 use actix::prelude::*;
-use util::structs::venta::Venta;
+use util::{log_error, log_info, log_warning, structs::venta::Venta};
 
 const PERSISTENCE_INTERVAL_SECS: u64 = 30;
 
@@ -15,18 +16,9 @@ pub struct Gestor {
     tarjetas: HashMap<usize, Tarjeta>,
     ventas: Vec<Venta>,
     index: usize,
+    logger: Sender<Vec<u8>>,
 }
 
-impl Default for Gestor {
-    fn default() -> Self {
-        Self {
-            empresas: HashMap::new(),
-            tarjetas: HashMap::new(),
-            ventas: Vec::new(),
-            index: 1,
-        }
-    }
-}
 
 fn load_json_vec<T: for<'de> serde::Deserialize<'de>>(path: &Path) -> Vec<T> {
     match File::open(path) {
@@ -45,7 +37,7 @@ fn load_json_vec<T: for<'de> serde::Deserialize<'de>>(path: &Path) -> Vec<T> {
 }
 
 impl Gestor {
-    pub fn new(index: usize) -> Gestor {
+    pub fn new(index: usize, logger: Sender<Vec<u8>>) -> Gestor {
         let data_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("src")
             .join("data");
@@ -73,6 +65,7 @@ impl Gestor {
             tarjetas: tarjetas_map,
             ventas: ventas_vec,
             index,
+            logger,
         }
     }
 
@@ -87,14 +80,14 @@ impl Gestor {
                     "No se puede establecer el nuevo límite general {} para la empresa con ID {} ya que el consumo actual {} lo supera",
                     nuevo_limite, id_empresa, empresa.consumo_actual
                 );
-                eprintln!("{}", msg);
+                log_warning!(self.logger, "{}", msg);
                 return Err(msg);
             }
             empresa.limite_general = nuevo_limite as u64;
             Ok(())
         } else {
             let msg = format!("Empresa con ID {} no encontrada", id_empresa);
-            eprintln!("{}", msg);
+            log_warning!(self.logger, "{}", msg);
             Err(msg)
         }
     }
@@ -110,14 +103,14 @@ impl Gestor {
                     "No se puede establecer el nuevo límite particular {} para la tarjeta con ID {} ya que el consumo actual {} lo supera",
                     nuevo_limite, id_tarjeta, tarjeta.consumo_actual
                 );
-                eprintln!("{}", msg);
+                log_warning!(self.logger, "{}", msg);
                 return Err(msg);
             }
             tarjeta.limite_particular = nuevo_limite as u64;
             Ok(())
         } else {
             let msg = format!("Tarjeta con ID {} no encontrada", id_tarjeta);
-            eprintln!("{}", msg);
+            log_warning!(self.logger, "{}", msg);
             Err(msg)
         }
     }
@@ -152,7 +145,7 @@ impl Gestor {
         let tarjeta = match self.tarjetas.get(&venta.id_tarjeta) {
             Some(t) => t.clone(),
             None => {
-                eprintln!("Tarjeta con ID {} no encontrada", venta.id_tarjeta);
+                log_warning!(self.logger, "Tarjeta con ID {} no encontrada", venta.id_tarjeta);
                 return false;
             }
         };
@@ -160,24 +153,18 @@ impl Gestor {
         let empresa = match self.empresas.get(&tarjeta.empresa_id) {
             Some(e) => e.clone(),
             None => {
-                eprintln!("Empresa con ID {} no encontrada", tarjeta.empresa_id);
+                log_warning!(self.logger, "Empresa con ID {} no encontrada", tarjeta.empresa_id);
                 return false;
             }
         };
 
         if tarjeta.consumo_actual + venta.monto > tarjeta.limite_particular as f32 {
-            eprintln!(
-                "Venta rechazada: excede el límite particular de la tarjeta (ID {})",
-                tarjeta.id
-            );
+            log_warning!(self.logger, "Venta rechazada: excede el límite particular de la tarjeta (ID {})", tarjeta.id);
             return false;
         }
 
         if empresa.consumo_actual + venta.monto > empresa.limite_general as f32 {
-            eprintln!(
-                "Venta rechazada: excede el límite general de la empresa (ID {})",
-                empresa.id
-            );
+            log_warning!(self.logger, "Venta rechazada: excede el límite general de la empresa (ID {})", empresa.id);   
             return false;
         }
 
@@ -200,14 +187,15 @@ impl Gestor {
                 file,
                 &self.empresas.values().collect::<Vec<&Empresa>>(),
             ) {
-                eprintln!(
+                log_error!(
+                    self.logger,
                     "Error al guardar empresas en {}: {}",
                     empresas_path.display(),
                     e
                 );
             }
         } else {
-            eprintln!("No se pudo crear el archivo {}", empresas_path.display());
+            log_error!(self.logger, "No se pudo crear el archivo {}", empresas_path.display());
         }
 
         // Persistir tarjetas
@@ -216,27 +204,19 @@ impl Gestor {
                 file,
                 &self.tarjetas.values().collect::<Vec<&Tarjeta>>(),
             ) {
-                eprintln!(
-                    "Error al guardar tarjetas en {}: {}",
-                    tarjetas_path.display(),
-                    e
-                );
+                log_error!(self.logger, "Error al guardar tarjetas en {}: {}", tarjetas_path.display(), e);
             }
         } else {
-            eprintln!("No se pudo crear el archivo {}", tarjetas_path.display());
+            log_error!(self.logger, "No se pudo crear el archivo {}", tarjetas_path.display());
         }
 
         // Persistir ventas
         if let Ok(file) = File::create(&ventas_path) {
             if let Err(e) = serde_json::to_writer_pretty(file, &self.ventas) {
-                eprintln!(
-                    "Error al guardar ventas en {}: {}",
-                    ventas_path.display(),
-                    e
-                );
+                log_error!(self.logger, "Error al guardar ventas en {}: {}", ventas_path.display(), e);
             }
         } else {
-            eprintln!("No se pudo crear el archivo {}", ventas_path.display());
+            log_error!(self.logger, "No se pudo crear el archivo {}", ventas_path.display());
         }
     }
 }
@@ -250,15 +230,15 @@ impl Actor for Gestor {
             Duration::from_secs(PERSISTENCE_INTERVAL_SECS),
             |act, _ctx| {
                 act.persistir_estado_actual();
-                println!("Gestor: estado persistido periódicamente");
+                log_info!(act.logger, "Gestor: estado persistido periódicamente");
             },
         );
 
-        println!("Gestor actor iniciado");
+        log_info!(self.logger, "Gestor actor iniciado");
     }
 
     fn stopped(&mut self, _ctx: &mut Self::Context) {
-        println!("Gestor actor detenido; persistiendo estado final");
+        log_info!(self.logger, "Gestor actor detenido; persistiendo estado final");
         self.persistir_estado_actual();
     }
 }

@@ -6,15 +6,18 @@ use serde_json;
 use tokio::io::AsyncReadExt;
 use tokio::net::TcpStream;
 use tokio::net::tcp::OwnedWriteHalf;
+use util::{log_info, log_warning};
+use std::sync::mpsc::Sender;
 
 pub struct Estacion {
     pub(crate) socket: Option<OwnedWriteHalf>,
     ypf_addr: Addr<YpfRuta>,
     ventas_iniciales: Option<Solicitud>,
+    pub(crate) logger: Sender<Vec<u8>>,
 }
 
 impl Estacion {
-    pub async fn new(socket: TcpStream, ypf_addr: Addr<YpfRuta>) -> Result<Estacion, ()> {
+    pub async fn new(socket: TcpStream, ypf_addr: Addr<YpfRuta>, logger: Sender<Vec<u8>>) -> Result<Estacion, ()> {
         let (mut reader, writer) = socket.into_split();
 
         // Leer el tamaño (4 bytes)
@@ -40,6 +43,7 @@ impl Estacion {
             socket: Some(writer),
             ypf_addr,
             ventas_iniciales: Some(solicitud),
+            logger,
         })
     }
 }
@@ -48,13 +52,13 @@ impl Actor for Estacion {
     type Context = Context<Self>;
 
     fn started(&mut self, ctx: &mut Self::Context) {
-        println!("Estacion actor iniciado.");
+        log_info!(self.logger, "Estacion actor iniciado.");
         if let Some(ventas) = self.ventas_iniciales.take() {
             let from = ctx.address();
             self.ypf_addr.do_send(ValidarVentas { ventas, from });
-            println!("Estacion: envié ValidarVentas a YpfRuta.");
+            log_info!(self.logger, "Estacion: envié ValidarVentas a YpfRuta.");
         } else {
-            println!("Estacion: no se recibieron ventas iniciales al conectar.");
+            log_warning!(self.logger, "Estacion: no se recibieron ventas iniciales al conectar.");
         }
     }
 }

@@ -23,7 +23,16 @@ async fn main() {
         .join("src")
         .join("data")
         .join("ypfs.config");
+    let log_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("src")
+        .join("logs")
+        .join(format!("ypf_ruta_{}.log", index));
 
+    let logger = util::logs::logger::Logger::new(log_path.to_str().unwrap()).unwrap_or_else(|| {
+        eprintln!("Error al inicializar el logger en {:?}", log_path);
+        std::process::exit(1);
+    });
+    
     let f = File::open(&file_path).unwrap_or_else(|e| {
         eprintln!(
             "Error al abrir archivo de configuración {:?}: {}",
@@ -66,9 +75,12 @@ async fn main() {
         }
     }
 
-    let gestor = Gestor::new(index).start();
+    let log_gestor = logger.get_log_channel();
+    let log_ypf = log_gestor.clone();
+    
+    let gestor = Gestor::new(index, log_gestor).start();
 
-    let _ypf_server = YpfRuta::new(local.0, local.1, lider, peers, gestor).start();
+    let _ypf_server = YpfRuta::new(local.0, local.1, lider, peers, gestor, log_ypf).start();
 
     std::future::pending::<()>().await;
 }

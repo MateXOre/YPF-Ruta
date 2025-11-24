@@ -594,3 +594,7 @@ impl InformarVentasOffline {
         buf
     }
 }
+
+#[derive(Message, Clone)]
+#[rtype(result = "()")]
+pub struct LiberarClientesEnCola;

@@ -1,13 +1,13 @@
-use actix::{Context, Handler};
-use crate::actores::estacion::Estacion;
-use crate::actores::estacion::messages::CambiarConexionListener;
+use actix::{Context, Handler, AsyncContext};
+use crate::actores::estacion::{Estacion};
+use crate::actores::estacion::messages::{CambiarConexionListener, LiberarClientesEnCola};
 use crate::actores::estacion_cercana::CerrarConexion;
 use std::sync::atomic::Ordering;
 
 impl Handler<CambiarConexionListener> for Estacion {
     type Result = ();
 
-    fn handle(&mut self, msg: CambiarConexionListener, _ctx: &mut Context<Self>) {
+    fn handle(&mut self, msg: CambiarConexionListener, ctx: &mut Context<Self>) {
         println!("[{}] Cambiando conexión - deteniendo listener y cerrando todas las conexiones", self.id);
         
         if self.listener_activo.load(Ordering::Relaxed) {
@@ -25,6 +25,8 @@ impl Handler<CambiarConexionListener> for Estacion {
                     estacion_addr.do_send(CerrarConexion);
                 }
             }
+
+            ctx.address().do_send(LiberarClientesEnCola);
             
             println!("[{}] Todas las conexiones cerradas. Total de estaciones cercanas: {}", 
                         self.id, self.estaciones_cercanas.len());

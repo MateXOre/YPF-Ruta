@@ -16,3 +16,4 @@ mod enviar_ventas_agrupadas;
 mod empezar_informar_ventas_offline;
 mod informar_ventas_offline;
 mod procesar_mensaje;
+mod liberar_clientes_en_cola;

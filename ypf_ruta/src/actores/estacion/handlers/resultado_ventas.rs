@@ -2,10 +2,9 @@ use actix::{ActorContext, ActorFutureExt};
 use actix::{AsyncContext, Context, Handler, WrapFuture};
 use tokio::io::AsyncWriteExt;
 use crate::actores::estacion::estacion_actor::Estacion;
-use crate::actores::estacion::messages::ResultadoVentas;
-use crate::actores::gestor::structs::Venta;
+use crate::actores::estacion::messages::{Resultado, ResultadoVentas};
 
-fn parse_to_json(ventas: Vec<Venta>) -> Vec<u8> {
+fn parse_to_json(ventas: Resultado) -> Vec<u8> {
     match serde_json::to_vec(&ventas) {
         Ok(mut bytes) => {
             bytes.push(b'\n');

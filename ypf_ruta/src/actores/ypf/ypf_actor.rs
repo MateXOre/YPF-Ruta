@@ -1,8 +1,7 @@
 use crate::actores::estacion::estacion_actor::Estacion;
-use crate::actores::estacion::messages::ResultadoVentas;
+use crate::actores::estacion::messages::{ResultadoVentas, Solicitud};
 use crate::actores::gestor::gestor_actor::Gestor;
 use crate::actores::gestor::messages::ValidarVenta;
-use crate::actores::gestor::structs::Venta;
 use crate::actores::peer::ypf_peer::YpfPeer;
 use crate::actores::ypf::messages::{ConexionEntrante, NuevoLider};
 use actix::ActorFutureExt;
@@ -24,7 +23,7 @@ pub struct YpfRuta {
     pub(crate) respuestas_recibidas: usize,
 
     pub(crate) gestor_addr: Addr<Gestor>,
-    pub(crate) ventas_por_confirmar: VecDeque<(Addr<Estacion>, Vec<Venta>)>,
+    pub(crate) ventas_por_confirmar: VecDeque<(Addr<Estacion>, Solicitud)>,
 }
 
 impl YpfRuta {
@@ -223,8 +222,6 @@ impl YpfRuta {
     }
 
     fn procesar_ventas(&mut self, ctx: &mut actix::Context<Self>) {
-        use actix::prelude::*;
-
         // Tarea periódica que procesa la cola de ventas
         ctx.run_interval(std::time::Duration::from_millis(100), |act, _ctx| {
             if let Some((estacion_addr, ventas)) = act.ventas_por_confirmar.pop_front() {
@@ -240,42 +237,50 @@ impl YpfRuta {
 
                 // procesar todas las ventas
                 actix::spawn(async move {
-                    let mut ventas_aprobadas = Vec::new();
-
-                    for venta in ventas {
-                        println!(
-                            "YpfRuta {}: Validando venta {} en el gestor",
-                            ypf_id, venta.id
-                        );
-
-                        // Enviar al gestor y esperar respuesta
-                        match gestor.send(ValidarVenta(venta.clone())).await {
-                            Ok(aprobada) => {
+                    //let mut ventas_aprobadas = Vec::new(); TODO: necesitamos broadcastear las ventas aprobadas
+                    let mut resultados_por_estacion = HashMap::new();
+                    for (estacion, ventas_por_surtidor) in ventas {
+                        let mut resultado_por_surtidor = HashMap::new();
+                        for (surtidor, vec_ventas) in ventas_por_surtidor {
+                            let mut resultado_ventas = Vec::new();
+                            for venta in vec_ventas {
                                 println!(
-                                    "YpfRuta {}: Venta {} - Resultado: {}",
-                                    ypf_id, venta.id, aprobada
+                                    "YpfRuta {}: Validando venta {} en el gestor",
+                                    ypf_id, venta.id_venta
                                 );
-                                if aprobada {
-                                    ventas_aprobadas.push(venta);
+
+                                // Enviar al gestor y esperar respuesta
+                                match gestor.send(ValidarVenta(venta.clone())).await {
+                                    Ok(aprobada) => {
+                                        println!(
+                                            "YpfRuta {}: Venta {} - Resultado: {}",
+                                            ypf_id, venta.id_venta, aprobada
+                                        );
+
+                                        resultado_ventas.push((venta.id_venta.clone(), aprobada));
+                                    }
+                                    Err(e) => {
+                                        eprintln!(
+                                            "YpfRuta {}: Error validando venta {}: {:?}",
+                                            ypf_id, venta.id_venta, e
+                                        );
+                                    }
                                 }
                             }
-                            Err(e) => {
-                                eprintln!(
-                                    "YpfRuta {}: Error validando venta {}: {:?}",
-                                    ypf_id, venta.id, e
-                                );
-                            }
-                        }
+                            resultado_por_surtidor.insert(surtidor, resultado_ventas);
+                        } 
+
+                        resultados_por_estacion.insert(estacion, resultado_por_surtidor);                           
                     }
 
                     // Enviar ventas aprobadas de vuelta a la estación
-                    println!(
-                        "YpfRuta {}: Enviando {} ventas aprobadas a la estación",
-                        ypf_id,
-                        ventas_aprobadas.len()
-                    );
+                    // println!(
+                    //     "YpfRuta {}: Enviando {} ventas aprobadas a la estación",
+                    //     ypf_id,
+                    //     ventas_aprobadas.len()
+                    // );
                     estacion_addr.do_send(ResultadoVentas {
-                        ventas: ventas_aprobadas,
+                        ventas: resultados_por_estacion,
                     });
                 });
             }

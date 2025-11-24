@@ -5,13 +5,14 @@ use std::time::Duration;
 use serde_json;
 
 use actix::prelude::*;
-use crate::actores::gestor::structs::{Empresa, Tarjeta, Venta};
+use util::structs::venta::Venta;
+use crate::actores::gestor::structs::{Empresa, Tarjeta};
 
 const PERSISTENCE_INTERVAL_SECS: u64 = 30;
 
 pub struct Gestor {
-    empresas: HashMap<u64, Empresa>,
-    tarjetas: HashMap<u64, Tarjeta>,
+    empresas: HashMap<usize, Empresa>,
+    tarjetas: HashMap<usize, Tarjeta>,
     ventas: Vec<Venta>,
 }
 
@@ -53,12 +54,12 @@ impl Gestor {
         let tarjetas_vec: Vec<Tarjeta> = load_json_vec(&tarjetas_path);
         let ventas_vec: Vec<Venta> = load_json_vec(&ventas_path);
 
-        let mut empresas_map: HashMap<u64, Empresa> = HashMap::new();
+        let mut empresas_map: HashMap<usize, Empresa> = HashMap::new();
         for e in empresas_vec {
             empresas_map.insert(e.id, e);
         }
 
-        let mut tarjetas_map: HashMap<u64, Tarjeta> = HashMap::new();
+        let mut tarjetas_map: HashMap<usize, Tarjeta> = HashMap::new();
         for t in tarjetas_vec {
             tarjetas_map.insert(t.id, t);
         }
@@ -70,7 +71,7 @@ impl Gestor {
         }
     }
 
-    pub fn modificar_limite_general_empresa(&mut self, id_empresa: u64, nuevo_limite: u64) -> Result<(), String> {
+    pub fn modificar_limite_general_empresa(&mut self, id_empresa: usize, nuevo_limite: f32) -> Result<(), String> {
         if let Some(empresa) = self.empresas.get_mut(&id_empresa) {
             if empresa.consumo_actual > nuevo_limite {
                 let msg = format!(
@@ -80,7 +81,7 @@ impl Gestor {
                 eprintln!("{}", msg);
                 return Err(msg);
             }
-            empresa.limite_general = nuevo_limite;
+            empresa.limite_general = nuevo_limite as u64;
             Ok(())
         } else {
             let msg = format!("Empresa con ID {} no encontrada", id_empresa);
@@ -89,7 +90,7 @@ impl Gestor {
         }
     }
 
-    pub fn modificar_limite_particular_tarjeta(&mut self, id_tarjeta: u64, nuevo_limite: u64) -> Result<(), String> {
+    pub fn modificar_limite_particular_tarjeta(&mut self, id_tarjeta: usize, nuevo_limite: f32) -> Result<(), String> {
         if let Some(tarjeta) = self.tarjetas.get_mut(&id_tarjeta) {
             if tarjeta.consumo_actual > nuevo_limite {
                 let msg = format!(
@@ -99,7 +100,7 @@ impl Gestor {
                 eprintln!("{}", msg);
                 return Err(msg);
             }
-            tarjeta.limite_particular = nuevo_limite;
+            tarjeta.limite_particular = nuevo_limite as u64;
             Ok(())
         } else {
             let msg = format!("Tarjeta con ID {} no encontrada", id_tarjeta);
@@ -108,7 +109,7 @@ impl Gestor {
         }
     }
 
-    pub fn consultar_estado_empresa_internal(&self, id_empresa: u64) -> Option<(Empresa, Vec<Tarjeta>)> {
+    pub fn consultar_estado_empresa_internal(&self, id_empresa: usize) -> Option<(Empresa, Vec<Tarjeta>)> {
         self.empresas.get(&id_empresa).map(|empresa| {
             let tarjetas: Vec<Tarjeta> = self
                 .tarjetas
@@ -148,7 +149,7 @@ impl Gestor {
             }
         };
 
-        if tarjeta.consumo_actual + venta.monto > tarjeta.limite_particular {
+        if tarjeta.consumo_actual + venta.monto > tarjeta.limite_particular as f32 {
             eprintln!(
                 "Venta rechazada: excede el límite particular de la tarjeta (ID {})",
                 tarjeta.id
@@ -156,7 +157,7 @@ impl Gestor {
             return false;
         }
 
-        if empresa.consumo_actual + venta.monto > empresa.limite_general {
+        if empresa.consumo_actual + venta.monto > empresa.limite_general as f32 {
             eprintln!(
                 "Venta rechazada: excede el límite general de la empresa (ID {})",
                 empresa.id

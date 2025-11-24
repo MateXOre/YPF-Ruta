@@ -6,8 +6,13 @@ impl Handler<VentaRegistrada> for YpfPeer {
     type Result = ();
 
     fn handle(&mut self, msg: VentaRegistrada, _ctx: &mut Context<Self>) -> Self::Result {
+        let mensaje = if let Ok(m) = msg.to_bytes() {
+            m
+        } else {
+            return
+        };
         self.cola_envio.as_mut().map(|tx| {
-            tx.send(msg.to_bytes()).expect("Fallo al enviar VentaRegistrada a la cola de envio");
+            tx.send(mensaje).expect("Fallo al enviar VentaRegistrada a la cola de envio");
         });
     }
 }

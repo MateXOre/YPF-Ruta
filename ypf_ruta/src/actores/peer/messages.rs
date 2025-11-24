@@ -1,7 +1,7 @@
 use actix::Message;
 use chrono::Local;
 use tokio::net::TcpStream;
-use crate::actores::gestor::structs::Venta;
+use util::structs::venta::Venta;
 
 #[derive(Message)]
 #[rtype(result = "()")]
@@ -71,11 +71,12 @@ impl VentaRegistrada {
         if bytes[0] != b'5' || bytes[1] != b'+' {
             println!("Error: formato incorrecto para VentaRegistrada");
             return VentaRegistrada { venta: Venta {
-                id: 0,
+                id_venta: 0,
                 id_estacion: 0,
                 id_tarjeta: 0,
-                monto: 0,
-                fecha: Local::now().format("%Y-%m-%d %H:%M:%S").to_string(),
+                monto: 0.0,
+                offline: false,
+                estado: util::structs::venta::EstadoVenta::Fallida
             } };
         }
 
@@ -83,35 +84,40 @@ impl VentaRegistrada {
         if parts.len() != 5 {
             println!("Error: formato incorrecto para VentaRegistrada");
             return VentaRegistrada { venta: Venta {
-                id: 0,
                 id_estacion: 0,
                 id_tarjeta: 0,
-                monto: 0,
-                fecha: Local::now().format("%Y-%m-%d %H:%M:%S").to_string(),
+                monto: 0.0,
+                id_venta: 0,
+                offline: false,
+                estado: util::structs::venta::EstadoVenta::Fallida,
             } };
 
         }
 
 
-        let id = parts[0].parse::<u64>().unwrap_or(0);
-        let id_estacion = parts[1].parse::<u64>().unwrap_or(0);
-        let id_tarjeta = parts[2].parse::<u64>().unwrap_or(0);
-        let monto = parts[3].parse::<u64>().unwrap_or(0);
-        let fecha = parts[4].to_string();
+        let id = parts[0].parse::<usize>().unwrap_or(0);
+        let id_estacion = parts[1].parse::<usize>().unwrap_or(0);
+        let id_tarjeta = parts[2].parse::<usize>().unwrap_or(0);
+        let monto = parts[3].parse::<f32>().unwrap_or(0.0);
 
         VentaRegistrada {
             venta: Venta {
-                id,
+                id_venta: id,
                 id_estacion,
                 id_tarjeta,
                 monto,
-                fecha,
+                offline: false,
+                estado: util::structs::venta::EstadoVenta::Pendiente
             }
         }
     }
 
-    pub fn to_bytes(&self) -> Vec<u8> {
-        format!("5+{},{},{},{},{:?}", self.venta.id, self.venta.id_estacion, self.venta.id_tarjeta, self.venta.monto, self.venta.fecha).as_bytes().to_vec()
+    pub fn to_bytes(&self) -> Result<Vec<u8>, serde_json::Error>{
+        let mut bytes = vec![b'5'];
+        let venta_bytes = serde_json::to_vec(&self.venta)?;
+        bytes.extend(venta_bytes);
+        bytes.push(b'\n');
+        Ok(bytes)
     }
 }
 

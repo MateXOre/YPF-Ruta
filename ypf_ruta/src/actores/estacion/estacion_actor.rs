@@ -1,65 +1,46 @@
 use actix::prelude::*;
-use crate::actores::gestor::structs::Venta;
+use crate::actores::estacion::messages::Solicitud;
 use crate::actores::ypf::ypf_actor::YpfRuta;
 use serde_json;
 use tokio::net::TcpStream;
-use tokio::io::BufReader;
+use tokio::io::{AsyncReadExt, BufReader};
 pub(crate) use crate::actores::estacion::messages::ValidarVentas;
-
-fn parse_msg_from_estacion(buffer: Vec<u8>) -> Result<Vec<Venta>, &'static str>{
-    match std::str::from_utf8(&buffer) {
-        Ok(s) => {
-            match serde_json::from_str::<Vec<Venta>>(s.trim()) {
-                Ok(vs) => {
-                    println!("Estacion: parseadas {} ventas iniciales.", vs.len());
-                    Ok(vs)
-                }
-                Err(_) => {
-                    Err("Estacion: error parseando JSON de ventas iniciales")
-                }
-            }
-        }
-        Err(_) => {
-            Err("Estacion: buffer no es UTF-8")
-        }
-    }
-}
 
 
 pub struct Estacion {
     pub(crate) socket: Option<TcpStream>,
     ypf_addr: Addr<YpfRuta>,
-    ventas_iniciales: Option<Vec<Venta>>,
+    ventas_iniciales: Option<Solicitud>,
 }
 
 impl Estacion {
     pub async fn new(socket: TcpStream, ypf_addr: Addr<YpfRuta>) -> Result<Estacion, ()> {
         let mut reader = BufReader::new(socket);
-        let mut buf: Vec<u8> = Vec::new();
+        
+        // Leer el tamaño (4 bytes)
+        let mut len_bytes = [0u8; 4];
+        if reader.read_exact(&mut len_bytes).await.is_err() {
+            return Err(())
+        };
+        let len = u32::from_be_bytes(len_bytes) as usize;
+        
+        // Leer los datos
+        let mut buffer = vec![0u8; len];
+        if reader.read_exact(&mut buffer).await.is_err() {
+            return Err(())
+        };
 
-        // Intentamos leer hasta '\n'. Si falla, buf queda vacío.
-        match tokio::io::AsyncBufReadExt::read_until(&mut reader, b'\n', &mut buf).await {
-            Ok(_n) => {
-                let ventas = match parse_msg_from_estacion(buf) {
-                    Ok(ventas) => ventas,
-                    Err(e) => {
-                        println!("{}", e);
-                        return Err(());
-                    }
-                };
+        let solicitud: Solicitud = if let Ok(s) = serde_json::from_slice(&buffer) {
+            s
+        } else {
+            return Err(())
+        };
 
-                let socket = reader.into_inner();
-                Ok(Estacion {
-                    socket: Some(socket),
-                    ypf_addr,
-                    ventas_iniciales: Some(ventas),
-                })
-            }
-            Err(e) => {
-                eprintln!("Estacion: error leyendo del socket inicial: {}", e);
-                Err(())
-            }
-        }
+        Ok(Estacion {
+            socket: todo!(),
+            ypf_addr,
+            ventas_iniciales: Some(solicitud),
+        })
     }
 }
 

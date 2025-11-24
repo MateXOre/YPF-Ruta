@@ -30,7 +30,7 @@ pub struct Estacion {
     pub(crate) total_estaciones: usize,
     pub(crate) todas_las_estaciones: HashMap<usize, SocketAddr>,   // id_estacion, socketaddr
     pub(crate) primer_anillo_realizado: bool,
-    pub(crate) ventas_a_confirmar: HashMap<usize, usize>, // id_venta, id_surtidor
+    pub(crate) ventas_a_confirmar: HashMap<usize, Venta>, // id_surtidor, venta (es solo una porque estas son ventas online)
     pub(crate) surtidores: HashMap<usize,Addr<Surtidor>>,
     pub(crate) max_surtidores: usize,
     pub(crate) cola_espera: VecDeque<AceptarCliente>,

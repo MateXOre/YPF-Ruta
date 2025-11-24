@@ -17,3 +17,6 @@ mod empezar_informar_ventas_offline;
 mod informar_ventas_offline;
 mod procesar_mensaje;
 mod liberar_clientes_en_cola;
+mod enviar_a_siguiente;
+mod lider_caido;
+mod nuevo_lider_conectado;

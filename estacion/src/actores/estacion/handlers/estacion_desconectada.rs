@@ -58,6 +58,10 @@ impl Handler<EstacionDesconectada> for Estacion {
                     } else {
                         println!("Reconexion fallida, reintentaremos con {} en 500 ms", prox_id);
                         tokio::time::sleep(Duration::from_millis(500)).await;
+                        if(prox_id == self_id){
+                            println!("No hay más estaciones para reconectar, quedando desconectada la estación {}", self_id);
+                            return None;
+                        }
                         addr_self2.do_send(EstacionDesconectada {
                             estacion_id: prox_id,
                             mensaje: mensaje2,

@@ -12,9 +12,10 @@ impl Handler<InformarVenta> for Estacion {
         println!("[{}] Soy el lider y recibi la venta de {} para confirmar", self.id, msg.id_estacion);
 
         if self.ventas_por_informar.is_empty() {
-            // iniciar temporizador
+            // iniciar temporizado
             if !self.temporizador_activo {
                 self.temporizador_activo = true;
+                println!("Iniciando temporizador para informar ventas agrupadas");
 
                 let addr = ctx.address();
                 ctx.spawn(

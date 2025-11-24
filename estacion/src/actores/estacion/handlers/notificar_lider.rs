@@ -15,14 +15,6 @@ impl Handler<NotificarLider> for Estacion {
                 "[{}] 🔁 Mensaje de líder {} completó el ciclo, fin de propagación.",
                 self.id, msg.id_lider
             );
-            let addr = ctx.address();
-            ctx.spawn(
-                async move {
-                    sleep(Duration::from_secs(Estacion::TIEMPO_INFORMAR_VENTAS_OFFLINE)).await;
-                    addr.do_send(EmpezarInformarVentasOffline{});
-                }
-                .into_actor(self)
-            );
             return;
         }
 
@@ -43,6 +35,8 @@ impl Handler<NotificarLider> for Estacion {
                     "[{}] Ya tengo conexión activa con el líder {}, no abro un nuevo socket.",
                     self.id, msg.id_lider
                 );
+
+                ctx.address().do_send(NuevoLiderConectado);
             } else if let Some(lider_addr) = self.todas_las_estaciones.get(&msg.id_lider).copied() {
 
                 // ❗ Solo si NO existe conexión → intento conectar
@@ -63,7 +57,10 @@ impl Handler<NotificarLider> for Estacion {
                             self_id,
                             nuevo_lider
                         ).await {
-                            Ok(_) => println!("[{}] ✅ conexión establecida con el líder {}", self_id, nuevo_lider),
+                            Ok(_) => {
+                                println!("[{}] ✅ conexión establecida con el líder {}", self_id, nuevo_lider);
+                                addr_self.do_send(NuevoLiderConectado);
+                            },
                             Err(_) => println!("[{}] ❌ no se pudo conectar con el líder {}", self_id, nuevo_lider),
                         }
                     })
@@ -75,6 +72,15 @@ impl Handler<NotificarLider> for Estacion {
             println!(
                 "[{}] Soy el nuevo líder, no necesito conectarme a mí mismo.",
                 self.id
+            );
+            ctx.address().do_send(NuevoLiderConectado);
+            let addr = ctx.address();
+            ctx.spawn(
+                async move {
+                    sleep(Duration::from_secs(Estacion::TIEMPO_INFORMAR_VENTAS_OFFLINE)).await;
+                    addr.do_send(EmpezarInformarVentasOffline{});
+                }
+                    .into_actor(self)
             );
         }
 

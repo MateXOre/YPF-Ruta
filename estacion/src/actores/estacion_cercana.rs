@@ -1,7 +1,7 @@
 use crate::actores::estacion::messages::EstacionDesconectada;
 use crate::actores::estacion::messages::InformarVenta;
 
-use crate::actores::estacion::{ConfirmarTransacciones, ProcesarMensaje};
+use crate::actores::estacion::{deserialize_message, ConfirmarTransacciones, EnviarASiguiente, LiderCaido, MessageType, ProcesarMensaje};
 use crate::actores::estacion::Eleccion;
 use crate::actores::estacion::Estacion;
 use crate::actores::estacion::NotificarLider;
@@ -23,6 +23,10 @@ pub struct Enviar {
 
 #[derive(Message)]
 #[rtype(result = "()")]
+pub struct EstacionCercanaCerroConexion;
+
+#[derive(Message)]
+#[rtype(result = "()")]
 pub struct ConectarEstacion(pub String);
 
 #[derive(Message)]
@@ -37,12 +41,29 @@ pub struct EstacionCercana {
     pub estacion_id: usize,
     pub estacion_local: Addr<Estacion>,
     pub socket_estacion_cercana: UnboundedSender<Vec<u8>>,
+    pub reader : Option<OwnedReadHalf>,
     pub estacion_local_id: usize,
+    pub desconectado: bool,
     reader_task: Option<tokio::task::JoinHandle<()>>, // Guardamos el handle del task de lectura para poder abortarlo
 }
 
 impl Actor for EstacionCercana {
     type Context = Context<Self>;
+
+    fn started(&mut self, ctx: &mut Self::Context) {
+        let estacion_addr = ctx.address();
+
+        let reader = self.reader.take().expect("reader debería estar");
+
+        let reader_task = EstacionCercana::read_from_socket(
+            reader,
+            self.estacion_local.clone(),
+            self.estacion_id,
+            estacion_addr,
+        );
+        self.reader_task = Some(reader_task);
+
+    }
 }
 
 /*pub fn serialize(msg: Enviar) -> Vec<u8> {
@@ -57,8 +78,20 @@ impl Handler<Enviar> for EstacionCercana {
     type Result = ();
 
     fn handle(&mut self, msg: Enviar, _ctx: &mut Context<Self>) {
+        println!("Enviando mensaje a la estación cercana {}", self.estacion_id);
         let buf = msg.bytes.clone();
         self.enviar_por_socket(buf);
+    }
+}
+
+impl Handler<EstacionCercanaCerroConexion> for EstacionCercana {
+    type Result = ();
+
+    fn handle(&mut self, msg: EstacionCercanaCerroConexion, _ctx: &mut Context<Self>) {
+        println!("[{}] Marcando estación {} como desconectada",
+                 self.estacion_local_id, self.estacion_id);
+
+        self.desconectado = true;
     }
 }
 
@@ -134,40 +167,75 @@ impl EstacionCercana {
     ) -> EstacionCercana {
         let (tx, mut rx) = unbounded_channel::<Vec<u8>>();
 
+        let id_clone = estacion_id;
+        let estacion_local_clone = estacion_local.clone();
+
         // Task que posee el writer y serializa las escrituras
         tokio::spawn(async move {
             while let Some(buf) = rx.recv().await {
+                println!("Enviamos mensaje al socket de la estacion {}", id_clone);
                 if let Err(e) = writer.write_all(&buf).await {
                     eprintln!("Error writing to socket: {}", e);
+                    match deserialize_message(&buf) {
+                        Ok(message) => match message {
+                            MessageType::Eleccion(m) => estacion_local_clone.do_send(EnviarASiguiente{ estacion_cercana_id: id_clone, msg: m.to_bytes()}),
+                            MessageType::NotificarLider(m) => estacion_local_clone.do_send(EnviarASiguiente{ estacion_cercana_id: id_clone, msg: m.to_bytes()}),
+                            MessageType::InformarVenta(m) => estacion_local_clone.do_send(LiderCaido{ mensaje: m}),
+                            MessageType::InformarVentasOffline(m) => estacion_local_clone.do_send(EnviarASiguiente{ estacion_cercana_id: id_clone, msg: m.to_bytes()}),
+                            _ => println!("Mensaje no manejado en desconexión"),
+
+                        }
+                        Err(e) => eprintln!("(Procesar) Error deserializando: {}", e),
+                    }
+
                     break;
                 }
             }
             // aquí puedes notificar desconexión si es necesario
         });
 
-        let reader_task = EstacionCercana::read_from_socket(reader, estacion_local.clone(), estacion_id);
+        //let reader_task = EstacionCercana::read_from_socket(reader, estacion_local.clone(), estacion_id);
 
         let estacion_cercana = EstacionCercana {
             estacion_id,
-            estacion_local: estacion_local,
+            estacion_local,
             socket_estacion_cercana: tx,
             estacion_local_id,
-            reader_task: Some(reader_task),
+            reader_task: None,
+            reader: Some(reader),
+            desconectado: false,
         };
 
         estacion_cercana
     }
 
     pub fn enviar_por_socket(&mut self, buf: Vec<u8>) {
-        if self.socket_estacion_cercana.send(buf.clone()).is_err() {
+        if self.socket_estacion_cercana.send(buf.clone()).is_err()  || self.desconectado {
             println!(
                 "Error al enviar mensaje al socket de la estación: {}",
                 self.estacion_id
             );
-            self.estacion_local.do_send(EstacionDesconectada {
+            /*self.estacion_local.do_send(EstacionDesconectada {
                 estacion_id: self.estacion_id,
                 mensaje: buf,
-            });
+            });*/
+
+
+
+            match deserialize_message(&buf) {
+                Ok(message) => match message {
+                    MessageType::Eleccion(m) => self.estacion_local.do_send(EnviarASiguiente{ estacion_cercana_id: self.estacion_id, msg: m.to_bytes()}),
+                    MessageType::NotificarLider(m) => self.estacion_local.do_send(EnviarASiguiente{ estacion_cercana_id: self.estacion_id, msg: m.to_bytes()}),
+                    MessageType::InformarVenta(m) => self.estacion_local.do_send(LiderCaido{ mensaje: m}),
+                    MessageType::InformarVentasOffline(m) => self.estacion_local.do_send(EnviarASiguiente{ estacion_cercana_id: self.estacion_id, msg: m.to_bytes()}),
+                    _ => println!("Mensaje no manejado en desconexión"),
+
+                }
+                Err(e) => eprintln!("(Procesar) Error deserializando: {}", e),
+            }
+
+
+
         } else {
             println!(
                 "Enviamos mensaje al socket de la estación: {}",
@@ -176,7 +244,7 @@ impl EstacionCercana {
         }
     }
 
-    pub fn read_from_socket(mut reader: OwnedReadHalf, estacion_local: Addr<Estacion>, estacion_remota_id: usize) -> tokio::task::JoinHandle<()> {
+    pub fn read_from_socket(mut reader: OwnedReadHalf, estacion_local: Addr<Estacion>, estacion_remota_id: usize, estacion: Addr<EstacionCercana>) -> tokio::task::JoinHandle<()> {
         tokio::spawn(async move {
             let mut buf = vec![0; 1024];
 
@@ -185,6 +253,7 @@ impl EstacionCercana {
                     Ok(bytes) => {
                         if bytes == 0 {
                             println!("[{}] Reader detectó fin de conexión (0 bytes)", estacion_remota_id);
+                            estacion.do_send(EstacionCercanaCerroConexion);
                             return;
                         }
 

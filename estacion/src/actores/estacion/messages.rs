@@ -13,8 +13,11 @@ const OPCODE_INFORMAR_VENTA: u8 = 0x04;
 const OPCODE_CONFIRMAR_TRANSACCIONES: u8 = 0x05;
 pub const OPCODE_IDENTIFICAR: u8 = 0x06;
 pub const OPCODE_RESULTADO_VENTAS: u8 = 0x07;
-const OPCODE_INFORMAR_VENTAS_OFFLINE: u8 = 0x08;
+pub const OPCODE_INFORMAR_VENTAS_OFFLINE: u8 = 0x08;
 const OPCODE_TRANSACCIONES_POR_ESTACION: u8 = 0x09;
+const OPCODE_ENVIAR_A_SIGUIENTE: u8 = 0x10;
+const OPCODE_LIDER_CAIDO: u8 = 0x11;
+const OPCODE_NUEVO_LIDER_CONECTADO: u8 = 0x12;
 
 // ===== Funciones helper para serialización binaria =====
 fn write_u64(buf: &mut Vec<u8>, value: u64) {
@@ -410,6 +413,89 @@ impl TransaccionesPorEstacion {
         buf
     }
 }
+
+#[derive(Message, Clone)]
+#[rtype(result = "()")]
+pub struct EnviarASiguiente {
+    pub estacion_cercana_id: usize,
+    pub msg: Vec<u8>,
+}
+
+impl EnviarASiguiente {
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut buf = Vec::new();
+        buf.push(OPCODE_ENVIAR_A_SIGUIENTE);
+        write_usize(&mut buf, self.estacion_cercana_id);
+        buf.extend_from_slice(&self.msg);
+        buf
+    }
+
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self, String> {
+        if bytes.is_empty() {
+            return Err("Buffer vacío".to_string());
+        }
+        if bytes[0] != OPCODE_ENVIAR_A_SIGUIENTE {
+            return Err("Opcode incorrecto para EnviarASiguiente".to_string());
+        }
+        let mut offset = 1;
+        let estacion_cercana_id = read_usize(bytes, &mut offset)?;
+        let msg = bytes[offset..].to_vec();
+        Ok(EnviarASiguiente {
+            estacion_cercana_id,
+            msg,
+        })
+    }
+}
+
+#[derive(Message, Clone)]
+#[rtype(result = "()")]
+pub struct LiderCaido {
+    pub mensaje: InformarVenta,
+}
+
+impl LiderCaido {
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut buf = Vec::new();
+        buf.push(OPCODE_LIDER_CAIDO);
+        buf.extend_from_slice(&self.mensaje.to_bytes());
+        buf
+    }
+
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self, String> {
+        if bytes.is_empty() {
+            return Err("Buffer vacío".to_string());
+        }
+        if bytes[0] != OPCODE_LIDER_CAIDO {
+            return Err("Opcode incorrecto para LiderCaido".to_string());
+        }
+        let mensaje = InformarVenta::from_bytes(&bytes[1..])?;
+        Ok(LiderCaido { mensaje })
+    }
+}
+
+
+#[derive(Message, Clone)]
+#[rtype(result = "()")]
+pub struct NuevoLiderConectado;
+
+impl NuevoLiderConectado {
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut buf = Vec::new();
+        buf.push(OPCODE_NUEVO_LIDER_CONECTADO);
+        buf
+    }
+
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self, String> {
+        if bytes.is_empty() {
+            return Err("Buffer vacío".to_string());
+        }
+        if bytes[0] != OPCODE_NUEVO_LIDER_CONECTADO {
+            return Err("Opcode incorrecto para NuevoLiderConectado".to_string());
+        }
+        Ok(NuevoLiderConectado {})
+    }
+}
+
 
 #[derive(Message, Clone)]
 #[rtype(result = "()")]

@@ -26,15 +26,18 @@ impl Handler<CobrarACliente> for Estacion {
 
 
         } else {
+            println!("validando venta con lider");
             // NO soy líder → envío venta al líder
             if self.estoy_conectada {
+                println!("Estoy conectada, enviando venta al lider");
                 if let Some(lider_addr) = self.buscar_estacion_lider() {
 
                     let venta_mensaje = InformarVenta {
                         venta: msg.venta.clone(),
                         id_surtidor: msg.surtidor_id,
                         id_estacion: self.id,
-                    };  
+                    };
+                    println!("enviando mensaje a lider");
                     lider_addr.do_send(Enviar{bytes: venta_mensaje.to_bytes()});
                     self.ventas_a_confirmar.insert(msg.surtidor_id, msg.venta);
                 }

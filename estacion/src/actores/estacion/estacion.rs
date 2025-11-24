@@ -43,7 +43,7 @@ pub struct Estacion {
 
 
 impl Estacion {
-    pub const TIEMPO_INFORMAR_VENTAS_OFFLINE: u64 = 20;
+    pub const TIEMPO_INFORMAR_VENTAS_OFFLINE: u64 = 120;
 
 
     pub fn new(index_estacion: usize, estaciones: Vec<SocketAddr>) -> Self {
@@ -74,7 +74,7 @@ impl Estacion {
         }
     }
 
-    async fn connect_and_register(
+    pub async fn connect_and_register(
         target: SocketAddr,
         actor_addr: Addr<Estacion>,
         id: usize,
@@ -132,6 +132,7 @@ impl Estacion {
     }
 
     pub(crate) fn buscar_estacion_lider(&self) -> Option<Addr<EstacionCercana>> {
+        println!("Buscando lider actual: {:?}", self.lider_actual);
         if let Some(lider) = self.lider_actual {
             if let Some(conexion) = self.estaciones_cercanas.get(&lider) {
                 return Some(conexion.clone());

@@ -28,6 +28,6 @@ impl Handler<NuevoLider> for YpfPeer {
                     self.peer_id
                 );
             }
-        };
+        });
     }
 }

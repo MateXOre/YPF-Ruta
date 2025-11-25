@@ -13,6 +13,9 @@ impl Handler<CobrarACliente> for Estacion {
             "[{}] Cobranza informada: {:?} por surtidor: {}",
             self.id, msg.venta.id_venta, msg.surtidor_id
         );
+        if self.buscar_estacion_lider() == None {
+            self.estoy_conectada = false;
+        }
 
         if self.lider_actual == Some(self.id) {
             ctx.address().do_send(InformarVenta {

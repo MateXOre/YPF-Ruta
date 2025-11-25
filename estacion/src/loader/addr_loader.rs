@@ -14,20 +14,28 @@ impl AddrLoader {
         Self {}
     }
 
-    pub fn load_all(&self) -> Result<Vec<SocketAddr>, Error> {
+    pub fn load_all(&self, rango_minimo: usize, rango_maximo: usize) -> Result<Vec<SocketAddr>, Error> {
+        println!("Cargando estaciones desde {} hasta {}", rango_minimo, rango_maximo);
         let file = match fs::File::open(ARCHIVO_NOMBRE) {
             Ok(file) => file,
             Err(e) => return Err(Error::ErrorString(e.to_string())),
         };
         let reader = BufReader::new(file);
         let mut addresses = Vec::new();
-        for line in reader.lines().skip(1) {
+        let mut line_number = 1 + rango_minimo;
+        for line in reader.lines().skip(line_number) {
             let line = match line {
                 Ok(line) => line,
                 Err(e) => return Err(Error::ErrorString(e.to_string())),
             };
             let addr = self.parse_line(&line)?;
             addresses.push(addr);
+            println!("Cargada estación {}", line_number - 1);
+
+            line_number += 1;
+            if line_number > (rango_maximo + 1) {
+                break;
+            }
         }
         Ok(addresses)
     }

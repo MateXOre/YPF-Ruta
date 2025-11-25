@@ -12,7 +12,7 @@ impl Handler<AceptarCliente> for Estacion {
         if self.surtidores.len() < self.max_surtidores {
             let id_surtidor = rand::random::<u64>() as usize;
             let estacion_addr = ctx.address();
-            let estacion_id = self.id;
+            let estacion_id = self.id_global;
 
             println!(
                 "[{}] habilitando surtidor {} para cliente {:?}",

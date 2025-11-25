@@ -15,4 +15,5 @@ Cargo.lock
 /tmp
 borrador.txt
 TP.pdf
-/storage
+/estacion/storage
+/ypf_ruta/src/data

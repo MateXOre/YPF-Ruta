@@ -1,5 +1,6 @@
 use actix::prelude::*;
 
+
 mod actores;
 mod errors;
 mod loader;
@@ -11,7 +12,12 @@ async fn main() {
     let args = std::env::args().collect::<Vec<String>>();
     let index_estacion: usize = args.get(1).and_then(|s| s.parse().ok()).unwrap_or(0);
     let loader = AddrLoader::new();
-    let estaciones = match loader.load_all() {
+
+    let rango_minimo = (index_estacion / Estacion::MAX_ESTACIONES_REGISTRADAS) * Estacion::MAX_ESTACIONES_REGISTRADAS;
+    let rango_maximo = rango_minimo + Estacion::MAX_ESTACIONES_REGISTRADAS - 1;
+
+
+    let estaciones = match loader.load_all(rango_minimo, rango_maximo) {
         Ok(estaciones) => estaciones,
         Err(e) => {
             return println!("{}", e);

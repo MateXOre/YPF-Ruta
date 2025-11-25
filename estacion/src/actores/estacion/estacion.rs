@@ -35,22 +35,25 @@ pub struct Estacion {
     pub(crate) temporizador_activo: bool,
     pub(crate) listener_activo: Arc<AtomicBool>, // Controla si el listener debe seguir aceptando conexiones
     pub(crate) estoy_conectada: bool,
+    pub(crate) id_global: usize,
 }
 
 impl Estacion {
     pub const TIEMPO_INFORMAR_VENTAS_OFFLINE: u64 = 30;
+    pub const MAX_ESTACIONES_REGISTRADAS: usize = 5;
 
     pub fn new(index_estacion: usize, estaciones: Vec<SocketAddr>) -> Self {
-        let siguiente = if index_estacion + 1 < estaciones.len() {
-            index_estacion + 1
+        let mi_id_regional = index_estacion % Estacion::MAX_ESTACIONES_REGISTRADAS;
+        let siguiente = if mi_id_regional + 1 < estaciones.len() {
+            mi_id_regional + 1
         } else {
             0
         };
 
         Self {
             desconectada: false,
-            id: index_estacion,
-            port: estaciones[index_estacion].port(),
+            id: mi_id_regional,
+            port: estaciones[mi_id_regional].port(),
             lider_actual: None,
             estaciones_cercanas: HashMap::new(),
             siguiente_estacion: siguiente,
@@ -65,6 +68,7 @@ impl Estacion {
             temporizador_activo: false,
             listener_activo: Arc::new(AtomicBool::new(true)),
             estoy_conectada: true,
+            id_global: index_estacion,
         }
     }
 
@@ -165,7 +169,7 @@ impl Estacion {
 
 
     pub(crate) fn cargar_ventas_sin_informar(&mut self){
-        let ventas_sin_informar = EstacionLoader::new(self.id).load_ventas_sin_informar();
+        let ventas_sin_informar = EstacionLoader::new(self.id_global).load_ventas_sin_informar();
         match ventas_sin_informar {
             Ok(ventas_sin_informar) => {
                 self.ventas_por_informar = ventas_sin_informar;
@@ -177,7 +181,7 @@ impl Estacion {
     }
 
     pub(crate) fn guardar_ventas_sin_informar(&mut self) {
-        let ventas_sin_informar = EstacionLoader::new(self.id).save_ventas_sin_informar(&self.ventas_por_informar);
+        let ventas_sin_informar = EstacionLoader::new(self.id_global).save_ventas_sin_informar(&self.ventas_por_informar);
         match ventas_sin_informar {
             Ok(_) => {
                 println!("Ventas sin informar guardadas correctamente");
@@ -189,7 +193,7 @@ impl Estacion {
     }
 
     pub(crate) fn limpiar_ventas_sin_informar(&mut self) {
-        let ventas_sin_informar = EstacionLoader::new(self.id).clear_ventas_sin_informar();
+        let ventas_sin_informar = EstacionLoader::new(self.id_global).clear_ventas_sin_informar();
         match ventas_sin_informar {
             Ok(_) => {
                 println!("Ventas sin informar limpiadas correctamente");

@@ -25,9 +25,8 @@ impl Handler<AgregarEstacion> for Estacion {
         }
 
         // Si es la última estación (id = total_estaciones - 1) y tiene su conexión lista, iniciar la ronda
-        let es_ultima = self.id == self.total_estaciones - 1;
 
-        if es_ultima && !self.primer_anillo_realizado {
+        if !self.primer_anillo_realizado {
             self.primer_anillo_realizado = true;
             println!(
                 "[{}] Soy la última estación, iniciando ronda de mensajes",

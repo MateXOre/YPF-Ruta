@@ -5,7 +5,6 @@
 # Comandos de Cargo
 linter = "clippy --verbose --all-targets --all-features"
 compile = "build --release"
-testall = "test --workspace --verbose --all-features"
-quicktest = "test --no-fail-fast --verbose --all-features"
+tests_integracion = "test --package tests_integracion --test estacion_test --test ypf_ruta_test"
 
 # Se pueden agregar comandos personalizados

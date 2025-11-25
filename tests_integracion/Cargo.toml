@@ -1,0 +1,15 @@
+[package]
+name = "tests_integracion"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix = "0.13"
+actix-rt = "2.11.0"
+tokio = { version = "1.39", features = ["full"] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0"
+util = { path = "../util" }
+estacion = { path = "../estacion" }
+ypf_ruta = { path = "../ypf_ruta" }
+tempfile = "3.8"

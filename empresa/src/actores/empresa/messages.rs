@@ -11,24 +11,11 @@ fn write_u64(buf: &mut Vec<u8>, value: u64) {
     buf.extend_from_slice(&value.to_le_bytes());
 }
 
-fn read_u64(buf: &[u8], offset: &mut usize) -> Result<u64, String> {
-    if *offset + 8 > buf.len() {
-        return Err("Buffer insuficiente para leer u64".to_string());
-    }
-    let bytes = &buf[*offset..*offset + 8];
-    *offset += 8;
-    Ok(u64::from_le_bytes([
-        bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7],
-    ]))
-}
 
 fn write_usize(buf: &mut Vec<u8>, value: usize) {
     write_u64(buf, value as u64);
 }
 
-fn read_usize(buf: &[u8], offset: &mut usize) -> Result<usize, String> {
-    read_u64(buf, offset).map(|v| v as usize)
-}
 
 // Mensaje para procesar entrada de consola
 #[derive(Message)]
@@ -56,18 +43,6 @@ pub struct IdentificarEmpresa {
 }
 
 impl IdentificarEmpresa {
-    pub fn from_bytes(bytes: &[u8]) -> Result<Self, String> {
-        if bytes.is_empty() {
-            return Err("Buffer vacío".to_string());
-        }
-        if bytes[0] != OPCODE_IDENTIFICAR_EMPRESA {
-            return Err("Opcode incorrecto para IdentificarEmpresa".to_string());
-        }
-        let mut offset = 1;
-        let id = read_usize(bytes, &mut offset)?;
-        Ok(IdentificarEmpresa { id })
-    }
-
     pub fn to_bytes(&self) -> Vec<u8> {
         let mut buf = Vec::new();
         buf.push(OPCODE_IDENTIFICAR_EMPRESA);

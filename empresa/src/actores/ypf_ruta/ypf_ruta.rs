@@ -1,5 +1,4 @@
-use actix::prelude::*;
-use actix::{Actor, Addr, Context, Handler, Message};
+use actix::{Actor, Addr, Context};
 use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
 use tokio::net::tcp::{OwnedReadHalf, OwnedWriteHalf};
@@ -41,8 +40,7 @@ impl YpfRuta {
 impl Actor for YpfRuta {
     type Context = Context<Self>;
 
-    fn started(&mut self, ctx: &mut Self::Context) {
-        let ypf_ruta_addr = ctx.address();
+    fn started(&mut self, _ctx: &mut Self::Context) {
 
         let reader = self.reader.take().expect("reader debería estar");
 

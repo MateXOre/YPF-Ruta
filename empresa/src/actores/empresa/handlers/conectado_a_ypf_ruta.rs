@@ -1,4 +1,3 @@
-use std::io::Read;
 use actix::{AsyncContext, Context, Handler};
 use tokio::io;
 use tokio::io::{AsyncBufReadExt, BufReader};

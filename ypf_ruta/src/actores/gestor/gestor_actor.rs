@@ -260,7 +260,6 @@ impl Actor for Gestor {
     type Context = Context<Self>;
 
     fn started(&mut self, ctx: &mut Self::Context) {
-        // Persistir regularmente cada 30 segundos
         ctx.run_interval(
             Duration::from_secs(PERSISTENCE_INTERVAL_SECS),
             |act, _ctx| {

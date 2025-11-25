@@ -223,10 +223,6 @@ impl EstacionCercana {
                 "Error al enviar mensaje al socket de la estación: {}",
                 self.estacion_id
             );
-            /*self.estacion_local.do_send(EstacionDesconectada {
-                estacion_id: self.estacion_id,
-                mensaje: buf,
-            });*/
 
             match deserialize_message(&buf) {
                 Ok(message) => match message {

@@ -62,19 +62,5 @@ impl Handler<CobrarACliente> for Estacion {
                 self.guardar_ventas_sin_informar();
             }
         }
-
-        /*let surtidor = self.surtidores.get(&msg.surtidor_id);
-
-        surtidor.unwrap().do_send(ResultadoVenta{exito: true, id_venta : msg.venta.id_venta}) //de momento la confirma unilateralmente(parecido a lo que debería hacer si esta offline)*/
-
-        // if self.lider_actual != Some(self.id) {
-
-        //     self.ventas_a_confirmar.insert(msg.venta.id_venta, msg.surtidor_id);
-        //     if let Some(addr) = self.buscar_estacion_lider() {
-        //         addr.do_send(InformarVenta {
-        //             venta: msg.venta
-        //         });
-        //     }
-        // }*/
     }
 }

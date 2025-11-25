@@ -14,8 +14,8 @@ impl Handler<ResponderConsola> for Empresa {
         if let Some(ypf_ruta_addr) = &self.ypf_ruta_addr {
             match operacion {
                 "configurar_limite" => {
-                    let id_tarjeta = parametros_de_operacion[0].parse::<usize>().unwrap();
-                    let monto = parametros_de_operacion[1].parse::<f32>().unwrap();
+                    let id_tarjeta = parametros_de_operacion[0].parse::<usize>().unwrap_or(0);
+                    let monto = parametros_de_operacion[1].parse::<f32>().unwrap_or(0.0);
                     ypf_ruta_addr.do_send(Enviar {
                         bytes: ConfigurarLimite {
                             id_tarjeta,
@@ -26,7 +26,7 @@ impl Handler<ResponderConsola> for Empresa {
                     });
                 }
                 "configurar_limite_general" => {
-                    let monto = parametros_de_operacion[0].parse::<f32>().unwrap();
+                    let monto = parametros_de_operacion[0].parse::<f32>().unwrap_or(0.0);
                     let id_empresa = self.id;
                     ypf_ruta_addr.do_send(Enviar {
                         bytes: ConfigurarLimiteGeneral { id_empresa, monto }.to_bytes(),

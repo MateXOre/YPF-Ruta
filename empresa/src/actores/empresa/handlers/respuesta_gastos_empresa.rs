@@ -7,7 +7,7 @@ impl Handler<RespuestaGastosEmpresa> for Empresa {
 
     fn handle(&mut self, msg: RespuestaGastosEmpresa, _ctx: &mut Context<Self>) -> Self::Result {
         if msg.exito {
-            println!("[Empresa {}] ✓ Gastos consultados exitosamente:", self.id);
+            println!("[Empresa {}] Gastos consultados exitosamente:", self.id);
             // Mostrar empresa
             if let Some(ref empresa) = msg.empresa {
                 if let Ok(formatted) = serde_json::to_string_pretty(empresa) {

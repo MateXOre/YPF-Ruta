@@ -114,24 +114,9 @@ impl IdentificarEmpresa {
         let id = read_usize(bytes, &mut offset)?;
         Ok(IdentificarEmpresa { id })
     }
-
-    pub fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = Vec::new();
-        buf.push(OPCODE_IDENTIFICAR_EMPRESA);
-        write_usize(&mut buf, self.id);
-        buf
-    }
 }
 
 pub const OPCODE_IDENTIFICAR_EMPRESA: u8 = 0x13;
-
-fn write_u64(buf: &mut Vec<u8>, value: u64) {
-    buf.extend_from_slice(&value.to_le_bytes());
-}
-
-fn write_usize(buf: &mut Vec<u8>, value: usize) {
-    write_u64(buf, value as u64);
-}
 
 fn read_usize(buf: &[u8], offset: &mut usize) -> Result<usize, String> {
     read_u64(buf, offset).map(|v| v as usize)
@@ -148,9 +133,6 @@ fn read_u64(buf: &[u8], offset: &mut usize) -> Result<u64, String> {
     ]))
 }
 
-fn write_f32(buf: &mut Vec<u8>, value: f32) {
-    buf.extend_from_slice(&value.to_le_bytes());
-}
 
 fn read_f32(buf: &[u8], offset: &mut usize) -> Result<f32, String> {
     if *offset + 4 > buf.len() {
@@ -189,15 +171,6 @@ impl ConfigurarLimite {
         let monto = read_f32(bytes, &mut offset)?;
         Ok(ConfigurarLimite { id_tarjeta, id_empresa, monto })
     }
-
-    pub fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = Vec::new();
-        buf.push(OPCODE_CONFIGURAR_LIMITE);
-        write_usize(&mut buf, self.id_tarjeta);
-        write_usize(&mut buf, self.id_empresa);
-        write_f32(&mut buf, self.monto);
-        buf
-    }
 }
 
 #[derive(Message, Clone)]
@@ -220,14 +193,6 @@ impl ConfigurarLimiteGeneral {
         let monto = read_f32(bytes, &mut offset)?;
         Ok(ConfigurarLimiteGeneral { id_empresa, monto })
     }
-
-    pub fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = Vec::new();
-        buf.push(OPCODE_CONFIGURAR_LIMITE_GENERAL);
-        write_usize(&mut buf, self.id_empresa);
-        write_f32(&mut buf, self.monto);
-        buf
-    }
 }
 
 #[derive(Message, Clone)]
@@ -247,13 +212,6 @@ impl GastosEmpresa {
         let mut offset = 1;
         let id_empresa = read_usize(bytes, &mut offset)?;
         Ok(GastosEmpresa { id_empresa })
-    }
-
-    pub fn to_bytes(&self) -> Vec<u8> {
-        let mut buf = Vec::new();
-        buf.push(OPCODE_GASTOS_EMPRESA);
-        write_usize(&mut buf, self.id_empresa);
-        buf
     }
 }
 

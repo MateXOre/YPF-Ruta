@@ -22,12 +22,21 @@ fi
 
 printf "%s\n" "${id}=${monto}" >&3
 
-# Espera respuesta del servidor hasta que llegue
-if IFS= read -r response <&3; then
-    printf "%s\n" "$response"
-    echo "Conexión finalizada" >&2
+# Espera PRIMER mensaje del servidor
+if IFS= read -r response1 <&3; then
+    printf "Mensaje 1: %s\n" "$response1"
 else
-    echo "Error: no se recibió respuesta" >&2
+    echo "Error: no se recibió primer mensaje" >&2
+    exec 3>&- 2>/dev/null || true
+    exit 1
+fi
+
+# Espera SEGUNDO mensaje del servidor
+if IFS= read -r response2 <&3; then
+    printf "Mensaje 2: %s\n" "$response2"
+    echo "Conexión finalizada correctamente" >&2
+else
+    echo "Error: no se recibió segundo mensaje" >&2
 fi
 
 # cerrar la conexión y finalizar

@@ -20,3 +20,4 @@ mod procesar_mensaje;
 pub mod reenviar;
 mod surtidor_libre;
 pub mod transacciones_por_estacion;
+mod desconexion_detectada;

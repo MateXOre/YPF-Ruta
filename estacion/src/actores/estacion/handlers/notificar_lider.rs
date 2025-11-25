@@ -18,6 +18,16 @@ impl Handler<NotificarLider> for Estacion {
             return;
         }
 
+        if let Some(lider) = self.lider_actual {
+            if lider == self.id {
+                println!(
+                    "[{}] Soy el líder, entonces no es necesario que siga el anillo",
+                    self.id
+                );
+                return;
+            }
+        }
+
         self.lider_actual = Some(msg.id_lider);
 
         println!("[{}] Mi nuevo lider es : {} ", self.id, msg.id_lider);

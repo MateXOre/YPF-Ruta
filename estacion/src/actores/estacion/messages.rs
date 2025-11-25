@@ -440,6 +440,12 @@ pub struct EnviarASiguiente {
 
 #[derive(Message, Clone)]
 #[rtype(result = "()")]
+pub struct DesconexionDetectada{
+ pub estacion_id:  usize, 
+}
+
+#[derive(Message, Clone)]
+#[rtype(result = "()")]
 pub struct LiderCaido {
     pub mensaje: InformarVenta,
 }

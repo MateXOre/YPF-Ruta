@@ -5,7 +5,7 @@ use crate::actores::estacion::Estacion;
 use crate::actores::estacion::NotificarLider;
 use crate::actores::estacion::{
     deserialize_message, ConfirmarTransacciones, EnviarASiguiente, LiderCaido, MessageType,
-    ProcesarMensaje,
+    ProcesarMensaje, DesconexionDetectada
 };
 use actix::prelude::*;
 use actix::{Actor, Addr, Context, Handler, Message};
@@ -82,6 +82,8 @@ impl Handler<EstacionCercanaCerroConexion> for EstacionCercana {
         );
 
         self.desconectado = true;
+
+        self.estacion_local.do_send(DesconexionDetectada{estacion_id: self.estacion_id});
     }
 }
 

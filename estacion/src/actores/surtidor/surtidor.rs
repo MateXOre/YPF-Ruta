@@ -1,3 +1,4 @@
+use std::time::{SystemTime, UNIX_EPOCH};
 use crate::actores::estacion::Estacion;
 use crate::actores::surtidor::messages::{CargarCombustible, Detenerme};
 use actix::{Actor, Addr, AsyncContext, Context};
@@ -108,8 +109,29 @@ impl Actor for Surtidor {
                                 }
                             };
 
+                            // Obtener timestamp de forma segura
+                            let timestamp = SystemTime::now()
+                                .duration_since(UNIX_EPOCH)
+                                .map(|d| d.as_millis())
+                                .unwrap_or_else(|e| {
+                                    eprintln!("SystemTime antes del UNIX_EPOCH: {:?}", e);
+                                    0u128
+                                });
+
+                            // Construir id de venta y manejar parse sin panics
+                            let id_str = format!("{:04}{:010}", estacion_id, timestamp);
+                            let id_venta = match id_str.parse::<usize>() {
+                                Ok(v) => v,
+                                Err(e) => {
+                                    eprintln!("Error al parsear id_venta '{}': {:?}", id_str, e);
+                                    0
+                                }
+                            };
+
+                            println!("ID de venta: {}", id_venta);
+
                             let venta = Venta {
-                                id_venta: 0,
+                                id_venta,
                                 id_tarjeta: id,
                                 monto,
                                 offline: false,

@@ -1,6 +1,8 @@
-use crate::actores::estacion::{Estacion, InformarVenta, NuevoLiderConectado};
+use std::time::Duration;
+use crate::actores::estacion::{EnviarVentasAgrupadas, Estacion, InformarVenta, NuevoLiderConectado};
 use crate::actores::estacion_cercana::Enviar;
-use actix::{AsyncContext, Handler};
+use actix::{AsyncContext, Handler, WrapFuture};
+use tokio::time::sleep;
 
 impl Handler<NuevoLiderConectado> for Estacion {
     type Result = ();
@@ -17,33 +19,21 @@ impl Handler<NuevoLiderConectado> for Estacion {
                 self.id,
             );
 
-            if let Some(ventas_pendientes) = self.ventas_por_informar.get(&self.id) {
-                println!(
-                    "[{}] Tengo ventas pendientes de confirmacion: {:?}",
-                    self.id, ventas_pendientes,
-                );
-                for (id_surtidor, ventas) in ventas_pendientes {
-                    println!(
-                        "[{}] Reenviando ventas del surtidor {}: {:?}",
-                        self.id, id_surtidor, ventas
+            if let Some(_ventas_pendientes) = self.ventas_por_informar.get(&self.id) {
+                if !self.temporizador_activo {
+                    self.temporizador_activo = true;
+                    println!("Iniciando temporizador para informar ventas agrupadas");
+
+                    let addr = ctx.address();
+                    ctx.spawn(
+                        async move {
+                            sleep(Duration::from_secs(10)).await;
+                            addr.do_send(EnviarVentasAgrupadas);
+                        }
+                            .into_actor(self),
                     );
-                    for venta in ventas {
-                        println!("[{}] Reenviando venta: {:?}", self.id, venta);
-                        let venta = venta.clone();
-
-                        ctx.address().do_send(InformarVenta {
-                            venta: venta.clone(),
-                            id_surtidor: *id_surtidor,
-                            id_estacion: self.id,
-                        });
-
-                        self.ventas_a_confirmar.insert(*id_surtidor, venta);
-                    }
                 }
             }
-            self.ventas_por_informar.clear();
-            self.limpiar_ventas_sin_informar();
-
             // como soy líder, no reenvío a ningún otro líder
             return;
         }

@@ -48,7 +48,7 @@ impl Handler<NuevoLiderConectado> for Estacion {
             return;
         }
 
-        // 🔥 Si NO soy el líder (reenvío al líder nuevo)
+        // Si NO soy el líder (reenvío al líder nuevo)
         if let Some(ventas_pendientes) = self.ventas_por_informar.get(&self.id) {
             if let Some(lider) = self.buscar_estacion_lider() {
                 for (id_surtidor, ventas) in ventas_pendientes {

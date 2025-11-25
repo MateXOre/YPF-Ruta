@@ -57,8 +57,6 @@ impl EstacionLoader {
     
 
     /// Carga un HashMap anidado desde un archivo JSON.
-    /// El JSON debe tener la estructura: { "usize": { "usize": [T, ...] } }
-    /// Retorna: HashMap<usize, HashMap<usize, Vec<T>>>
     pub fn load_json_nested_hashmap<T: for<'de> serde::Deserialize<'de>>(
         &self, 
         path: &Path
@@ -78,38 +76,7 @@ impl EstacionLoader {
         }
     }
 
-    pub fn load_json_hashmap<T, F>(&self, path: &Path, get_id: F) -> Result<HashMap<usize, T>, Error>
-    where
-        T: for<'de> serde::Deserialize<'de>,
-        F: Fn(&T) -> usize,
-    {
-        let vec: Vec<T> = self.load_json_vec(path)?;
-        let mut hashmap = HashMap::new();
-        for item in vec {
-            let id = get_id(&item);
-            hashmap.insert(id, item);
-        }
-        Ok(hashmap)
-    }
-
-    fn load_json_vec<T: for<'de> serde::Deserialize<'de>>(&self, path: &Path) -> Result<Vec<T>, Error> {
-        match File::open(path) {
-            Ok(f) => match serde_json::from_reader(f) {
-                Ok(v) => Ok(v),
-                Err(e) => {
-                    eprintln!("No se pudo parsear {}: {}", path.display(), e);
-                    Ok(Vec::new())
-                }
-            },
-            Err(e) => {
-                eprintln!("No se pudo abrir {}: {}", path.display(), e);
-                Ok(Vec::new())
-            }
-        }
-    }
-
     /// Guarda un HashMap anidado en un archivo JSON.
-    /// El JSON tendrá la estructura: { "usize": { "usize": [T, ...] } }
     pub fn save_json_nested_hashmap<T: serde::Serialize>(
         &self,
         path: &Path,

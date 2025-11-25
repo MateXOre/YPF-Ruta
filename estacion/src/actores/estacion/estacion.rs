@@ -16,13 +16,6 @@ use std::sync::{
 };
 use util::structs::venta::Venta;
 use crate::loader::estacion_loader::EstacionLoader;
-// Estructura para guardar información de una conexión
-// #[derive(Clone)]
-// pub struct ConexionEstacion {
-//     pub peer_addr: SocketAddr,
-//     pub actor: Addr<EstacionCercana>,
-//     pub estacion_id: usize
-// }
 
 pub struct Estacion {
     pub(crate) desconectada: bool,
@@ -142,10 +135,6 @@ impl Estacion {
         });
     }
 
-    // pub(crate) fn id_siguiente_estacion(&self) -> usize {
-    //     (self.id + 1) % (self.todas_las_estaciones.len())
-    // }
-
     pub(crate) fn buscar_estacion_lider(&self) -> Option<Addr<EstacionCercana>> {
         println!("Buscando lider actual: {:?}", self.lider_actual);
         if let Some(lider) = self.lider_actual {
@@ -155,13 +144,6 @@ impl Estacion {
         }
         None
     }
-
-    // pub(crate) fn buscar_estacion_por_id(&self, id: usize) -> Option<Addr<EstacionCercana>> {
-    //     if let Some(conexion) = self.estaciones_cercanas.get(&id) {
-    //         return Some(conexion.clone());
-    //     }
-    //     None
-    // }
 
     pub(crate) fn agregar_ventas_acumuladas(
         &mut self,
@@ -243,7 +225,6 @@ impl Actor for Estacion {
 
         self.cargar_ventas_sin_informar();
 
-        // correr listener en background
         actix_rt::spawn(async move {
             let listener = TcpListener::bind(("127.0.0.1", port + 1000)).await.unwrap();
             loop {
@@ -255,17 +236,6 @@ impl Actor for Estacion {
                         );
                         // se inicia un actor de surtidor por cada conexión entrante
                         addr_self_clone.do_send(AceptarCliente { stream, peer_addr });
-                        /*let estacion_addr = addr_self_clone.clone();
-                        let id_surtidor = rand::random::<u64>() as usize;
-                        actix_rt::spawn(async move {
-                            let estacion: Addr<Estacion> = estacion_addr.clone();
-                            let surtidor = Surtidor::new(id_surtidor, estacion_addr, stream, id);
-                            let surtidor_addr = surtidor.start();
-                            estacion.do_send(HabilitarSurtidor {
-                                surtidor_id: id_surtidor,
-                                surtidor_addr,
-                            });
-                        });*/
                     }
                     Err(e) => {
                         eprintln!("Error al aceptar conexión de cliente: {:?}", e);
@@ -279,9 +249,6 @@ impl Actor for Estacion {
             id, port
         );
 
-        // correr listener en background
-        // Para detener el listener desde cualquier handler, usar:
-        // self.listener_activo.store(false, Ordering::Relaxed);
         let listener_activo = Arc::clone(&self.listener_activo);
         actix_rt::spawn(async move {
             let listener: TcpListener = match TcpListener::bind(("127.0.0.1", port)).await {
@@ -306,7 +273,7 @@ impl Actor for Estacion {
                             "[{}] conexión de estación entrante desde {:?}",
                             id, peer_addr
                         );
-                        // Spawn en un task separado para no bloquear el accept de nuevas conexiones
+
                         let addr_clone = addr_self.clone();
                         actix_rt::spawn(async move {
                             if let Err(e) = handle_stream_incoming(stream, id, addr_clone).await {
@@ -348,7 +315,6 @@ impl Actor for Estacion {
             }
         });
 
-        // Conectar con la siguiente estación después de crear el hilo
 
         let addr_self_clone = ctx.address();
         let sig_addr = *self

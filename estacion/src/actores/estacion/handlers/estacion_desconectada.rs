@@ -8,8 +8,6 @@ impl Handler<EstacionDesconectada> for Estacion {
 
     fn handle(&mut self, msg: EstacionDesconectada, ctx: &mut Context<Self>) {
         if self.desconectada {
-            // Si ya estamos desconectados, no hacemos nada.
-
             return;
         }
 

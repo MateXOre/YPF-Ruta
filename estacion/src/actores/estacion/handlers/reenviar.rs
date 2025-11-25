@@ -11,10 +11,8 @@ impl Handler<Reenviar> for Estacion {
             self.siguiente_estacion
         );
 
-        // 1. reenviar
         self.enviar_a_siguiente(ctx, msg.bytes);
 
-        // 2. recalcular el siguiente
         let siguiente_correcto = if self.id + 1 >= self.todas_las_estaciones.len() {
             0
         } else {

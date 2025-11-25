@@ -21,7 +21,6 @@ impl Handler<TransaccionesPorEstacion> for Estacion {
                 let mut resultados_surtidor = Vec::new();
 
                 for venta in ventas {
-                    // Validación dummy (true)
                     resultados_surtidor.push((venta.0, venta.1));
                 }
 

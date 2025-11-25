@@ -14,7 +14,6 @@ impl Handler<InformarVenta> for Estacion {
         );
 
         if self.ventas_por_informar.is_empty() {
-            // iniciar temporizado
             if !self.temporizador_activo {
                 self.temporizador_activo = true;
                 println!("Iniciando temporizador para informar ventas agrupadas");

@@ -23,7 +23,7 @@ impl Handler<NotificarLider> for Estacion {
         println!("[{}] Mi nuevo lider es : {} ", self.id, msg.id_lider);
 
         if self.id != msg.id_lider {
-            // ✔️ PRIMERO verificamos si ya existe conexión
+            // PRIMERO verificamos si ya existe conexión
             if self.estaciones_cercanas.contains_key(&msg.id_lider) {
                 println!(
                     "[{}] Ya tengo conexión activa con el líder {}, no abro un nuevo socket.",
@@ -32,7 +32,7 @@ impl Handler<NotificarLider> for Estacion {
 
                 ctx.address().do_send(NuevoLiderConectado);
             } else if let Some(lider_addr) = self.todas_las_estaciones.get(&msg.id_lider).copied() {
-                // ❗ Solo si NO existe conexión → intento conectar
+                // Solo si NO existe conexión → intento conectar
                 println!(
                     "[{}] intentando conectarme al nuevo líder en {}...",
                     self.id, lider_addr

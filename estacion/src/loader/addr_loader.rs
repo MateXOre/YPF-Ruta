@@ -9,7 +9,6 @@ const ARCHIVO_NOMBRE: &str = "estaciones.csv";
 
 pub struct AddrLoader {}
 
-#[allow(dead_code)]
 impl AddrLoader {
     pub fn new() -> Self {
         Self {}

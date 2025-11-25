@@ -26,14 +26,6 @@ pub struct Enviar {
 #[rtype(result = "()")]
 pub struct EstacionCercanaCerroConexion;
 
-// #[derive(Message)]
-// #[rtype(result = "()")]
-// pub struct ConectarEstacion(pub String);
-
-// #[derive(Message)]
-// #[rtype(result = "()")]
-// pub struct RespuestaConexion(pub String);
-
 #[derive(Message)]
 #[rtype(result = "()")]
 pub struct CerrarConexion;
@@ -66,13 +58,6 @@ impl Actor for EstacionCercana {
     }
 }
 
-/*pub fn serialize(msg: Enviar) -> Vec<u8> {
-    msg.0.as_bytes().to_vec()
-}
-
-pub fn deserialize(buffer: Vec<u8>) -> Enviar {
-    Enviar(String::from_utf8(buffer).unwrap())
-}*/
 
 impl Handler<Enviar> for EstacionCercana {
     type Result = ();

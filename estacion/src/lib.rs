@@ -1,4 +1,3 @@
-#![allow(unused)]
-pub mod actores;
+mod actores;
 mod errors;
 mod loader;

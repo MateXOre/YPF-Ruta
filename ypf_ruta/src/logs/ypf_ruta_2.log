@@ -59,3 +59,94 @@
 24/11/2025 - 18:59:59 [DEBUG] YpfPeer 1: Ping recibido.
 24/11/2025 - 18:59:59 [DEBUG] YpfPeer 1: Pong enviado exitosamente
 24/11/2025 - 18:59:59 [DEBUG] YpfPeer 1: Pong recibido.
+24/11/2025 - 20:17:37 [INFO] YpfRuta 2: Creando instancia
+24/11/2025 - 20:17:37 [INFO] Gestor actor iniciado
+24/11/2025 - 20:17:37 [INFO] YpfRuta 2: Intentando conectar a peers...
+24/11/2025 - 20:17:37 [INFO] YpfRuta 2: Escuchando conexiones entrantes de peers...
+24/11/2025 - 20:17:37 [DEBUG] YpfRuta 2: Iniciando procesador de cola de ventas...
+24/11/2025 - 20:17:37 [ERROR] YpfPeer 3: Error al obtener socket - No se pudo conectar al YpfPeer 3: Connection refused (os error 111)
+24/11/2025 - 20:17:37 [INFO] YpfRuta 2: Peer 3 iniciado.
+24/11/2025 - 20:17:37 [INFO] YpfPeer 3: Iniciado correctamente.
+24/11/2025 - 20:17:37 [WARN] YpfPeer 3: No se puede iniciar el ping loop sin un socket válido.
+24/11/2025 - 20:17:37 [INFO] YpfRuta 2: Peer 1 iniciado.
+24/11/2025 - 20:17:37 [INFO] YpfPeer 1: Iniciado correctamente.
+24/11/2025 - 20:17:37 [DEBUG] YpfPeer 1: Iniciando ping loop...
+24/11/2025 - 20:17:37 [DEBUG] YpfRuta 2: Socket del peer 1 está listo
+24/11/2025 - 20:17:37 [DEBUG] YpfPeer 1: Iniciando tarea de escritura del socket...
+24/11/2025 - 20:17:37 [DEBUG] YpfPeer 1: Iniciando tarea de lectura del socket...
+24/11/2025 - 20:17:43 [DEBUG] YpfRuta 2: Línea recibida del socket entrante: 
+24/11/2025 - 20:17:43 [ERROR] YpfRuta 2: Formato de mensaje inválido. Se esperaba: ID_LOCAL:<ID>, recibido: 
+24/11/2025 - 20:17:43 [DEBUG] YpfRuta 2: Línea recibida del socket entrante: ID_LOCAL:3
+24/11/2025 - 20:17:43 [DEBUG] YpfRuta 2: Conexión entrante del peer 3
+24/11/2025 - 20:17:43 [DEBUG] YpfRuta 2: Peer 3 ya existe, enviando socket
+24/11/2025 - 20:17:43 [DEBUG] YpfPeer 3: Guardando socket entrante...
+24/11/2025 - 20:17:43 [DEBUG] YpfPeer 3: Iniciando ping loop...
+24/11/2025 - 20:17:43 [DEBUG] YpfPeer 3: Socket guardado exitosamente.
+24/11/2025 - 20:17:43 [DEBUG] YpfRuta 2: Socket del peer 3 está listo
+24/11/2025 - 20:17:43 [DEBUG] YpfPeer 3: Iniciando tarea de escritura del socket...
+24/11/2025 - 20:17:43 [DEBUG] YpfPeer 3: Iniciando tarea de lectura del socket...
+24/11/2025 - 20:17:43 [DEBUG] YpfRuta 2: Recibido anuncio de COORDINATOR del nodo 3
+24/11/2025 - 20:17:43 [INFO] YpfRuta 2: Nodo 3 es el nuevo líder.
+24/11/2025 - 20:18:07 [INFO] Gestor: estado persistido periódicamente
+24/11/2025 - 20:18:07 [DEBUG] YpfPeer 1: PING enviado.
+24/11/2025 - 20:18:07 [DEBUG] YpfPeer 1: Ping recibido.
+24/11/2025 - 20:18:07 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+24/11/2025 - 20:18:07 [DEBUG] YpfPeer 1: Pong recibido.
+24/11/2025 - 20:18:13 [DEBUG] YpfPeer 3: PING enviado.
+24/11/2025 - 20:18:13 [DEBUG] YpfPeer 3: Ping recibido.
+24/11/2025 - 20:18:13 [DEBUG] YpfPeer 3: Pong enviado exitosamente
+24/11/2025 - 20:18:13 [DEBUG] YpfPeer 3: Pong recibido.
+24/11/2025 - 20:18:25 [WARN] YpfPeer 3: Conexión cerrada por el peer remoto.
+24/11/2025 - 20:18:25 [WARN] YpfRuta 2: Peer 3 desconectado.
+24/11/2025 - 20:18:25 [INFO] YpfRuta 2: El líder 3 se ha desconectado. Iniciando elección Bully.
+24/11/2025 - 20:18:25 [INFO] YpfRuta 2: Iniciando elección Bully
+24/11/2025 - 20:18:25 [INFO] YpfRuta 2: No hay nodos con ID mayor. Me declaro líder.
+24/11/2025 - 20:18:25 [INFO] YpfRuta 2: Soy el nuevo LÍDER
+24/11/2025 - 20:18:25 [INFO] YpfRuta 2: Enviando COORDINATOR al peer 1
+24/11/2025 - 20:18:25 [DEBUG] YpfPeer 1: Recibido nuevo líder: 2
+24/11/2025 - 20:18:25 [DEBUG] YpfPeer 1: Enviando nuevo líder al socket: byte[0] = 52
+24/11/2025 - 20:18:25 [INFO] YpfRuta 2: Recibido ELECCION del nodo 1
+24/11/2025 - 20:18:25 [INFO] YpfRuta 2: Enviando OK al nodo 1 e iniciando mi propia elección
+24/11/2025 - 20:18:25 [INFO] YpfRuta 2: Iniciando elección Bully
+24/11/2025 - 20:18:25 [INFO] YpfRuta 2: No hay nodos con ID mayor. Me declaro líder.
+24/11/2025 - 20:18:25 [INFO] YpfRuta 2: Soy el nuevo LÍDER
+24/11/2025 - 20:18:25 [INFO] YpfRuta 2: Enviando COORDINATOR al peer 1
+24/11/2025 - 20:18:25 [DEBUG] YpfPeer 1: Recibido nuevo líder: 2
+24/11/2025 - 20:18:25 [DEBUG] YpfPeer 1: Enviando nuevo líder al socket: byte[0] = 52
+24/11/2025 - 22:01:25 [INFO] YpfRuta 2: Creando instancia
+24/11/2025 - 22:01:25 [INFO] Gestor actor iniciado
+24/11/2025 - 22:01:25 [INFO] YpfRuta 2: Intentando conectar a peers...
+24/11/2025 - 22:01:25 [INFO] YpfRuta 2: Escuchando conexiones entrantes de peers...
+24/11/2025 - 22:01:25 [DEBUG] YpfRuta 2: Iniciando procesador de cola de ventas...
+24/11/2025 - 22:01:25 [ERROR] YpfPeer 1: Error al obtener socket - No se pudo conectar al YpfPeer 1: Connection refused (os error 111)
+24/11/2025 - 22:01:25 [INFO] YpfRuta 2: Peer 1 iniciado.
+24/11/2025 - 22:01:25 [ERROR] YpfPeer 3: Error al obtener socket - No se pudo conectar al YpfPeer 3: Connection refused (os error 111)
+24/11/2025 - 22:01:25 [INFO] YpfRuta 2: Peer 3 iniciado.
+24/11/2025 - 22:01:25 [INFO] YpfPeer 1: Iniciado correctamente.
+24/11/2025 - 22:01:25 [WARN] YpfPeer 1: No se puede iniciar el ping loop sin un socket válido.
+24/11/2025 - 22:01:25 [INFO] YpfPeer 3: Iniciado correctamente.
+24/11/2025 - 22:01:25 [WARN] YpfPeer 3: No se puede iniciar el ping loop sin un socket válido.
+24/11/2025 - 22:01:25 [DEBUG] YpfRuta 2: Línea recibida del socket entrante: 
+24/11/2025 - 22:01:25 [ERROR] YpfRuta 2: Formato de mensaje inválido. Se esperaba: ID_LOCAL:<ID>, recibido: 
+24/11/2025 - 22:01:25 [DEBUG] YpfRuta 2: Línea recibida del socket entrante: ID_LOCAL:1
+24/11/2025 - 22:01:25 [DEBUG] YpfRuta 2: Conexión entrante del peer 1
+24/11/2025 - 22:01:25 [DEBUG] YpfRuta 2: Peer 1 ya existe, enviando socket
+24/11/2025 - 22:01:25 [DEBUG] YpfPeer 1: Guardando socket entrante...
+24/11/2025 - 22:01:25 [DEBUG] YpfPeer 1: Iniciando ping loop...
+24/11/2025 - 22:01:25 [DEBUG] YpfPeer 1: Socket guardado exitosamente.
+24/11/2025 - 22:01:25 [DEBUG] YpfRuta 2: Socket del peer 1 está listo
+24/11/2025 - 22:01:25 [DEBUG] YpfPeer 1: Iniciando tarea de escritura del socket...
+24/11/2025 - 22:01:25 [DEBUG] YpfPeer 1: Iniciando tarea de lectura del socket...
+24/11/2025 - 22:01:25 [DEBUG] YpfRuta 2: Línea recibida del socket entrante: 
+24/11/2025 - 22:01:25 [ERROR] YpfRuta 2: Formato de mensaje inválido. Se esperaba: ID_LOCAL:<ID>, recibido: 
+24/11/2025 - 22:01:25 [DEBUG] YpfRuta 2: Línea recibida del socket entrante: ID_LOCAL:3
+24/11/2025 - 22:01:25 [DEBUG] YpfRuta 2: Conexión entrante del peer 3
+24/11/2025 - 22:01:25 [DEBUG] YpfRuta 2: Peer 3 ya existe, enviando socket
+24/11/2025 - 22:01:25 [DEBUG] YpfPeer 3: Guardando socket entrante...
+24/11/2025 - 22:01:25 [DEBUG] YpfPeer 3: Iniciando ping loop...
+24/11/2025 - 22:01:25 [DEBUG] YpfPeer 3: Socket guardado exitosamente.
+24/11/2025 - 22:01:25 [DEBUG] YpfRuta 2: Socket del peer 3 está listo
+24/11/2025 - 22:01:25 [DEBUG] YpfPeer 3: Iniciando tarea de escritura del socket...
+24/11/2025 - 22:01:25 [DEBUG] YpfPeer 3: Iniciando tarea de lectura del socket...
+24/11/2025 - 22:01:29 [WARN] YpfPeer 3: Conexión cerrada por el peer remoto.
+24/11/2025 - 22:01:29 [WARN] YpfRuta 2: Peer 3 desconectado.

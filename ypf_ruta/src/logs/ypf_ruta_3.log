@@ -75,3 +75,75 @@
 24/11/2025 - 18:59:58 [DEBUG] YpfPeer 1: Ping recibido.
 24/11/2025 - 18:59:58 [DEBUG] YpfPeer 1: Pong enviado exitosamente
 24/11/2025 - 18:59:58 [DEBUG] YpfPeer 1: Pong recibido.
+24/11/2025 - 20:17:43 [INFO] YpfRuta 3: Creando instancia
+24/11/2025 - 20:17:43 [INFO] Gestor actor iniciado
+24/11/2025 - 20:17:43 [INFO] YpfRuta 3: Intentando conectar a peers...
+24/11/2025 - 20:17:43 [INFO] YpfRuta 3: Escuchando conexiones entrantes de peers...
+24/11/2025 - 20:17:43 [DEBUG] YpfRuta 3: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...
+24/11/2025 - 20:17:43 [DEBUG] YpfRuta 3: Iniciando procesador de cola de ventas...
+24/11/2025 - 20:17:43 [INFO] YpfRuta 3: Listener de estaciones activo en puerto 18082
+24/11/2025 - 20:17:43 [INFO] YpfRuta 3: Peer 2 iniciado.
+24/11/2025 - 20:17:43 [INFO] YpfRuta 3: Peer 1 iniciado.
+24/11/2025 - 20:17:43 [INFO] YpfPeer 2: Iniciado correctamente.
+24/11/2025 - 20:17:43 [DEBUG] YpfPeer 2: Iniciando ping loop...
+24/11/2025 - 20:17:43 [INFO] YpfPeer 1: Iniciado correctamente.
+24/11/2025 - 20:17:43 [DEBUG] YpfPeer 1: Iniciando ping loop...
+24/11/2025 - 20:17:43 [DEBUG] YpfRuta 3: Socket del peer 2 está listo
+24/11/2025 - 20:17:43 [DEBUG] YpfRuta 3: Enviando NuevoLider al peer 2 (socket listo)
+24/11/2025 - 20:17:43 [DEBUG] YpfRuta 3: Socket del peer 1 está listo
+24/11/2025 - 20:17:43 [DEBUG] YpfRuta 3: Enviando NuevoLider al peer 1 (socket listo)
+24/11/2025 - 20:17:43 [DEBUG] YpfPeer 2: Recibido nuevo líder: 3
+24/11/2025 - 20:17:43 [DEBUG] YpfPeer 2: Enviando nuevo líder al socket: byte[0] = 52
+24/11/2025 - 20:17:43 [DEBUG] YpfPeer 1: Recibido nuevo líder: 3
+24/11/2025 - 20:17:43 [DEBUG] YpfPeer 1: Enviando nuevo líder al socket: byte[0] = 52
+24/11/2025 - 20:17:43 [DEBUG] YpfPeer 2: Iniciando tarea de escritura del socket...
+24/11/2025 - 20:17:43 [DEBUG] YpfPeer 1: Iniciando tarea de escritura del socket...
+24/11/2025 - 20:17:43 [DEBUG] YpfPeer 2: Iniciando tarea de lectura del socket...
+24/11/2025 - 20:17:43 [DEBUG] YpfPeer 1: Iniciando tarea de lectura del socket...
+24/11/2025 - 20:18:05 [INFO] YpfRuta 3: Nueva conexión de estación desde 127.0.0.1:35734
+24/11/2025 - 20:18:05 [DEBUG] YpfRuta 3: Actor de Estacion creado para 127.0.0.1:35734
+24/11/2025 - 20:18:05 [INFO] Estacion actor iniciado.
+24/11/2025 - 20:18:05 [INFO] Estacion: envié ValidarVentas a YpfRuta.
+24/11/2025 - 20:18:05 [DEBUG] YpfRuta 3: Recibidas 1 ventas para validar
+24/11/2025 - 20:18:05 [DEBUG] YpfRuta 3: Ventas agregadas a la cola. Total en cola: 1
+24/11/2025 - 20:18:05 [DEBUG] YpfRuta 3: Procesando 1 ventas de la cola
+24/11/2025 - 20:18:05 [DEBUG] YpfRuta 3: Validando venta 0 en el gestor
+24/11/2025 - 20:18:05 [DEBUG] YpfRuta 3: Venta 0 - Resultado: true
+24/11/2025 - 20:18:05 [DEBUG] YpfRuta 3: Replicando venta 0 a 2 peers
+24/11/2025 - 20:18:05 [DEBUG] Estacion: recibí ResultadoVentas
+24/11/2025 - 20:18:05 [DEBUG] YpfPeer: encolando venta registrada
+24/11/2025 - 20:18:05 [DEBUG] YpfPeer: encolando venta registrada
+24/11/2025 - 20:18:13 [INFO] Gestor: estado persistido periódicamente
+24/11/2025 - 20:18:13 [DEBUG] YpfPeer 2: PING enviado.
+24/11/2025 - 20:18:13 [DEBUG] YpfPeer 1: PING enviado.
+24/11/2025 - 20:18:13 [DEBUG] YpfPeer 2: Ping recibido.
+24/11/2025 - 20:18:13 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+24/11/2025 - 20:18:13 [DEBUG] YpfPeer 1: Ping recibido.
+24/11/2025 - 20:18:13 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+24/11/2025 - 20:18:13 [DEBUG] YpfPeer 2: Pong recibido.
+24/11/2025 - 20:18:13 [DEBUG] YpfPeer 1: Pong recibido.
+24/11/2025 - 22:01:25 [INFO] YpfRuta 3: Creando instancia
+24/11/2025 - 22:01:25 [INFO] Gestor actor iniciado
+24/11/2025 - 22:01:25 [INFO] YpfRuta 3: Intentando conectar a peers...
+24/11/2025 - 22:01:25 [INFO] YpfRuta 3: Escuchando conexiones entrantes de peers...
+24/11/2025 - 22:01:25 [DEBUG] YpfRuta 3: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...
+24/11/2025 - 22:01:25 [DEBUG] YpfRuta 3: Iniciando procesador de cola de ventas...
+24/11/2025 - 22:01:25 [INFO] YpfRuta 3: Listener de estaciones activo en puerto 18082
+24/11/2025 - 22:01:25 [INFO] YpfRuta 3: Peer 1 iniciado.
+24/11/2025 - 22:01:25 [INFO] YpfRuta 3: Peer 2 iniciado.
+24/11/2025 - 22:01:25 [INFO] YpfPeer 1: Iniciado correctamente.
+24/11/2025 - 22:01:25 [DEBUG] YpfPeer 1: Iniciando ping loop...
+24/11/2025 - 22:01:25 [INFO] YpfPeer 2: Iniciado correctamente.
+24/11/2025 - 22:01:25 [DEBUG] YpfPeer 2: Iniciando ping loop...
+24/11/2025 - 22:01:25 [DEBUG] YpfRuta 3: Socket del peer 1 está listo
+24/11/2025 - 22:01:25 [DEBUG] YpfRuta 3: Enviando NuevoLider al peer 1 (socket listo)
+24/11/2025 - 22:01:25 [DEBUG] YpfRuta 3: Socket del peer 2 está listo
+24/11/2025 - 22:01:25 [DEBUG] YpfRuta 3: Enviando NuevoLider al peer 2 (socket listo)
+24/11/2025 - 22:01:25 [DEBUG] YpfPeer 1: Recibido nuevo líder: 3
+24/11/2025 - 22:01:25 [DEBUG] YpfPeer 1: Enviando nuevo líder al socket: byte[0] = 52
+24/11/2025 - 22:01:25 [DEBUG] YpfPeer 2: Recibido nuevo líder: 3
+24/11/2025 - 22:01:25 [DEBUG] YpfPeer 2: Enviando nuevo líder al socket: byte[0] = 52
+24/11/2025 - 22:01:25 [DEBUG] YpfPeer 1: Iniciando tarea de escritura del socket...
+24/11/2025 - 22:01:25 [DEBUG] YpfPeer 2: Iniciando tarea de escritura del socket...
+24/11/2025 - 22:01:25 [DEBUG] YpfPeer 1: Iniciando tarea de lectura del socket...
+24/11/2025 - 22:01:25 [DEBUG] YpfPeer 2: Iniciando tarea de lectura del socket...

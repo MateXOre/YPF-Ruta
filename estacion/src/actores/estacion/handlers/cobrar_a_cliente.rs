@@ -13,7 +13,7 @@ impl Handler<CobrarACliente> for Estacion {
             "[{}] Cobranza informada: {:?} por surtidor: {}",
             self.id, msg.venta.id_venta, msg.surtidor_id
         );
-        if self.buscar_estacion_lider() == None {
+        if self.buscar_estacion_lider().is_none() {
             self.estoy_conectada = false;
         }
 
@@ -27,7 +27,6 @@ impl Handler<CobrarACliente> for Estacion {
             self.ventas_a_confirmar.insert(msg.surtidor_id, msg.venta);
         } else {
             println!("validando venta con lider");
-            // NO soy líder → envío venta al líder
             if self.estoy_conectada {
                 println!("Estoy conectada, enviando venta al lider");
                 if let Some(lider_addr) = self.buscar_estacion_lider() {

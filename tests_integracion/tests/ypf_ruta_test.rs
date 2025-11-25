@@ -18,17 +18,42 @@ const TEST_INDEX_4: usize = 9999;
 
 fn crear_logger_test() -> mpsc::Sender<Vec<u8>> {
     let (tx, rx) = mpsc::channel();
-    std::thread::spawn(move || {
-        while rx.recv().is_ok() {
-        }
-    });
+    std::thread::spawn(move || while rx.recv().is_ok() {});
     tx
+}
+
+fn obtener_data_dir() -> std::path::PathBuf {
+    let workspace_root = Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap();
+    workspace_root.join("ypf_ruta").join("src").join("data")
+}
+
+fn inicializar_archivos_test(index: usize) {
+    let data_dir = obtener_data_dir();
+
+    if let Err(e) = fs::create_dir_all(&data_dir) {
+        eprintln!(
+            "Advertencia: No se pudo crear el directorio {:?}: {}",
+            data_dir, e
+        );
+    }
+    let empresas_path = data_dir.join(format!("empresas_{}.json", index));
+    let tarjetas_path = data_dir.join(format!("tarjetas_{}.json", index));
+    let ventas_path = data_dir.join(format!("ventas_{}.json", index));
+
+    if !empresas_path.exists() {
+        let _ = fs::write(&empresas_path, "[]");
+    }
+    if !tarjetas_path.exists() {
+        let _ = fs::write(&tarjetas_path, "[]");
+    }
+    if !ventas_path.exists() {
+        let _ = fs::write(&ventas_path, "[]");
+    }
 }
 
 /// Limpia los archivos JSON creados por el Gestor durante los tests
 fn limpiar_archivos_test(index: usize) {
-    let workspace_root = Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap();
-    let data_dir = workspace_root.join("ypf_ruta").join("src").join("data");
+    let data_dir = obtener_data_dir();
 
     let empresas_path = data_dir.join(format!("empresas_{}.json", index));
     let tarjetas_path = data_dir.join(format!("tarjetas_{}.json", index));
@@ -40,8 +65,7 @@ fn limpiar_archivos_test(index: usize) {
 }
 
 fn limpiar_todos_los_archivos_test() {
-    let workspace_root = Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap();
-    let data_dir = workspace_root.join("ypf_ruta").join("src").join("data");
+    let data_dir = obtener_data_dir();
 
     let test_indices = [
         TEST_INDEX_1,
@@ -99,6 +123,7 @@ fn crear_venta_test(id_venta: usize, id_tarjeta: usize, monto: f32, id_estacion:
 
 #[actix_rt::test]
 async fn test_ypf_ruta_maneja_estaciones_concurrentes() {
+    inicializar_archivos_test(TEST_INDEX_1);
     let base_port = 18080usize;
     let logger = crear_logger_test();
     let logger_ypf = logger.clone();
@@ -155,6 +180,7 @@ async fn test_ypf_ruta_maneja_estaciones_concurrentes() {
 
 #[actix_rt::test]
 async fn test_ypf_ruta_procesamiento_ventas_concurrentes() {
+    inicializar_archivos_test(TEST_INDEX_2);
     let base_port = 18081usize;
     let logger = crear_logger_test();
     let logger_ypf = logger.clone();
@@ -210,6 +236,7 @@ async fn test_ypf_ruta_procesamiento_ventas_concurrentes() {
 
 #[actix_rt::test]
 async fn test_ypf_ruta_cola_ventas() {
+    inicializar_archivos_test(TEST_INDEX_3);
     let base_port = 18082usize;
     let logger = crear_logger_test();
     let logger_ypf = logger.clone();
@@ -258,6 +285,9 @@ async fn test_ypf_ruta_cola_ventas() {
 async fn test_multiple_ypf_ruta_concurrentes() {
     let mut ypf_rutas = vec![];
     let test_indices = [TEST_INDEX_4, TEST_INDEX_4 + 1, TEST_INDEX_4 + 2];
+    for &test_idx in &test_indices {
+        inicializar_archivos_test(test_idx);
+    }
     for (i, &test_idx) in test_indices.iter().enumerate() {
         let base_port = 18100 + i;
         let logger = crear_logger_test();

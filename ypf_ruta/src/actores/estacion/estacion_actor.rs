@@ -3,11 +3,11 @@ pub(crate) use crate::actores::estacion::messages::ValidarVentas;
 use crate::actores::ypf::ypf_actor::YpfRuta;
 use actix::prelude::*;
 use serde_json;
+use std::sync::mpsc::Sender;
 use tokio::io::AsyncReadExt;
 use tokio::net::TcpStream;
 use tokio::net::tcp::OwnedWriteHalf;
 use util::{log_info, log_warning};
-use std::sync::mpsc::Sender;
 
 pub struct Estacion {
     pub(crate) socket: Option<OwnedWriteHalf>,
@@ -17,17 +17,19 @@ pub struct Estacion {
 }
 
 impl Estacion {
-    pub async fn new(socket: TcpStream, ypf_addr: Addr<YpfRuta>, logger: Sender<Vec<u8>>) -> Result<Estacion, ()> {
+    pub async fn new(
+        socket: TcpStream,
+        ypf_addr: Addr<YpfRuta>,
+        logger: Sender<Vec<u8>>,
+    ) -> Result<Estacion, ()> {
         let (mut reader, writer) = socket.into_split();
 
-        // Leer el tamaño (4 bytes)
         let mut len_bytes = [0u8; 4];
         if reader.read_exact(&mut len_bytes).await.is_err() {
             return Err(());
         };
         let len = u32::from_be_bytes(len_bytes) as usize;
 
-        // Leer los datos
         let mut buffer = vec![0u8; len];
         if reader.read_exact(&mut buffer).await.is_err() {
             return Err(());
@@ -58,7 +60,10 @@ impl Actor for Estacion {
             self.ypf_addr.do_send(ValidarVentas { ventas, from });
             log_info!(self.logger, "Estacion: envié ValidarVentas a YpfRuta.");
         } else {
-            log_warning!(self.logger, "Estacion: no se recibieron ventas iniciales al conectar.");
+            log_warning!(
+                self.logger,
+                "Estacion: no se recibieron ventas iniciales al conectar."
+            );
         }
     }
 }

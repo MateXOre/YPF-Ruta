@@ -10,16 +10,12 @@ impl Handler<NuevoLider> for YpfRuta {
         log_debug!(
             self.logger,
             "YpfRuta {}: Recibido anuncio de COORDINATOR del nodo {}",
-            self.id, msg.id
+            self.id,
+            msg.id
         );
 
-        // Aceptar el nuevo líder y cancelar cualquier elección en curso
         if self.id == msg.id {
-            log_info!(
-                self.logger,
-                "YpfRuta {}: He sido elegido líder.",
-                self.id
-            );
+            log_info!(self.logger, "YpfRuta {}: He sido elegido líder.", self.id);
         } else {
             log_info!(
                 self.logger,

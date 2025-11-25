@@ -13,7 +13,7 @@ impl Handler<NuevoLider> for YpfPeer {
             self.peer_id,
             msg.id
         );
-        self.cola_envio.as_mut().map(|tx| {
+        if let Some(tx) = self.cola_envio.as_mut() {
             let bytes = msg.to_bytes();
             log_debug!(
                 self.logger,
@@ -28,6 +28,6 @@ impl Handler<NuevoLider> for YpfPeer {
                     self.peer_id
                 );
             }
-        });
+        }
     }
 }

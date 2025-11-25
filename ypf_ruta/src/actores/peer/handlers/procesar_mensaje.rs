@@ -12,11 +12,7 @@ impl Handler<ProcesarMensaje> for YpfPeer {
             b'0' => {
                 // Ping recibido
                 self.last_ping = std::time::Instant::now();
-                log_debug!(
-                    self.logger,
-                    "YpfPeer {}: Ping recibido.",
-                    self.peer_id
-                );
+                log_debug!(self.logger, "YpfPeer {}: Ping recibido.", self.peer_id);
                 if let Some(cola) = self.cola_envio.as_mut() {
                     match cola.send(vec![b'1', b'\n']) {
                         Ok(_) => log_debug!(
@@ -44,11 +40,7 @@ impl Handler<ProcesarMensaje> for YpfPeer {
             b'1' => {
                 // Pong recibido
                 self.last_pong = std::time::Instant::now();
-                log_debug!(
-                    self.logger,
-                    "YpfPeer {}: Pong recibido.",
-                    self.peer_id
-                );
+                log_debug!(self.logger, "YpfPeer {}: Pong recibido.", self.peer_id);
             }
             b'3' => {
                 // Mensaje ELECTION
@@ -73,7 +65,8 @@ impl Handler<ProcesarMensaje> for YpfPeer {
                 log_error!(
                     self.logger,
                     "YpfPeer {}: Tipo de mensaje desconocido: {}",
-                    self.peer_id, msg.bytes[0]
+                    self.peer_id,
+                    msg.bytes[0]
                 );
             }
         }

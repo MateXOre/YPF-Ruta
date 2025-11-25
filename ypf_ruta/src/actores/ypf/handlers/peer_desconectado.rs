@@ -15,7 +15,6 @@ impl Handler<PeerDesconectado> for YpfRuta {
         );
         self.ypf_peers.remove(&msg.id);
 
-        // Si el líder se desconectó, iniciar elección
         if Some(msg.id) == self.lider {
             self.lider = None;
             log_info!(

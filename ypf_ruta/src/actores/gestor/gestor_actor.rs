@@ -1,14 +1,16 @@
 use serde_json;
-use std::sync::mpsc::Sender;
 use std::collections::HashMap;
 use std::fs::File;
 use std::path::Path;
+use std::sync::mpsc::Sender;
 use std::time::Duration;
-
 
 use crate::actores::gestor::structs::{Empresa, Tarjeta};
 use actix::prelude::*;
-use util::{log_error, log_info, log_warning, structs::venta::{Venta, EstadoVenta}};
+use util::{
+    log_error, log_info, log_warning,
+    structs::venta::{EstadoVenta, Venta},
+};
 
 const PERSISTENCE_INTERVAL_SECS: u64 = 30;
 
@@ -19,7 +21,6 @@ pub struct Gestor {
     index: usize,
     logger: Sender<Vec<u8>>,
 }
-
 
 fn load_json_vec<T: for<'de> serde::Deserialize<'de>>(path: &Path) -> Vec<T> {
     match File::open(path) {
@@ -132,14 +133,18 @@ impl Gestor {
     }
 
     pub fn crear_venta(&mut self, venta: Venta) {
-        if let Some(nueva_venta) = self.ventas.iter().find(|v| v.id_venta == venta.id_venta){
-            log_info!(self.logger, "Venta con ID {} ya procesada previamente", nueva_venta.id_venta);
+        if let Some(nueva_venta) = self.ventas.iter().find(|v| v.id_venta == venta.id_venta) {
+            log_info!(
+                self.logger,
+                "Venta con ID {} ya procesada previamente",
+                nueva_venta.id_venta
+            );
             return;
         }
         if let Some(t) = self.tarjetas.get_mut(&venta.id_tarjeta) {
-            let mut consumo = venta.monto.clone();
+            let mut consumo = venta.monto;
             if t.consumo_actual + consumo > t.limite_particular as f32 {
-                consumo = (t.limite_particular as f32) - (t.consumo_actual as f32);
+                consumo = (t.limite_particular as f32) - (t.consumo_actual);
                 t.consumo_actual = t.limite_particular as f32;
             } else {
                 t.consumo_actual += consumo;
@@ -159,28 +164,44 @@ impl Gestor {
     pub fn procesar_venta_internal(&mut self, venta: &Venta) -> EstadoVenta {
         let mut estado = EstadoVenta::Confirmada;
 
-        if let Some(nueva_venta) = self.ventas.iter().find(|v| v.id_venta == venta.id_venta){
-            log_info!(self.logger, "Venta con ID {} ya procesada previamente", nueva_venta.id_venta);
+        if let Some(nueva_venta) = self.ventas.iter().find(|v| v.id_venta == venta.id_venta) {
+            log_info!(
+                self.logger,
+                "Venta con ID {} ya procesada previamente",
+                nueva_venta.id_venta
+            );
             return estado;
         }
         let tarjeta = match self.tarjetas.get(&venta.id_tarjeta) {
             Some(t) => t.clone(),
             None => {
-                log_warning!(self.logger, "Tarjeta con ID {} no encontrada", venta.id_tarjeta);
+                log_warning!(
+                    self.logger,
+                    "Tarjeta con ID {} no encontrada",
+                    venta.id_tarjeta
+                );
                 return EstadoVenta::Rechazada;
             }
         };
         let empresa = match self.empresas.get(&tarjeta.empresa_id) {
             Some(e) => e.clone(),
             None => {
-                log_warning!(self.logger, "Empresa con ID {} no encontrada", tarjeta.empresa_id);
+                log_warning!(
+                    self.logger,
+                    "Empresa con ID {} no encontrada",
+                    tarjeta.empresa_id
+                );
                 return EstadoVenta::Rechazada;
             }
         };
 
         if tarjeta.consumo_actual + venta.monto > tarjeta.limite_particular as f32 {
             if !venta.offline {
-                log_warning!(self.logger, "Venta rechazada: excede el límite particular de la tarjeta (ID {})", tarjeta.id);
+                log_warning!(
+                    self.logger,
+                    "Venta rechazada: excede el límite particular de la tarjeta (ID {})",
+                    tarjeta.id
+                );
                 return EstadoVenta::Rechazada;
             } else {
                 estado = EstadoVenta::Rechazada;
@@ -189,7 +210,11 @@ impl Gestor {
 
         if empresa.consumo_actual + venta.monto > empresa.limite_general as f32 {
             if !venta.offline {
-                log_warning!(self.logger, "Venta rechazada: excede el límite general de la empresa (ID {})", empresa.id);   
+                log_warning!(
+                    self.logger,
+                    "Venta rechazada: excede el límite general de la empresa (ID {})",
+                    empresa.id
+                );
                 return EstadoVenta::Rechazada;
             } else {
                 estado = EstadoVenta::Rechazada;
@@ -216,7 +241,6 @@ impl Gestor {
         let tarjetas_path = data_dir.join(format!("tarjetas_{}.json", self.index));
         let ventas_path = data_dir.join(format!("ventas_{}.json", self.index));
 
-        // Persistir empresas
         if let Ok(file) = File::create(&empresas_path) {
             if let Err(e) = serde_json::to_writer_pretty(
                 file,
@@ -230,28 +254,48 @@ impl Gestor {
                 );
             }
         } else {
-            log_error!(self.logger, "No se pudo crear el archivo {}", empresas_path.display());
+            log_error!(
+                self.logger,
+                "No se pudo crear el archivo {}",
+                empresas_path.display()
+            );
         }
 
-        // Persistir tarjetas
         if let Ok(file) = File::create(&tarjetas_path) {
             if let Err(e) = serde_json::to_writer_pretty(
                 file,
                 &self.tarjetas.values().collect::<Vec<&Tarjeta>>(),
             ) {
-                log_error!(self.logger, "Error al guardar tarjetas en {}: {}", tarjetas_path.display(), e);
+                log_error!(
+                    self.logger,
+                    "Error al guardar tarjetas en {}: {}",
+                    tarjetas_path.display(),
+                    e
+                );
             }
         } else {
-            log_error!(self.logger, "No se pudo crear el archivo {}", tarjetas_path.display());
+            log_error!(
+                self.logger,
+                "No se pudo crear el archivo {}",
+                tarjetas_path.display()
+            );
         }
 
-        // Persistir ventas
         if let Ok(file) = File::create(&ventas_path) {
             if let Err(e) = serde_json::to_writer_pretty(file, &self.ventas) {
-                log_error!(self.logger, "Error al guardar ventas en {}: {}", ventas_path.display(), e);
+                log_error!(
+                    self.logger,
+                    "Error al guardar ventas en {}: {}",
+                    ventas_path.display(),
+                    e
+                );
             }
         } else {
-            log_error!(self.logger, "No se pudo crear el archivo {}", ventas_path.display());
+            log_error!(
+                self.logger,
+                "No se pudo crear el archivo {}",
+                ventas_path.display()
+            );
         }
     }
 }
@@ -272,7 +316,10 @@ impl Actor for Gestor {
     }
 
     fn stopped(&mut self, _ctx: &mut Self::Context) {
-        log_info!(self.logger, "Gestor actor detenido; persistiendo estado final");
+        log_info!(
+            self.logger,
+            "Gestor actor detenido; persistiendo estado final"
+        );
         self.persistir_estado_actual();
     }
 }

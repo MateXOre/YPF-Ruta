@@ -20,9 +20,7 @@ impl Handler<GuardarSocket> for YpfPeer {
         let local_clone = self.ypf_local_addr.clone();
         let peer_id = self.peer_id;
 
-        // Task que posee el writer y serializa las escrituras
         Self::escribir_a_socket(rx, writer, peer_id, local_clone, self.logger.clone());
-
         self.start_ping_loop(ctx);
 
         let self_addr = ctx.address();
@@ -44,7 +42,6 @@ impl Handler<GuardarSocket> for YpfPeer {
             self.peer_id
         );
 
-        // Notificar al YpfRuta que el socket está listo
         self.ypf_local_addr
             .do_send(crate::actores::ypf::messages::SocketListo {
                 peer_id: self.peer_id,

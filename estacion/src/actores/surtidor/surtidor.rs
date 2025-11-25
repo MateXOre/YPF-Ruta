@@ -1,7 +1,7 @@
-use std::time::{SystemTime, UNIX_EPOCH};
 use crate::actores::estacion::Estacion;
 use crate::actores::surtidor::messages::{CargarCombustible, Detenerme};
 use actix::{Actor, Addr, AsyncContext, Context};
+use std::time::{SystemTime, UNIX_EPOCH};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::tcp::OwnedReadHalf;
 use tokio::net::TcpStream;
@@ -27,12 +27,10 @@ impl Surtidor {
 
         let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel::<Vec<u8>>();
 
-        // Task que posee el writer y serializa las escrituras
         tokio::spawn(async move {
             let mut writer = writer;
             while let Some(buf) = rx.recv().await {
                 if buf.is_empty() {
-                    // señal de cierre
                     break;
                 }
                 if let Err(e) = writer.write_all(&buf).await {
@@ -58,10 +56,8 @@ impl Actor for Surtidor {
     fn started(&mut self, ctx: &mut Self::Context) {
         println!("[{}] Surtidor conectado a la estación", self.estacion_id);
 
-        // Enviar mensaje inicial al cliente
         let _ = self.writer_tx.send(b"Ingrese tarjeta=monto\n".to_vec());
 
-        // leer del stream del cliente la tarjeta y monto -> asumimos formato "tarjeta=monto\n"
         let mut reader = match self.reader.take() {
             Some(r) => r,
             None => {
@@ -105,7 +101,6 @@ impl Actor for Surtidor {
                                 }
                             };
 
-                            // Obtener timestamp de forma segura
                             let timestamp = SystemTime::now()
                                 .duration_since(UNIX_EPOCH)
                                 .map(|d| d.as_millis())
@@ -114,7 +109,6 @@ impl Actor for Surtidor {
                                     0u128
                                 });
 
-                            // Construir id de venta y manejar parse sin panics
                             let id_str = format!("{:04}{:010}", estacion_id, timestamp);
                             let id_venta = match id_str.parse::<usize>() {
                                 Ok(v) => v,
@@ -159,6 +153,5 @@ impl Actor for Surtidor {
                 }
             }
         });
-
     }
 }

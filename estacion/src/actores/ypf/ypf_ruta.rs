@@ -66,11 +66,10 @@ impl Ypf {
                     eprintln!("Conexión cerrada por YPF.");
                 }
                 Ok(_) => {
-                    // Remover el \n final si existe
                     if line.last() == Some(&b'\n') {
                         line.pop();
                     }
-                    
+
                     let transacciones: HashMap<usize, HashMap<usize, Vec<(usize, bool)>>> =
                         match serde_json::from_slice(&line) {
                             Ok(data) => data,
@@ -86,7 +85,6 @@ impl Ypf {
                     eprintln!("Error leyendo de YPF: {}", e);
                 }
             }
-            
         });
     }
 }

@@ -2,8 +2,8 @@ use crate::actores::peer::messages::Eleccion;
 use crate::actores::ypf::messages::{EleccionTimeout, IniciarEleccion};
 use crate::actores::ypf::ypf_actor::YpfRuta;
 use actix::{AsyncContext, Context, Handler};
-use util::{log_debug, log_info, log_warning};
 use std::time::Duration;
+use util::{log_debug, log_info, log_warning};
 
 impl Handler<IniciarEleccion> for YpfRuta {
     type Result = ();
@@ -18,15 +18,10 @@ impl Handler<IniciarEleccion> for YpfRuta {
             return;
         }
 
-        log_info!(
-            self.logger,
-            "YpfRuta {}: Iniciando elección Bully",
-            self.id
-        );
+        log_info!(self.logger, "YpfRuta {}: Iniciando elección Bully", self.id);
         self.en_eleccion = true;
         self.respuestas_recibidas = 0;
 
-        // Enviar ELECTION a todos los nodos con ID mayor
         let mut envio_a_mayores = false;
         for (peer_id, peer_addr) in self.ypf_peers.iter() {
             if *peer_id > self.id {
@@ -42,7 +37,6 @@ impl Handler<IniciarEleccion> for YpfRuta {
         }
 
         if !envio_a_mayores {
-            // No hay nodos con ID mayor, me declaro líder
             log_info!(
                 self.logger,
                 "YpfRuta {}: No hay nodos con ID mayor. Me declaro líder.",
@@ -50,7 +44,6 @@ impl Handler<IniciarEleccion> for YpfRuta {
             );
             self.declarar_lider(ctx);
         } else {
-            // Esperar timeout para respuestas (2 segundos)
             ctx.run_later(Duration::from_secs(2), |_act, ctx| {
                 ctx.address().do_send(EleccionTimeout);
             });

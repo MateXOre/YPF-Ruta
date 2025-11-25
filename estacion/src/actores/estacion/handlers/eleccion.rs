@@ -30,7 +30,6 @@ impl Handler<Eleccion> for Estacion {
                     self.id, nuevo_lider
                 );
 
-                // Enviamos el mensaje solo si encontramos líder
                 ctx.address().do_send(NotificarLider {
                     id_lider: nuevo_lider,
                     id_iniciador: self.id,

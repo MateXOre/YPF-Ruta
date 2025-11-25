@@ -14,7 +14,6 @@ impl Handler<ValidarVentas> for YpfRuta {
             msg.ventas.len()
         );
 
-        // Agregar a la cola de ventas por confirmar
         self.ventas_por_confirmar.push_back((msg.from, msg.ventas));
 
         log_debug!(

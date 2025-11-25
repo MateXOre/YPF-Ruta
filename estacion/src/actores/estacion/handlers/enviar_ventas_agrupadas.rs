@@ -29,7 +29,7 @@ impl Handler<EnviarVentasAgrupadas> for Estacion {
 
     fn handle(&mut self, _msg: EnviarVentasAgrupadas, ctx: &mut Context<Self>) {
         let self_addr = ctx.address();
-        let ventas = self.ventas_por_informar.clone(); // acá quizas conviene directamente crear el mensaje en vez de clonar pero bueno
+        let ventas = self.ventas_por_informar.clone();
 
         ctx.spawn(
             async move {
@@ -53,7 +53,7 @@ impl Handler<EnviarVentasAgrupadas> for Estacion {
             .into_actor(self),
         );
 
-        self.ventas_por_informar.clear(); // TODO: manejar caso de ypf caida en el medio
+        self.ventas_por_informar.clear();
         self.limpiar_ventas_sin_informar();
         self.temporizador_activo = false;
     }

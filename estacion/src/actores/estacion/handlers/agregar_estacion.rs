@@ -24,8 +24,6 @@ impl Handler<AgregarEstacion> for Estacion {
             self.siguiente_estacion = msg.estacion_id;
         }
 
-        // Si es la última estación (id = total_estaciones - 1) y tiene su conexión lista, iniciar la ronda
-
         if !self.primer_anillo_realizado {
             self.primer_anillo_realizado = true;
             println!(

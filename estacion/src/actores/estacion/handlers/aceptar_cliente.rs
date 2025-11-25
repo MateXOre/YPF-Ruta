@@ -19,22 +19,19 @@ impl Handler<AceptarCliente> for Estacion {
                 self.id, id_surtidor, msg.peer_addr
             );
 
-            // movemos stream dentro del future
             let stream = msg.stream;
-
             ctx.spawn(
                 async move {
                     let surtidor =
                         Surtidor::new(id_surtidor, estacion_addr.clone(), stream, estacion_id);
                     let surtidor_addr = surtidor.start();
 
-                    // avisamos al actor que el surtidor quedó listo
                     estacion_addr.do_send(HabilitarSurtidor {
                         surtidor_id: id_surtidor,
                         surtidor_addr,
                     });
                 }
-                .into_actor(self), // IMPORTANTÍSIMO
+                .into_actor(self),
             );
         } else {
             println!(

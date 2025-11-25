@@ -27,7 +27,7 @@ impl Handler<ResultadoVentas> for Estacion {
             let logger = self.logger.clone();
             let fut = async move {
                 let bytes = parse_to_json(msg.ventas);
-                if socket.write_all(&*bytes).await.is_err() {
+                if socket.write_all(&bytes).await.is_err() {
                     log_error!(logger, "Estacion: error serializando ResultadoVentas");
                 }
             };
@@ -36,7 +36,10 @@ impl Handler<ResultadoVentas> for Estacion {
                 ctx.stop();
             }));
         } else {
-            log_debug!(self.logger, "Estacion: no hay socket para enviar ResultadoVentas, finalizando actor.");
+            log_debug!(
+                self.logger,
+                "Estacion: no hay socket para enviar ResultadoVentas, finalizando actor."
+            );
             ctx.stop();
         }
     }

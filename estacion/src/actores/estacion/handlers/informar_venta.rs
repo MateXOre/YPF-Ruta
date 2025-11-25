@@ -13,20 +13,18 @@ impl Handler<InformarVenta> for Estacion {
             self.id, msg.id_estacion
         );
 
-        if self.ventas_por_informar.is_empty() {
-            if !self.temporizador_activo {
-                self.temporizador_activo = true;
-                println!("Iniciando temporizador para informar ventas agrupadas");
+        if self.ventas_por_informar.is_empty() && !self.temporizador_activo {
+            self.temporizador_activo = true;
+            println!("Iniciando temporizador para informar ventas agrupadas");
 
-                let addr = ctx.address();
-                ctx.spawn(
-                    async move {
-                        sleep(Duration::from_secs(10)).await;
-                        addr.do_send(EnviarVentasAgrupadas);
-                    }
-                    .into_actor(self),
-                );
-            }
+            let addr = ctx.address();
+            ctx.spawn(
+                async move {
+                    sleep(Duration::from_secs(10)).await;
+                    addr.do_send(EnviarVentasAgrupadas);
+                }
+                .into_actor(self),
+            );
         }
 
         self.ventas_por_informar

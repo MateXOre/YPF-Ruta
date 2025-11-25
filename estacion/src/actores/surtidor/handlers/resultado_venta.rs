@@ -14,7 +14,6 @@ impl Handler<ResultadoVenta> for Surtidor {
             "Venta fallida.\n".to_string()
         };
 
-        // Enviar la respuesta al cliente mediante el canal
         if let Err(e) = self.writer_tx.send(respuesta.into_bytes()) {
             println!("Error al enviar respuesta al writer: {:?}", e);
         } else {

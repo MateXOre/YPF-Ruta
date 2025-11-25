@@ -13,15 +13,10 @@ impl Handler<Detenerme> for Surtidor {
             surtidor_id: self.id,
         });
 
-        //Señal para que la task de escritura termine
         let _ = self.writer_tx.send(Vec::new());
-
-        //Cerrar reader si aún está activo
         if let Some(reader) = self.reader.take() {
-            drop(reader); // cerrar TcpStream
+            drop(reader);
         }
-
-        //Detener el actor
         ctx.stop();
     }
 }

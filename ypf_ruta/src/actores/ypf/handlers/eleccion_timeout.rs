@@ -12,7 +12,6 @@ impl Handler<EleccionTimeout> for YpfRuta {
         }
 
         if self.respuestas_recibidas == 0 {
-            // No recibí respuestas, me declaro líder
             log_info!(
                 self.logger,
                 "YpfRuta {}: Timeout alcanzado sin respuestas. Me declaro líder.",

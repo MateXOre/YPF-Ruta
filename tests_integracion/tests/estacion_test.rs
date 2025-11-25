@@ -1,9 +1,31 @@
 use actix::prelude::*;
 use estacion::actores::estacion::Estacion;
+use std::fs;
 use std::net::SocketAddr;
+use std::path::Path;
 use std::time::Duration;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
+
+fn obtener_storage_dir() -> std::path::PathBuf {
+    let workspace_root = Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap();
+    workspace_root.join("estacion").join("storage")
+}
+
+fn inicializar_storage_estacion(estacion_id: usize) {
+    let storage_dir = obtener_storage_dir();
+    if let Err(e) = fs::create_dir_all(&storage_dir) {
+        eprintln!(
+            "Advertencia: No se pudo crear el directorio {:?}: {}",
+            storage_dir, e
+        );
+    }
+
+    let ventas_path = storage_dir.join(format!("ventas_sin_informar_{}.json", estacion_id));
+    if !ventas_path.exists() {
+        let _ = fs::write(&ventas_path, "{}");
+    }
+}
 
 async fn simular_cliente(
     addr: SocketAddr,
@@ -33,6 +55,7 @@ async fn simular_cliente(
 
 #[actix_rt::test]
 async fn test_estacion_maneja_clientes_concurrentes() {
+    inicializar_storage_estacion(0);
     let base_port = 20000u16;
     let estaciones = vec![SocketAddr::from(([127, 0, 0, 1], base_port))];
     let _estacion = Estacion::new(0, estaciones).start();
@@ -65,6 +88,7 @@ async fn test_estacion_maneja_clientes_concurrentes() {
 
 #[actix_rt::test]
 async fn test_estacion_limite_surtidores() {
+    inicializar_storage_estacion(0);
     let base_port = 20001u16;
     let estaciones = vec![SocketAddr::from(([127, 0, 0, 1], base_port))];
     let _estacion = Estacion::new(0, estaciones).start();
@@ -100,6 +124,7 @@ async fn test_estacion_limite_surtidores() {
 
 #[actix_rt::test]
 async fn test_estacion_procesamiento_ventas_concurrentes() {
+    inicializar_storage_estacion(0);
     let base_port = 20002u16;
     let estaciones = vec![SocketAddr::from(([127, 0, 0, 1], base_port))];
     let _estacion = Estacion::new(0, estaciones).start();
@@ -139,6 +164,10 @@ async fn test_estacion_procesamiento_ventas_concurrentes() {
 
 #[actix_rt::test]
 async fn test_multiple_estaciones_concurrentes() {
+    for i in 0..3 {
+        inicializar_storage_estacion(i);
+    }
+
     let mut estaciones_addrs = vec![];
     let mut estaciones_actors = vec![];
 

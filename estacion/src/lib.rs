@@ -1,3 +1,3 @@
 pub mod actores;
-mod errors;
-mod loader;
+pub mod errors;
+pub mod loader;

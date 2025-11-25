@@ -4,7 +4,7 @@ use tokio::net::TcpStream;
 
 use crate::actores::empresa::messages::*;
 use crate::actores::empresa::Empresa;
-use crate::actores::ypf_ruta::ypf_ruta::YpfRuta;
+use crate::actores::ypf_ruta::ypf_ruta_actor::YpfRuta;
 
 pub async fn handle_stream_outgoing(
     stream: TcpStream,

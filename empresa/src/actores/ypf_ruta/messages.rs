@@ -1,4 +1,4 @@
-use crate::actores::ypf_ruta::ypf_ruta::YpfRuta;
+use crate::actores::ypf_ruta::ypf_ruta_actor::YpfRuta;
 use actix::{Context, Handler, Message};
 
 // ===== Opcodes del protocolo =====

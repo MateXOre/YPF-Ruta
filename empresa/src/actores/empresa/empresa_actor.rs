@@ -1,5 +1,5 @@
 use crate::actores::empresa::io::outgoing::handle_stream_outgoing;
-use crate::actores::ypf_ruta::ypf_ruta::YpfRuta;
+use crate::actores::ypf_ruta::ypf_ruta_actor::YpfRuta;
 use actix::prelude::*;
 
 const YPF_ADDRS: [&str; 3] = ["127.0.0.1:19080", "127.0.0.1:19081", "127.0.0.1:19082"];

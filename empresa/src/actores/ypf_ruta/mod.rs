@@ -1,4 +1,4 @@
 pub mod messages;
-pub mod ypf_ruta;
+pub mod ypf_ruta_actor;
 
-pub use ypf_ruta::YpfRuta;
+pub use ypf_ruta_actor::YpfRuta;

@@ -52,12 +52,7 @@ impl Handler<EnviarASiguiente> for Estacion {
                         estacion_id: siguiente_estacion,
                         mensaje: msg.msg.clone(),
                     });
-            } else {
-                println!(
-                    "[{}] No se encontró la dirección de la siguiente estación {}",
-                    self.id, siguiente_estacion
-                );
-            }
+            };
         }
     }
 }

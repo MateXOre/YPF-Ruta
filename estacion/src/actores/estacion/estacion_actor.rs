@@ -109,17 +109,14 @@ impl Estacion {
     }
 
     pub(crate) fn enviar_a_siguiente(&self, ctx: &mut Context<Self>, mensaje: Vec<u8>) {
-        let siguiente = if self
-            .estaciones_cercanas
-            .contains_key(&self.siguiente_estacion)
-        {
-            self.estaciones_cercanas
-                .get(&self.siguiente_estacion)
-                .unwrap()
-                .clone()
+        if let Some(siguiente) = self
+            .estaciones_cercanas.get(&self.siguiente_estacion) {
+            siguiente.do_send(Enviar {
+                bytes: mensaje.clone(),
+            });
         } else {
             println!(
-                "[{}] La siguiente estación {} no está conectada, no se puede reenviar el mensaje",
+                "[{}] La siguiente estación {} no está conectada, no se puede mandar el mensaje de anillo",
                 self.id, self.siguiente_estacion
             );
             ctx.address().do_send(EstacionDesconectada {
@@ -128,9 +125,6 @@ impl Estacion {
             });
             return;
         };
-        siguiente.do_send(Enviar {
-            bytes: mensaje.clone(),
-        });
     }
 
     pub(crate) fn buscar_estacion_lider(&self) -> Option<Addr<EstacionCercana>> {
@@ -216,23 +210,21 @@ impl Actor for Estacion {
         self.cargar_ventas_sin_informar();
 
         actix_rt::spawn(async move {
-            let listener = TcpListener::bind((
+            if let Ok(listener) = TcpListener::bind((
                 "127.0.0.1",
                 port + Estacion::DESPLAZAMIENTO_PUERTO_ESCUCHA_CLIENTES,
             ))
             .await
-            .unwrap();
-            loop {
-                match listener.accept().await {
-                    Ok((stream, peer_addr)) => {
-                        println!(
-                            "[{}] conexión de cliente entrante desde {:?}",
-                            id, peer_addr
-                        );
-                        addr_self_clone.do_send(AceptarCliente { stream, peer_addr });
-                    }
-                    Err(e) => {
-                        eprintln!("Error al aceptar conexión de cliente: {:?}", e);
+            {
+                loop {
+                    match listener.accept().await {
+                        Ok((stream, peer_addr)) => {
+                            println!("[{}] conexión de cliente entrante desde {:?}", id, peer_addr);
+                            addr_self_clone.do_send(AceptarCliente { stream, peer_addr });
+                        }
+                        Err(e) => {
+                            eprintln!("Error al aceptar conexión de cliente: {:?}", e);
+                        }
                     }
                 }
             }
@@ -258,7 +250,7 @@ impl Actor for Estacion {
                     Ok((stream, peer_addr)) => {
                         let esta_activo = listener_activo.load(Ordering::Relaxed);
                         if !esta_activo {
-                            println!("[{}] ⚠️ Listener detenido (activo={}), rechazando conexión de {:?}", id, esta_activo, peer_addr);
+                            println!("[{}] Listener detenido (activo={}), rechazando conexión de {:?}", id, esta_activo, peer_addr);
                             drop(stream); // Cerrar la conexión
                             continue;
                         }
@@ -289,40 +281,37 @@ impl Actor for Estacion {
         );
 
         actix_rt::spawn(async move {
-            let listener = TcpListener::bind((
+            if let Ok(listener) = TcpListener::bind((
                 "127.0.0.1",
                 port + Estacion::DESPLAZAMIENTO_PUERTO_ESCUCHA_CAMBIO_LISTENER,
             ))
             .await
-            .unwrap();
-            loop {
-                match listener.accept().await {
-                    Ok((stream, peer_addr)) => {
-                        println!(
-                            "[{}] conexión entrante para cambiar conexión listener desde {:?}",
-                            id, peer_addr
-                        );
-                        addr_self_clone_2.do_send(CambiarConexionListener { stream });
-                    }
-                    Err(e) => {
-                        eprintln!(
-                            "Error al aceptar conexión para cambiar conexión listener: {:?}",
-                            e
-                        );
+            {
+                loop {
+                    match listener.accept().await {
+                        Ok((stream, peer_addr)) => {
+                            println!("[{}] conexión entrante para cambiar conexión listener desde {:?}", id, peer_addr);
+                            addr_self_clone_2.do_send(CambiarConexionListener { stream });
+                        }
+                        Err(e) => {
+                            eprintln!("Error al aceptar conexión para cambiar conexión listener: {:?}", e);
+                        }
                     }
                 }
             }
         });
 
         let addr_self_clone = ctx.address();
-        let sig_addr = *self
+        if let Some(sig_addr) = self
             .todas_las_estaciones
             .get(&self.siguiente_estacion)
-            .unwrap();
-        let sig_id = self.siguiente_estacion;
-        println!("Conectando con siguiente estación {}", sig_id);
-        actix_rt::spawn(async move {
-            Estacion::connect_and_register(sig_addr, addr_self_clone, id, sig_id).await;
-        });
+            .cloned()
+        {
+            println!("Conectando con siguiente estación {}", self.siguiente_estacion);
+            let siguiente_estacion = self.siguiente_estacion.clone();
+            actix_rt::spawn(async move {
+                Estacion::connect_and_register(sig_addr, addr_self_clone, id, siguiente_estacion).await;
+            });
+        }
     }
 }

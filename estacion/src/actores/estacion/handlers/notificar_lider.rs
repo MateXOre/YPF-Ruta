@@ -51,14 +51,10 @@ impl Handler<NotificarLider> for Estacion {
                         .await
                         {
                             Ok(_) => {
-                                println!(
-                                    "[{}] ✅ conexión establecida con el líder {}",
-                                    self_id, nuevo_lider
-                                );
                                 addr_self.do_send(NuevoLiderConectado);
                             }
                             Err(_) => println!(
-                                "[{}] ❌ no se pudo conectar con el líder {}",
+                                "[{}] no se pudo conectar con el líder {}",
                                 self_id, nuevo_lider
                             ),
                         }

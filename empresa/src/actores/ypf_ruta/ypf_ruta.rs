@@ -4,7 +4,11 @@ use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
 use tokio::net::tcp::{OwnedReadHalf, OwnedWriteHalf};
 use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
-use crate::actores::empresa::{Empresa, ProcesarMensajeSocket, ResponderConsola};
+use crate::actores::empresa::{Empresa};
+
+use crate::actores::empresa::{
+    messages::{ProcesarMensajeSocket},
+};
 
 
 pub struct YpfRuta {
@@ -29,10 +33,10 @@ impl YpfRuta {
             }
         });
 
-        Self { 
-            empresa_local, 
-            socket_ypf_ruta: tx, 
-            reader: Some(reader), 
+        Self {
+            empresa_local,
+            socket_ypf_ruta: tx,
+            reader: Some(reader),
             writer: None,
         }
     }
@@ -51,13 +55,6 @@ impl Actor for YpfRuta {
             self.empresa_local.clone(),
             ypf_ruta_addr,
         );
-    }
-}
-
-impl Handler<ResponderConsola> for YpfRuta {
-    type Result = ();
-    fn handle(&mut self, msg: ResponderConsola, _: &mut Context<Self>) {
-        println!("YpfRuta received message: {}", msg.linea);
     }
 }
 

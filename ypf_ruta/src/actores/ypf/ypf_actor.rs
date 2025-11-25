@@ -428,7 +428,7 @@ impl YpfRuta {
                             self_id,
                             peer_addr
                         );
-                        let _ = handle_stream_incoming(socket, self_id, self_addr.clone()).await;
+                        let _ = handle_stream_incoming(socket, self_id, self_addr.clone(), logger.clone()).await;
                     }
                 }
             }

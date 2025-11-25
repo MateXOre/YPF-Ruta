@@ -1,15 +1,17 @@
+use std::sync::mpsc::Sender;
 use actix::prelude::*;
 use tokio::io::AsyncReadExt;
 use tokio::net::TcpStream;
-
+use util::{log_debug, log_error, log_info};
 use crate::actores::ypf::messages::*;
 use crate::actores::ypf::{YpfRuta, EmpresaConectada};
 
 
 pub async fn handle_stream_incoming(
     stream: TcpStream,
-    id: usize,
+    _id: usize,
     server_addr: Addr<YpfRuta>,
+    logger: Sender<Vec<u8>>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let (mut reader, writer) = stream.into_split();
 
@@ -24,23 +26,34 @@ pub async fn handle_stream_incoming(
             match IdentificarEmpresa::from_bytes(&mensaje) {
                 Ok(msg) => msg.id,
                 Err(e) => {
-                    println!("Error deserializando IdentificarEmpresa: {}", e);
+                    log_error!(
+                        logger,
+                        "Error deserializando IdentificarEmpresa: {}",
+                        e
+                    );
                     return Ok(());
                 }
             }
         }
         _ => {
-            println!(
-                "Opcode desconocido: 0x{:02x}, solo se conoce {}",
-                opcode, OPCODE_IDENTIFICAR_EMPRESA
+            log_error!(
+                logger,
+                "Opcode desconocido recibido al identificar empresa: 0x{:02x}",
+                opcode
             );
             return Ok(());
         }
     };
-    println!("[{}] empresa remota identificada como {}", id, id_remoto);
+    log_info!(
+        logger,
+        "Empresa remota identificada como {}",
+        id_remoto
+    );
+
+    let logger_clone = logger.clone();
 
     let server_addr_clone = server_addr.clone();
-    let empresa = EmpresaConectada::new(server_addr_clone, reader, writer, id_remoto).await;
+    let empresa = EmpresaConectada::new(server_addr_clone, reader, writer, id_remoto, logger_clone).await;
 
     let empresa_addr = empresa.start();
     server_addr.do_send(AgregarEmpresa {

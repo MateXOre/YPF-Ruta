@@ -1,11 +1,23 @@
-use actix::{Context, Handler};
+use actix::{AsyncContext, Context, Handler};
 use crate::actores::empresa::Empresa;
-use crate::actores::empresa::messages::ProcesarMensajeSocket;
+use crate::actores::empresa::messages::{
+    ProcesarMensajeSocket, 
+    deserialize_respuesta_ypfruta, 
+    RespuestaYpfRuta
+};
 
 impl Handler<ProcesarMensajeSocket> for Empresa {
     type Result = ();
-    fn handle(&mut self, msg: ProcesarMensajeSocket, _: &mut Context<Self>) {
+    fn handle(&mut self, msg: ProcesarMensajeSocket, ctx: &mut Context<Self>) {
         println!("[Empresa {}] Mensaje recibido del socket: {} bytes", self.id, msg.bytes.len());
-        // Aquí puedes procesar los bytes según tus necesidades
+        
+        match deserialize_respuesta_ypfruta(&msg.bytes) {
+            Ok(respuesta) => match respuesta {
+                RespuestaYpfRuta::ConfigurarLimite(m) => ctx.address().do_send(m),
+                RespuestaYpfRuta::ConfigurarLimiteGeneral(m) => ctx.address().do_send(m),
+                RespuestaYpfRuta::GastosEmpresa(m) => ctx.address().do_send(m),
+            },
+            Err(e) => eprintln!("[Empresa {}] Error deserializando respuesta: {}", self.id, e),
+        }
     }
 }

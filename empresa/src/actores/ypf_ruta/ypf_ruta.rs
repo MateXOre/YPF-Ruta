@@ -10,15 +10,10 @@ use crate::actores::empresa::{
     messages::{ProcesarMensajeSocket},
 };
 
-
-
-
 pub struct YpfRuta {
     pub empresa_local: Addr<Empresa>,
     pub socket_ypf_ruta: UnboundedSender<Vec<u8>>,
-    reader: Option<OwnedReadHalf>,
-    writer: Option<OwnedWriteHalf>,
-
+    reader: Option<OwnedReadHalf>
 }
 
 impl YpfRuta {
@@ -39,7 +34,6 @@ impl YpfRuta {
             empresa_local,
             socket_ypf_ruta: tx,
             reader: Some(reader),
-            writer: None,
         }
     }
 }
@@ -65,7 +59,7 @@ impl YpfRuta {
         empresa_local: Addr<Empresa>,
     ) -> tokio::task::JoinHandle<()> {
         tokio::spawn(async move {
-            let mut buf = vec![0; 1024];
+            let mut buf = vec![0; 8192];
 
             loop {
                 match reader.read(&mut buf).await {

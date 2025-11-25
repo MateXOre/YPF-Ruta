@@ -6,16 +6,16 @@
     "consumo_actual": 20542.0
   },
   {
-    "id": 2,
-    "empresa_id": 1,
-    "limite_particular": 30000,
-    "consumo_actual": 8000.0
-  },
-  {
     "id": 5,
     "empresa_id": 2,
     "limite_particular": 90000,
     "consumo_actual": 30000.0
+  },
+  {
+    "id": 3,
+    "empresa_id": 1,
+    "limite_particular": 100000,
+    "consumo_actual": 25000.0
   },
   {
     "id": 1,
@@ -36,9 +36,9 @@
     "consumo_actual": 20000.0
   },
   {
-    "id": 3,
+    "id": 2,
     "empresa_id": 1,
-    "limite_particular": 100000,
-    "consumo_actual": 25000.0
+    "limite_particular": 35000,
+    "consumo_actual": 8000.0
   }
 ]

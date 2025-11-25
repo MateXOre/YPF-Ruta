@@ -5,12 +5,16 @@ use crate::actores::gestor::messages::ValidarVenta;
 use crate::actores::peer::messages::VentaRegistrada;
 use crate::actores::peer::ypf_peer::YpfPeer;
 use crate::actores::ypf::messages::ConexionEntrante;
+use crate::actores::ypf::EmpresaConectada;
 use actix::ActorFutureExt;
 use actix::{Actor, Addr, AsyncContext, WrapFuture};
 use std::collections::{HashMap, VecDeque};
 use std::net::SocketAddr;
 use std::sync::mpsc::Sender;
 use util::logs::log_info;
+
+use crate::actores::ypf::io::incoming::handle_stream_incoming;
+
 use util::{
     log_debug, log_error,
     structs::venta::{EstadoVenta, Venta},
@@ -18,6 +22,7 @@ use util::{
 
 const DIRECCION_IP: &str = "127.0.0.1";
 const OFFSET_ESTACIONES: usize = 10000;
+const OFFSET_EMPRESAS: usize = 11000;
 
 pub struct YpfRuta {
     pub(crate) id: usize,
@@ -32,6 +37,7 @@ pub struct YpfRuta {
     pub(crate) gestor_addr: Addr<Gestor>,
     pub(crate) ventas_por_confirmar: VecDeque<(Addr<Estacion>, Solicitud)>,
     pub(crate) logger: Sender<Vec<u8>>,
+    pub(crate) empresas_activas: HashMap<usize, Addr<EmpresaConectada>>,
 }
 
 impl YpfRuta {
@@ -41,7 +47,7 @@ impl YpfRuta {
         lider: Option<usize>,
         peers: HashMap<usize, SocketAddr>,
         gestor_addr: Addr<Gestor>,
-        logger: Sender<Vec<u8>>,
+        logger: Sender<Vec<u8>>
     ) -> Self {
         let ypf_peers = HashMap::new();
         log_info!(logger, "YpfRuta {}: Creando instancia", id);
@@ -58,6 +64,7 @@ impl YpfRuta {
             gestor_addr,
             ventas_por_confirmar,
             logger,
+            empresas_activas: HashMap::new(),
         }
     }
 
@@ -383,6 +390,42 @@ impl YpfRuta {
             }
         });
     }
+
+    fn escuchar_empresas(&mut self, ctx: &mut actix::Context<Self>) {
+
+
+        let puerto = (self.puerto + OFFSET_EMPRESAS) as u16;
+        log_info!(
+            self.logger,
+            "YpfRuta {}: Escuchando conexiones entrantes de empresas en puerto {}",
+            self.id,
+            puerto
+        );
+        let self_id = self.id;
+        let self_addr = ctx.address().clone();
+        let logger = self.logger.clone();
+        ctx.spawn(
+            async move {
+                let listener = tokio::net::TcpListener::bind(("127.0.0.1", puerto))
+                    .await
+                    .unwrap();
+                loop {
+                    if let Ok((socket, peer_addr)) = listener.accept().await {
+                        log_info!(
+                            logger,
+                            "YpfRuta {}: Nueva conexión de empresa desde {:?}",
+                            self_id,
+                            peer_addr
+                        );
+                        handle_stream_incoming(socket, self_id, self_addr.clone()).await;
+                    }
+                }
+            }
+            .into_actor(self)
+            .map(|_, _, _| ()),
+        );
+    }
+
 }
 
 impl Actor for YpfRuta {
@@ -394,5 +437,6 @@ impl Actor for YpfRuta {
 
         self.escuchar_estaciones(ctx);
         self.procesar_ventas(ctx);
+        self.escuchar_empresas(ctx);
     }
 }

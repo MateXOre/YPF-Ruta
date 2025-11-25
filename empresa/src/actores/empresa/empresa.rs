@@ -2,6 +2,7 @@ use actix::prelude::*;
 use tokio::io::{self, AsyncBufReadExt, BufReader};
 use crate::actores::ypf_ruta::ypf_ruta::YpfRuta;
 use crate::actores::empresa::messages::{ConectadoAypfRuta, ResponderConsola};
+use crate::actores::empresa::io::outgoing::handle_stream_outgoing;
 
 const YPF_ADDRS: [&str; 3] = ["127.0.0.1:19080", "127.0.0.1:19081", "127.0.0.1:19082"];
 
@@ -22,12 +23,9 @@ impl Actor for Empresa {
     fn started(&mut self, ctx: &mut Self::Context) {
         let empresa_addr = ctx.address();
 
-        //
-        // 1. Conectarse a YPF Ruta
-        //
         actix_rt::spawn({
             let empresa_addr = empresa_addr.clone();
-
+            let id = self.id;
             async move {
                 for addr in YPF_ADDRS.iter() {
                     println!("Intentando conectarse a YpfRuta en {}", addr);
@@ -35,13 +33,7 @@ impl Actor for Empresa {
                         Ok(stream) => {
                             println!("Empresa conectada a YpfRuta en {}", addr);
 
-                            let (reader, writer) = stream.into_split();
-
-                            // crear actor YpfRuta
-                            let ypf_ruta = YpfRuta::new(empresa_addr.clone(), reader, writer).start();
-
-                            // avisar a la empresa que ya tenemos conexión
-                            empresa_addr.do_send(ConectadoAypfRuta { addr: ypf_ruta });
+                            handle_stream_outgoing(stream, id, empresa_addr.clone()).await;
                             break;
                         }
                         Err(e) => {

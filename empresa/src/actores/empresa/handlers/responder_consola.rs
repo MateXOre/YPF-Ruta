@@ -6,7 +6,7 @@ use crate::actores::ypf_ruta::messages::{Enviar, ConfigurarLimite, ConfigurarLim
 impl Handler<ResponderConsola> for Empresa {
     type Result = ();
     fn handle(&mut self, msg: ResponderConsola, _: &mut Context<Self>) {
-        let (operacion, parametros) = msg.linea.split_once(' ').unwrap();
+        let (operacion, parametros) = msg.linea.split_once(' ').unwrap_or((&msg.linea, ""));
         let parametros_de_operacion = parametros.split(',').collect::<Vec<&str>>();
 
         if let Some(ypf_ruta_addr) = &self.ypf_ruta_addr {
@@ -14,7 +14,7 @@ impl Handler<ResponderConsola> for Empresa {
                 "configurar_limite" => {
                     let id_tarjeta = parametros_de_operacion[0].parse::<usize>().unwrap();
                     let monto = parametros_de_operacion[1].parse::<f32>().unwrap();
-                    ypf_ruta_addr.do_send(Enviar{bytes: ConfigurarLimite { id_tarjeta, monto }.to_bytes()});
+                    ypf_ruta_addr.do_send(Enviar{bytes: ConfigurarLimite { id_tarjeta, id_empresa: self.id, monto }.to_bytes()});
                 }
                 "configurar_limite_general" => {
                     let monto = parametros_de_operacion[0].parse::<f32>().unwrap();

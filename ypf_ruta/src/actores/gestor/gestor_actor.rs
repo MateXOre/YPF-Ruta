@@ -131,6 +131,10 @@ impl Gestor {
     }
 
     pub fn crear_venta(&mut self, venta: Venta) {
+        if let Some(nueva_venta) = self.ventas.iter().find(|v| v.id_venta == venta.id_venta){
+            log_info!(self.logger, "Venta con ID {} ya procesada previamente", nueva_venta.id_venta);
+            return;
+        }
         if let Some(t) = self.tarjetas.get_mut(&venta.id_tarjeta) {
             t.consumo_actual += venta.monto;
             let empresa_id = t.empresa_id;
@@ -142,6 +146,10 @@ impl Gestor {
     }
 
     pub fn procesar_venta_internal(&mut self, venta: &Venta) -> bool {
+        if let Some(nueva_venta) = self.ventas.iter().find(|v| v.id_venta == venta.id_venta){
+            log_info!(self.logger, "Venta con ID {} ya procesada previamente", nueva_venta.id_venta);
+            return true;
+        }
         let tarjeta = match self.tarjetas.get(&venta.id_tarjeta) {
             Some(t) => t.clone(),
             None => {

@@ -19,6 +19,7 @@ impl Handler<LiberarClientesEnCola> for Estacion {
                 .or_default()
                 .push(venta);
         }
+        self.guardar_ventas_sin_informar();
         self.ventas_a_confirmar.clear();
         for surtidor in self.surtidores.values() {
             // avisamos a los surtidores que liberamos a los clientes

@@ -56,6 +56,7 @@ impl Handler<CobrarACliente> for Estacion {
                     .entry(msg.surtidor_id)
                     .or_default()
                     .push(venta);
+                self.guardar_ventas_sin_informar();
             }
         }
 

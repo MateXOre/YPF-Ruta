@@ -35,6 +35,7 @@ impl Handler<InformarVentasOffline> for Estacion {
                 }
             }
             self.ventas_por_informar = self.agregar_ventas_acumuladas(msg.ventas);
+            self.guardar_ventas_sin_informar();
         } else {
             println!(
                 "[{}] Soy no lider, y sigo ronda de informar ventas offline",
@@ -47,6 +48,7 @@ impl Handler<InformarVentasOffline> for Estacion {
                 println!("[{}] No tengo ventas acumuladas offline", self.id);
             } else {
                 self.ventas_por_informar.clear();
+                self.limpiar_ventas_sin_informar();
                 println!("[{}] Tengo ventas acumuladas offline", self.id);
             }
 

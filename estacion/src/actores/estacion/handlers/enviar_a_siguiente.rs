@@ -39,6 +39,7 @@ impl Handler<EnviarASiguiente> for Estacion {
                 );
                 let ventas_acumuladas = mensaje.ventas;
                 self.ventas_por_informar = self.agregar_ventas_acumuladas(ventas_acumuladas);
+                self.guardar_ventas_sin_informar();
                 return;
             }
         }

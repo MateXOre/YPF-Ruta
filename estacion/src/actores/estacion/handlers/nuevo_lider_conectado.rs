@@ -41,8 +41,8 @@ impl Handler<NuevoLiderConectado> for Estacion {
                     }
                 }
             }
-
             self.ventas_por_informar.clear();
+            self.limpiar_ventas_sin_informar();
 
             // como soy líder, no reenvío a ningún otro líder
             return;
@@ -67,5 +67,6 @@ impl Handler<NuevoLiderConectado> for Estacion {
             }
         }
         self.ventas_por_informar.clear();
+        self.limpiar_ventas_sin_informar();
     }
 }

@@ -295,7 +295,6 @@ pub struct EnviarVentasAgrupadas;
 
 impl InformarVenta {
     pub fn from_bytes(bytes: &[u8]) -> Result<Self, String> {
-        println!("descerializando Informar Venta");
         if bytes.is_empty() {
             return Err("Buffer vacío".to_string());
         }
@@ -305,19 +304,15 @@ impl InformarVenta {
 
         let mut offset = 1;
 
-        println!("descerializando Informar Venta: venta");
         // Leer venta
         let venta = read_venta(bytes, &mut offset)?;
 
-        println!("descerializando Informar Venta: id_surtidor");
         // Leer id_surtidor
         let id_surtidor = read_usize(bytes, &mut offset)?;
 
-        println!("descerializando Informar Venta: id_estacion");
         // Leer id_estacion
         let id_estacion = read_usize(bytes, &mut offset)?;
 
-        println!("descerializando Informar Venta finalizado");
 
         Ok(InformarVenta {
             venta,

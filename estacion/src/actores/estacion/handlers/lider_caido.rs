@@ -27,6 +27,8 @@ impl Handler<LiderCaido> for Estacion {
             .entry(msg.mensaje.id_surtidor)
             .or_default()
             .push(msg.mensaje.venta);
+        self.guardar_ventas_sin_informar();
+
 
         println!("[{}] Iniciando elección de nuevo líder", self.id);
 

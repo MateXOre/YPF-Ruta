@@ -15,6 +15,7 @@ use std::sync::{
     Arc,
 };
 use util::structs::venta::Venta;
+use crate::loader::estacion_loader::EstacionLoader;
 // Estructura para guardar información de una conexión
 // #[derive(Clone)]
 // pub struct ConexionEstacion {
@@ -44,7 +45,7 @@ pub struct Estacion {
 }
 
 impl Estacion {
-    pub const TIEMPO_INFORMAR_VENTAS_OFFLINE: u64 = 120;
+    pub const TIEMPO_INFORMAR_VENTAS_OFFLINE: u64 = 30;
 
     pub fn new(index_estacion: usize, estaciones: Vec<SocketAddr>) -> Self {
         let siguiente = if index_estacion + 1 < estaciones.len() {
@@ -179,6 +180,46 @@ impl Estacion {
         }
         ventas_acumuladas
     }
+
+
+    pub(crate) fn cargar_ventas_sin_informar(&mut self){
+        let ventas_sin_informar = EstacionLoader::new(self.id).load_ventas_sin_informar();
+        match ventas_sin_informar {
+            Ok(ventas_sin_informar) => {
+                self.ventas_por_informar = ventas_sin_informar;
+            }
+            Err(e) => {
+                eprintln!("Error al cargar ventas sin informar: {:?}", e);
+            }
+        }
+    }
+
+    pub(crate) fn guardar_ventas_sin_informar(&mut self) {
+        let ventas_sin_informar = EstacionLoader::new(self.id).save_ventas_sin_informar(&self.ventas_por_informar);
+        match ventas_sin_informar {
+            Ok(_) => {
+                println!("Ventas sin informar guardadas correctamente");
+            }
+            Err(e) => {
+                eprintln!("Error al guardar ventas sin informar: {:?}", e);
+            }
+        }
+    }
+
+    pub(crate) fn limpiar_ventas_sin_informar(&mut self) {
+        let ventas_sin_informar = EstacionLoader::new(self.id).clear_ventas_sin_informar();
+        match ventas_sin_informar {
+            Ok(_) => {
+                println!("Ventas sin informar limpiadas correctamente");
+            }
+            Err(e) => {
+                eprintln!("Error al limpiar ventas sin informar: {:?}", e);
+            }
+        }
+    }
+
+
+
 }
 
 impl Actor for Estacion {
@@ -199,6 +240,8 @@ impl Actor for Estacion {
             id,
             port + 1000
         );
+
+        self.cargar_ventas_sin_informar();
 
         // correr listener en background
         actix_rt::spawn(async move {

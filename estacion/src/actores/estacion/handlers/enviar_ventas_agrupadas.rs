@@ -54,6 +54,7 @@ impl Handler<EnviarVentasAgrupadas> for Estacion {
         );
 
         self.ventas_por_informar.clear(); // TODO: manejar caso de ypf caida en el medio
+        self.limpiar_ventas_sin_informar();
         self.temporizador_activo = false;
     }
 }

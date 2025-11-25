@@ -26,10 +26,7 @@ impl Handler<AgregarEstacion> for Estacion {
 
         if !self.primer_anillo_realizado {
             self.primer_anillo_realizado = true;
-            println!(
-                "[{}] Soy la última estación, iniciando ronda de mensajes",
-                self.id
-            );
+            println!("Iniciando ronda de mensajes de lider");
             let id_estacion = self.id;
             let mensaje = Eleccion {
                 aspirantes_ids: vec![id_estacion],

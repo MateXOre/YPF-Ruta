@@ -43,7 +43,6 @@ impl AddrLoader {
             };
             let addr = self.parse_line(&line)?;
             addresses.push(addr);
-            println!("Cargada estación {}", line_number - 1);
 
             line_number += 1;
             if line_number > (rango_maximo + 1) {

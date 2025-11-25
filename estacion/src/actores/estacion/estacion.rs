@@ -39,6 +39,8 @@ pub struct Estacion {
 }
 
 impl Estacion {
+    pub const DESPLAZAMIENTO_PUERTO_ESCUCHA_CLIENTES: u16 = 1000;
+    pub const DESPLAZAMIENTO_PUERTO_ESCUCHA_CAMBIO_LISTENER: u16 = 3000;
     pub const TIEMPO_INFORMAR_VENTAS_OFFLINE: u64 = 30;
     pub const MAX_ESTACIONES_REGISTRADAS: usize = 5;
 
@@ -90,16 +92,9 @@ impl Estacion {
         match TcpStream::connect(target).await {
             Ok(stream) => {
                 println!(
-                    "[{}] ✅ conectado a {} con dirección:{}",
+                    "[{}] conectado a {} con dirección:{}",
                     id, id_destino, target
                 );
-                println!(
-                    "[{}] ✅ conectado → local={} → remoto={}",
-                    id,
-                    stream.local_addr()?,
-                    stream.peer_addr()?
-                );
-
                 let addr_clone = actor_addr.clone();
                 if let Err(e) = handle_stream_outgoing(stream, id, addr_clone, id_destino).await {
                     eprintln!("[{}] error al manejar conexión con {}: {:?}", id, target, e);
@@ -107,7 +102,7 @@ impl Estacion {
                 Ok(())
             }
             Err(e) => {
-                eprintln!("[{}] ❌ no pudo conectar a {}: {}", id, target, e);
+                eprintln!("[{}] no pudo conectar a {}: {}", id, target, e);
                 Err(e)
             }
         }
@@ -213,19 +208,15 @@ impl Actor for Estacion {
         let addr_self_clone = addr_self.clone();
         let addr_self_clone_2 = addr_self.clone();
         println!(
-            "[{}] Soy la estacion {} la siguiente es la estacion {}",
-            id, id, self.siguiente_estacion
-        );
-        println!(
             "[{}] escuchando conexiones de clientes en 127.0.0.1:{}",
             id,
-            port + 1000
+            port + Estacion::DESPLAZAMIENTO_PUERTO_ESCUCHA_CLIENTES
         );
 
         self.cargar_ventas_sin_informar();
 
         actix_rt::spawn(async move {
-            let listener = TcpListener::bind(("127.0.0.1", port + 1000)).await.unwrap();
+            let listener = TcpListener::bind(("127.0.0.1", port + Estacion::DESPLAZAMIENTO_PUERTO_ESCUCHA_CLIENTES)).await.unwrap();
             loop {
                 match listener.accept().await {
                     Ok((stream, peer_addr)) => {
@@ -289,11 +280,11 @@ impl Actor for Estacion {
         println!(
             "[{}] escuchando conexiones para cambiar conexión listener en 127.0.0.1:{}",
             id,
-            port + 2000
+            port + Estacion::DESPLAZAMIENTO_PUERTO_ESCUCHA_CAMBIO_LISTENER
         );
 
         actix_rt::spawn(async move {
-            let listener = TcpListener::bind(("127.0.0.1", port + 2000)).await.unwrap();
+            let listener = TcpListener::bind(("127.0.0.1", port + Estacion::DESPLAZAMIENTO_PUERTO_ESCUCHA_CAMBIO_LISTENER)).await.unwrap();
             loop {
                 match listener.accept().await {
                     Ok((stream, peer_addr)) => {

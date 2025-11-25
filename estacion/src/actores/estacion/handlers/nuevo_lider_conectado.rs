@@ -10,10 +10,7 @@ impl Handler<NuevoLiderConectado> for Estacion {
     type Result = ();
 
     fn handle(&mut self, _msg: NuevoLiderConectado, ctx: &mut Self::Context) -> Self::Result {
-        println!(
-            "[{}] Nuevo líder conectado, Enviando ventas pendientes de confirmacion",
-            self.id,
-        );
+
 
         if self.lider_actual == Some(self.id) {
             println!(
@@ -38,7 +35,10 @@ impl Handler<NuevoLiderConectado> for Estacion {
             }
             return;
         }
-
+        println!(
+            "[{}] Nuevo líder conectado, Enviando ventas pendientes de confirmacion",
+            self.id,
+        );
         if let Some(ventas_pendientes) = self.ventas_por_informar.get(&self.id) {
             if let Some(lider) = self.buscar_estacion_lider() {
                 for (id_surtidor, ventas) in ventas_pendientes {

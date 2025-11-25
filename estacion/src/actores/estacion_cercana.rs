@@ -62,10 +62,6 @@ impl Handler<Enviar> for EstacionCercana {
     type Result = ();
 
     fn handle(&mut self, msg: Enviar, _ctx: &mut Context<Self>) {
-        println!(
-            "Enviando mensaje a la estación cercana {}",
-            self.estacion_id
-        );
         let buf = msg.bytes.clone();
         self.enviar_por_socket(buf);
     }
@@ -242,11 +238,6 @@ impl EstacionCercana {
                 },
                 Err(e) => eprintln!("(Procesar) Error deserializando: {}", e),
             }
-        } else {
-            println!(
-                "Enviamos mensaje al socket de la estación: {}",
-                self.estacion_id
-            );
         }
     }
 
@@ -257,7 +248,7 @@ impl EstacionCercana {
         estacion: Addr<EstacionCercana>,
     ) -> tokio::task::JoinHandle<()> {
         tokio::spawn(async move {
-            let mut buf = vec![0; 1024];
+            let mut buf = vec![0; 8192];
 
             loop {
                 match reader.read(&mut buf).await {

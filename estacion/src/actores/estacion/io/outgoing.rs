@@ -14,7 +14,6 @@ pub async fn handle_stream_outgoing(
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let _peer_addr = stream.peer_addr()?;
 
-    println!("Vamos a intentar establecer conexión de {}", id_destino);
     let server_addr_clone = server_addr.clone();
 
     let (reader, mut writer) = stream.into_split();

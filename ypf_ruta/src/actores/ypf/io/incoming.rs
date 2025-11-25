@@ -14,7 +14,6 @@ pub async fn handle_stream_incoming(
     let (mut reader, writer) = stream.into_split();
 
     let mut buf = [0u8; 128];
-    println!("HANDLE STREAM INCOMING, esperando identificacion");
     let bytes = reader.read(&mut buf).await?;
 
     let mensaje = buf[..bytes].to_vec();

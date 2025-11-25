@@ -12,7 +12,7 @@ impl Handler<NotificarLider> for Estacion {
     fn handle(&mut self, msg: NotificarLider, ctx: &mut Context<Self>) {
         if self.id == msg.id_iniciador && self.lider_actual == Some(msg.id_lider) {
             println!(
-                "[{}] 🔁 Mensaje de líder {} completó el ciclo, fin de propagación.",
+                "[{}] Mensaje de líder {} completó el ciclo, fin de propagación.",
                 self.id, msg.id_lider
             );
             return;
@@ -34,18 +34,8 @@ impl Handler<NotificarLider> for Estacion {
 
         if self.id != msg.id_lider {
             if self.estaciones_cercanas.contains_key(&msg.id_lider) {
-                println!(
-                    "[{}] Ya tengo conexión activa con el líder {}, no abro un nuevo socket.",
-                    self.id, msg.id_lider
-                );
-
                 ctx.address().do_send(NuevoLiderConectado);
             } else if let Some(lider_addr) = self.todas_las_estaciones.get(&msg.id_lider).copied() {
-                println!(
-                    "[{}] intentando conectarme al nuevo líder en {}...",
-                    self.id, lider_addr
-                );
-
                 let addr_self = ctx.address();
                 let self_id = self.id;
                 let nuevo_lider = msg.id_lider;

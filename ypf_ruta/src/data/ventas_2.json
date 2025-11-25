@@ -1,0 +1,90 @@
+[
+  {
+    "id_venta": 1,
+    "id_tarjeta": 1,
+    "id_estacion": 101,
+    "monto": 10000.0,
+    "offline": false,
+    "estado": "Confirmada"
+  },
+  {
+    "id_venta": 2,
+    "id_tarjeta": 2,
+    "id_estacion": 102,
+    "monto": 5000.0,
+    "offline": false,
+    "estado": "Confirmada"
+  },
+  {
+    "id_venta": 3,
+    "id_tarjeta": 3,
+    "id_estacion": 103,
+    "monto": 25000.0,
+    "offline": false,
+    "estado": "Confirmada"
+  },
+  {
+    "id_venta": 4,
+    "id_tarjeta": 4,
+    "id_estacion": 104,
+    "monto": 20000.0,
+    "offline": false,
+    "estado": "Confirmada"
+  },
+  {
+    "id_venta": 5,
+    "id_tarjeta": 5,
+    "id_estacion": 105,
+    "monto": 30000.0,
+    "offline": false,
+    "estado": "Confirmada"
+  },
+  {
+    "id_venta": 6,
+    "id_tarjeta": 6,
+    "id_estacion": 106,
+    "monto": 15000.0,
+    "offline": false,
+    "estado": "Confirmada"
+  },
+  {
+    "id_venta": 7,
+    "id_tarjeta": 7,
+    "id_estacion": 107,
+    "monto": 20000.0,
+    "offline": false,
+    "estado": "Confirmada"
+  },
+  {
+    "id_venta": 100,
+    "id_tarjeta": 1,
+    "id_estacion": 999,
+    "monto": 5000.0,
+    "offline": false,
+    "estado": "Pendiente"
+  },
+  {
+    "id_venta": 101,
+    "id_tarjeta": 2,
+    "id_estacion": 999,
+    "monto": 3000.0,
+    "offline": false,
+    "estado": "Pendiente"
+  },
+  {
+    "id_venta": 0,
+    "id_tarjeta": 4,
+    "id_estacion": 1,
+    "monto": 542.0,
+    "offline": false,
+    "estado": "Pendiente"
+  },
+  {
+    "id_venta": 1764095422258,
+    "id_tarjeta": 1,
+    "id_estacion": 0,
+    "monto": 67.0,
+    "offline": false,
+    "estado": "Confirmada"
+  }
+]

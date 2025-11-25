@@ -1,0 +1,4 @@
+[workspace]
+
+members = [ "empresa", "estacion", "util", "ypf_ruta", "tests_integracion"]
+resolver = "2"

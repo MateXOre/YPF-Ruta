@@ -1,0 +1,107 @@
+Hello, world!
+Loading file 3
+YpfRuta 3: Creando instancia.
+Gestor actor iniciado
+YpfRuta 3 iniciado en el puerto 8082.
+YpfRuta 3: Intentando conectar a peers...
+YpfRuta 3: Escuchando conexiones entrantes de peers...
+YpfRuta 3: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...
+YpfRuta 3: Listener de estaciones activo en puerto 18082
+YpfRuta 3: Peer 2 iniciado.
+Conectado exitosamente al YpfPeer 1 en 127.0.0.1:8080
+YpfPeer 2 iniciado.
+YpfRuta 3: Peer 1 iniciado.
+YpfPeer 1 iniciado.
+YpfPeer 1: Iniciando ping loop...
+YpfRuta 3: Socket del peer 1 está listo
+YpfRuta 3: Enviando NuevoLider al peer 1 (socket listo)
+YpfPeer 1: Recibido nuevo líder: 3
+YpfPeer 1: Enviando nuevo líder al socket: byte[0] = 52
+YpfPeer 1: Iniciando tarea de escritura del socket...
+YpfPeer 1: Tarea de escritura del socket iniciada, hay 1 por enviar
+YpfPeer 1: Enviando byte[0] al socket: 52
+YpfPeer 1: Iniciando tarea de lectura del socket...
+YpfRuta 3: Línea recibida del socket entrante: 
+YpfRuta 3: Formato de mensaje inválido: 
+YpfRuta 3: Línea recibida del socket entrante: ID_LOCAL:2
+YpfRuta 3: Conexión entrante del peer 2
+YpfRuta 3: Peer 2 ya existe, enviando socket
+YpfPeer 2: Guardando socket entrante...
+YpfPeer 2: Iniciando ping loop...
+Socket guardado exitosamente para YpfPeer 2
+YpfRuta 3: Socket del peer 2 está listo
+YpfRuta 3: Enviando NuevoLider al peer 2 (socket listo)
+YpfPeer 2: Recibido nuevo líder: 3
+YpfPeer 2: Enviando nuevo líder al socket: byte[0] = 52
+YpfPeer 2: Iniciando tarea de escritura del socket...
+YpfPeer 2: Tarea de escritura del socket iniciada, hay 1 por enviar
+YpfPeer 2: Enviando byte[0] al socket: 52
+YpfPeer 2: Iniciando tarea de lectura del socket...
+Gestor: estado persistido periódicamente
+YpfPeer 1: PING enviado.
+YpfPeer 1: Enviando byte[0] al socket: 48
+YpfPeer 1: Línea recibida del socket (2 bytes): "0\n"
+Byte 0 recibido: 48
+YpfPeer 1: Ping recibido.
+YpfPeer 1: Pong enviado exitosamente
+YpfPeer 1: Enviando byte[0] al socket: 49
+YpfPeer 1: Línea recibida del socket (2 bytes): "1\n"
+Byte 0 recibido: 49
+YpfPeer 1: Pong recibido.
+YpfPeer 2: PING enviado.
+YpfPeer 2: Enviando byte[0] al socket: 48
+YpfPeer 2: Línea recibida del socket (2 bytes): "0\n"
+Byte 0 recibido: 48
+YpfPeer 2: Ping recibido.
+YpfPeer 2: Pong enviado exitosamente
+YpfPeer 2: Enviando byte[0] al socket: 49
+YpfPeer 2: Línea recibida del socket (2 bytes): "1\n"
+Byte 0 recibido: 49
+YpfPeer 2: Pong recibido.
+YpfRuta 3: Nueva conexión de estación desde 127.0.0.1:33830
+YpfRuta 3: Actor de Estacion creado para 127.0.0.1:33830
+Estacion actor iniciado.
+Estacion: envié ValidarVentas a YpfRuta.
+YpfRuta 3: Recibidas 1 ventas para validar
+YpfRuta 3: Ventas agregadas a la cola. Total en cola: 1
+YpfRuta 3: Procesando 1 ventas de la cola
+YpfRuta 3: Validando venta 100 en el gestor
+YpfRuta 3: Venta 100 - Resultado: true
+YpfRuta 3: Validando venta 101 en el gestor
+YpfRuta 3: Venta 101 - Resultado: true
+YpfRuta 3: Replicando venta 100 a 2 peers
+YpfRuta 3: Replicando venta 101 a 2 peers
+Estacion: recibí ResultadoVentas
+YpfPeer: encolando venta registrada
+YpfPeer: encolando venta registrada
+YpfPeer: encolando venta registrada
+YpfPeer: encolando venta registrada
+YpfPeer 2: Enviando byte[0] al socket: 53
+YpfPeer 2: Enviando byte[0] al socket: 53
+YpfPeer 1: Enviando byte[0] al socket: 53
+YpfPeer 1: Enviando byte[0] al socket: 53
+Gestor: estado persistido periódicamente
+YpfPeer 1: PING enviado.
+YpfPeer 1: Línea recibida del socket (2 bytes): "0\n"
+YpfPeer 1: Enviando byte[0] al socket: 48
+Byte 0 recibido: 48
+YpfPeer 1: Ping recibido.
+YpfPeer 1: Pong enviado exitosamente
+YpfPeer 1: Enviando byte[0] al socket: 49
+YpfPeer 1: Línea recibida del socket (2 bytes): "1\n"
+Byte 0 recibido: 49
+YpfPeer 1: Pong recibido.
+YpfPeer 2: PING enviado.
+YpfPeer 2: Enviando byte[0] al socket: 48
+YpfPeer 2: Línea recibida del socket (2 bytes): "0\n"
+Byte 0 recibido: 48
+YpfPeer 2: Ping recibido.
+YpfPeer 2: Pong enviado exitosamente
+YpfPeer 2: Enviando byte[0] al socket: 49
+YpfPeer 2: Línea recibida del socket (2 bytes): "1\n"
+Byte 0 recibido: 49
+YpfPeer 2: Pong recibido.
+YpfPeer 2: Conexión cerrada por el peer remoto.
+YpfRuta 3: Peer 2 desconectado.
+YpfPeer 1: Conexión cerrada por el peer remoto.
+YpfRuta 3: Peer 1 desconectado.

@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "empresa_id": 1,
+    "limite_particular": 50000,
+    "consumo_actual": 24667.0
+  },
+  {
+    "id": 7,
+    "empresa_id": 3,
+    "limite_particular": 70000,
+    "consumo_actual": 70000.0
+  },
+  {
+    "id": 5,
+    "empresa_id": 2,
+    "limite_particular": 90000,
+    "consumo_actual": 32000.0
+  },
+  {
+    "id": 3,
+    "empresa_id": 1,
+    "limite_particular": 100000,
+    "consumo_actual": 25000.0
+  },
+  {
+    "id": 2,
+    "empresa_id": 1,
+    "limite_particular": 30000,
+    "consumo_actual": 30000.0
+  },
+  {
+    "id": 6,
+    "empresa_id": 3,
+    "limite_particular": 60000,
+    "consumo_actual": 15000.0
+  },
+  {
+    "id": 4,
+    "empresa_id": 2,
+    "limite_particular": 80000,
+    "consumo_actual": 80000.0
+  }
+]

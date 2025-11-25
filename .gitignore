@@ -1,0 +1,19 @@
+# Output de Cargo build
+/target
+*/target
+
+# Archivos Cargo
+Cargo.lock
+
+# Directorios y archivos del editor
+/.idea
+/.vscode/
+*.swp
+*~
+
+# Archivos temporales
+/tmp
+borrador.txt
+TP.pdf
+/estacion/storage
+/ypf_ruta/src/data

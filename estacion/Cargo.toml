@@ -1,0 +1,15 @@
+[package]
+name = "estacion"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix = "0.13"
+tokio = { version = "1.39", features = ["full"] }
+tokio-util = "0.7"
+futures = "0.3"
+actix-rt = "2.11.0"
+util = { path = "../util" }
+rand = "0.10.0-rc.5"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0"

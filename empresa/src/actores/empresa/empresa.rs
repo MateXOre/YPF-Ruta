@@ -1,6 +1,6 @@
-use actix::prelude::*;
-use crate::actores::ypf_ruta::ypf_ruta::YpfRuta;
 use crate::actores::empresa::io::outgoing::handle_stream_outgoing;
+use crate::actores::ypf_ruta::ypf_ruta::YpfRuta;
+use actix::prelude::*;
 
 const YPF_ADDRS: [&str; 3] = ["127.0.0.1:19080", "127.0.0.1:19081", "127.0.0.1:19082"];
 
@@ -11,7 +11,10 @@ pub struct Empresa {
 
 impl Empresa {
     pub fn new(id: usize) -> Self {
-        Self { id, ypf_ruta_addr: None }
+        Self {
+            id,
+            ypf_ruta_addr: None,
+        }
     }
 }
 
@@ -37,11 +40,9 @@ impl Actor for Empresa {
                         Err(e) => {
                             eprintln!("No se pudo conectar a {}: {}", addr, e);
                         }
-                    } 
+                    }
                 }
             }
         });
-
-
     }
 }

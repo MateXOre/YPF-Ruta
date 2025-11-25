@@ -1,6 +1,6 @@
-use crate::actores::ypf::messages::ProcesarMensajeEmpresa;
 use crate::actores::ypf::YpfRuta;
-use crate::actores::ypf::messages::{deserialize_message, MessageType};
+use crate::actores::ypf::messages::ProcesarMensajeEmpresa;
+use crate::actores::ypf::messages::{MessageType, deserialize_message};
 use actix::prelude::*;
 
 impl Handler<ProcesarMensajeEmpresa> for YpfRuta {

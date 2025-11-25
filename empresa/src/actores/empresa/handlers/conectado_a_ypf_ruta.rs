@@ -1,8 +1,8 @@
+use crate::actores::empresa::messages::{ConectadoAypfRuta, ResponderConsola};
+use crate::actores::empresa::Empresa;
 use actix::{AsyncContext, Context, Handler};
 use tokio::io;
 use tokio::io::{AsyncBufReadExt, BufReader};
-use crate::actores::empresa::Empresa;
-use crate::actores::empresa::messages::{ConectadoAypfRuta, ResponderConsola};
 
 impl Handler<ConectadoAypfRuta> for Empresa {
     type Result = ();

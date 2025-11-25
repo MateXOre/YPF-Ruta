@@ -4,8 +4,8 @@ use crate::actores::gestor::gestor_actor::Gestor;
 use crate::actores::gestor::messages::ValidarVenta;
 use crate::actores::peer::messages::VentaRegistrada;
 use crate::actores::peer::ypf_peer::YpfPeer;
-use crate::actores::ypf::messages::ConexionEntrante;
 use crate::actores::ypf::EmpresaConectada;
+use crate::actores::ypf::messages::ConexionEntrante;
 use actix::ActorFutureExt;
 use actix::{Actor, Addr, AsyncContext, WrapFuture};
 use std::collections::{HashMap, VecDeque};
@@ -47,7 +47,7 @@ impl YpfRuta {
         lider: Option<usize>,
         peers: HashMap<usize, SocketAddr>,
         gestor_addr: Addr<Gestor>,
-        logger: Sender<Vec<u8>>
+        logger: Sender<Vec<u8>>,
     ) -> Self {
         let ypf_peers = HashMap::new();
         log_info!(logger, "YpfRuta {}: Creando instancia", id);
@@ -404,7 +404,6 @@ impl YpfRuta {
             return;
         }
 
-
         let puerto = (self.puerto + OFFSET_EMPRESAS) as u16;
         log_info!(
             self.logger,
@@ -428,7 +427,13 @@ impl YpfRuta {
                             self_id,
                             peer_addr
                         );
-                        let _ = handle_stream_incoming(socket, self_id, self_addr.clone(), logger.clone()).await;
+                        let _ = handle_stream_incoming(
+                            socket,
+                            self_id,
+                            self_addr.clone(),
+                            logger.clone(),
+                        )
+                        .await;
                     }
                 }
             }
@@ -436,7 +441,6 @@ impl YpfRuta {
             .map(|_, _, _| ()),
         );
     }
-
 }
 
 impl Actor for YpfRuta {

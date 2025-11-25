@@ -1,6 +1,6 @@
-use crate::actores::ypf::YpfRuta;
-use crate::actores::ypf::messages::{GastosEmpresa, EnviarBytesEmpresa};
 use crate::actores::gestor::messages::ConsultarEstado;
+use crate::actores::ypf::YpfRuta;
+use crate::actores::ypf::messages::{EnviarBytesEmpresa, GastosEmpresa};
 use actix::{AsyncContext, Context, Handler};
 use util::log_info;
 
@@ -14,13 +14,13 @@ impl Handler<GastosEmpresa> for YpfRuta {
             self.id,
             msg.id_empresa
         );
-        
+
         let gestor_addr = self.gestor_addr.clone();
         let logger = self.logger.clone();
         let ypf_ruta_id = self.id;
         let ypf_ruta_addr = ctx.address();
         let empresa_id = msg.id_empresa;
-        
+
         // Enviar al gestor para consultar el estado
         actix::spawn(async move {
             let respuesta = match gestor_addr.send(ConsultarEstado(empresa_id)).await {
@@ -40,7 +40,7 @@ impl Handler<GastosEmpresa> for YpfRuta {
                         empresa,
                         tarjetas
                     );
-                    
+
                     serde_json::json!({
                         "tipo": "GastosEmpresa",
                         "exito": true,
@@ -49,7 +49,10 @@ impl Handler<GastosEmpresa> for YpfRuta {
                     })
                 }
                 Ok(None) => {
-                    eprintln!("YpfRuta {}: Empresa {} no encontrada", ypf_ruta_id, empresa_id);
+                    eprintln!(
+                        "YpfRuta {}: Empresa {} no encontrada",
+                        ypf_ruta_id, empresa_id
+                    );
                     serde_json::json!({
                         "tipo": "GastosEmpresa",
                         "exito": false,
@@ -57,7 +60,10 @@ impl Handler<GastosEmpresa> for YpfRuta {
                     })
                 }
                 Err(e) => {
-                    eprintln!("YpfRuta {}: Error consultando estado de empresa {}: {}", ypf_ruta_id, empresa_id, e);
+                    eprintln!(
+                        "YpfRuta {}: Error consultando estado de empresa {}: {}",
+                        ypf_ruta_id, empresa_id, e
+                    );
                     serde_json::json!({
                         "tipo": "GastosEmpresa",
                         "exito": false,
@@ -65,15 +71,11 @@ impl Handler<GastosEmpresa> for YpfRuta {
                     })
                 }
             };
-            
+
             // Enviar respuesta a la empresa
             if let Ok(bytes) = serde_json::to_vec(&respuesta) {
-                ypf_ruta_addr.do_send(EnviarBytesEmpresa {
-                    empresa_id,
-                    bytes,
-                });
+                ypf_ruta_addr.do_send(EnviarBytesEmpresa { empresa_id, bytes });
             }
         });
     }
 }
-

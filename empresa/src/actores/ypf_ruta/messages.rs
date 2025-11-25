@@ -1,5 +1,5 @@
-use actix::{Context, Handler, Message};
 use crate::actores::ypf_ruta::ypf_ruta::YpfRuta;
+use actix::{Context, Handler, Message};
 
 // ===== Opcodes del protocolo =====
 const OPCODE_CONFIGURAR_LIMITE: u8 = 0x10;
@@ -29,9 +29,7 @@ impl Handler<Enviar> for YpfRuta {
     type Result = ();
 
     fn handle(&mut self, msg: Enviar, _ctx: &mut Context<Self>) {
-        println!(
-            "Enviando mensaje a YPF Ruta",
-        );
+        println!("Enviando mensaje a YPF Ruta",);
         let buf = msg.bytes.clone();
         self.enviar_por_socket(buf);
     }

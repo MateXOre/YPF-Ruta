@@ -1,6 +1,6 @@
-use actix::{Message, Addr};
-use tokio::net::TcpStream;
 use crate::actores::ypf::EmpresaConectada;
+use actix::{Addr, Message};
+use tokio::net::TcpStream;
 
 #[derive(Message)]
 #[rtype(result = "()")]
@@ -83,7 +83,6 @@ const OPCODE_CONFIGURAR_LIMITE: u8 = 0x10;
 const OPCODE_CONFIGURAR_LIMITE_GENERAL: u8 = 0x11;
 const OPCODE_GASTOS_EMPRESA: u8 = 0x12;
 
-
 #[derive(Message)]
 #[rtype(result = "()")]
 pub struct AgregarEmpresa {
@@ -97,7 +96,6 @@ pub struct EnviarBytesEmpresa {
     pub empresa_id: usize,
     pub bytes: Vec<u8>,
 }
-
 
 pub struct IdentificarEmpresa {
     pub id: usize,
@@ -132,7 +130,6 @@ fn read_u64(buf: &[u8], offset: &mut usize) -> Result<u64, String> {
         bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], bytes[6], bytes[7],
     ]))
 }
-
 
 fn read_f32(buf: &[u8], offset: &mut usize) -> Result<f32, String> {
     if *offset + 4 > buf.len() {
@@ -169,7 +166,11 @@ impl ConfigurarLimite {
         let id_tarjeta = read_usize(bytes, &mut offset)?;
         let id_empresa = read_usize(bytes, &mut offset)?;
         let monto = read_f32(bytes, &mut offset)?;
-        Ok(ConfigurarLimite { id_tarjeta, id_empresa, monto })
+        Ok(ConfigurarLimite {
+            id_tarjeta,
+            id_empresa,
+            monto,
+        })
     }
 }
 
@@ -229,12 +230,13 @@ pub fn deserialize_message(bytes: &[u8]) -> Result<MessageType, String> {
     }
     let opcode = bytes[0];
     match opcode {
-        OPCODE_CONFIGURAR_LIMITE => ConfigurarLimite::from_bytes(bytes).map(MessageType::ConfigurarLimite),
-        OPCODE_CONFIGURAR_LIMITE_GENERAL => ConfigurarLimiteGeneral::from_bytes(bytes).map(MessageType::ConfigurarLimiteGeneral),
+        OPCODE_CONFIGURAR_LIMITE => {
+            ConfigurarLimite::from_bytes(bytes).map(MessageType::ConfigurarLimite)
+        }
+        OPCODE_CONFIGURAR_LIMITE_GENERAL => {
+            ConfigurarLimiteGeneral::from_bytes(bytes).map(MessageType::ConfigurarLimiteGeneral)
+        }
         OPCODE_GASTOS_EMPRESA => GastosEmpresa::from_bytes(bytes).map(MessageType::GastosEmpresa),
         _ => Err(format!("Opcode desconocido: 0x{:02x}", opcode)),
     }
 }
-
-
-

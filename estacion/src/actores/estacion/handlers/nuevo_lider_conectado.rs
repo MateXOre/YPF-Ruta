@@ -10,8 +10,6 @@ impl Handler<NuevoLiderConectado> for Estacion {
     type Result = ();
 
     fn handle(&mut self, _msg: NuevoLiderConectado, ctx: &mut Self::Context) -> Self::Result {
-
-
         if self.lider_actual == Some(self.id) {
             println!(
                 "[{}] Soy el líder actual, me envio a mi mismo las ventas pendientes de confirmacion",

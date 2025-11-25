@@ -216,7 +216,12 @@ impl Actor for Estacion {
         self.cargar_ventas_sin_informar();
 
         actix_rt::spawn(async move {
-            let listener = TcpListener::bind(("127.0.0.1", port + Estacion::DESPLAZAMIENTO_PUERTO_ESCUCHA_CLIENTES)).await.unwrap();
+            let listener = TcpListener::bind((
+                "127.0.0.1",
+                port + Estacion::DESPLAZAMIENTO_PUERTO_ESCUCHA_CLIENTES,
+            ))
+            .await
+            .unwrap();
             loop {
                 match listener.accept().await {
                     Ok((stream, peer_addr)) => {
@@ -284,7 +289,12 @@ impl Actor for Estacion {
         );
 
         actix_rt::spawn(async move {
-            let listener = TcpListener::bind(("127.0.0.1", port + Estacion::DESPLAZAMIENTO_PUERTO_ESCUCHA_CAMBIO_LISTENER)).await.unwrap();
+            let listener = TcpListener::bind((
+                "127.0.0.1",
+                port + Estacion::DESPLAZAMIENTO_PUERTO_ESCUCHA_CAMBIO_LISTENER,
+            ))
+            .await
+            .unwrap();
             loop {
                 match listener.accept().await {
                     Ok((stream, peer_addr)) => {

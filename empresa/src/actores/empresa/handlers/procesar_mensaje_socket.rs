@@ -1,10 +1,8 @@
-use actix::{AsyncContext, Context, Handler};
-use crate::actores::empresa::Empresa;
 use crate::actores::empresa::messages::{
-    ProcesarMensajeSocket, 
-    deserialize_respuesta_ypfruta, 
-    RespuestaYpfRuta
+    deserialize_respuesta_ypfruta, ProcesarMensajeSocket, RespuestaYpfRuta,
 };
+use crate::actores::empresa::Empresa;
+use actix::{AsyncContext, Context, Handler};
 
 impl Handler<ProcesarMensajeSocket> for Empresa {
     type Result = ();
@@ -15,7 +13,10 @@ impl Handler<ProcesarMensajeSocket> for Empresa {
                 RespuestaYpfRuta::ConfigurarLimiteGeneral(m) => ctx.address().do_send(m),
                 RespuestaYpfRuta::GastosEmpresa(m) => ctx.address().do_send(m),
             },
-            Err(e) => eprintln!("[Empresa {}] Error deserializando respuesta: {}", self.id, e),
+            Err(e) => eprintln!(
+                "[Empresa {}] Error deserializando respuesta: {}",
+                self.id, e
+            ),
         }
     }
 }

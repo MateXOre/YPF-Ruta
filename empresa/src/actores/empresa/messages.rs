@@ -1,5 +1,5 @@
-use actix::{Addr, Message};
 use crate::actores::ypf_ruta::YpfRuta;
+use actix::{Addr, Message};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -11,11 +11,9 @@ fn write_u64(buf: &mut Vec<u8>, value: u64) {
     buf.extend_from_slice(&value.to_le_bytes());
 }
 
-
 fn write_usize(buf: &mut Vec<u8>, value: usize) {
     write_u64(buf, value as u64);
 }
-
 
 // Mensaje para procesar entrada de consola
 #[derive(Message)]
@@ -32,7 +30,7 @@ pub struct ProcesarMensajeSocket {
 }
 
 #[derive(Message)]
-#[rtype(result="()")]
+#[rtype(result = "()")]
 pub struct ConectadoAypfRuta {
     pub addr: Addr<YpfRuta>,
 }
@@ -91,10 +89,11 @@ pub enum RespuestaYpfRuta {
 
 /// Deserializa bytes JSON a un tipo de respuesta de YpfRuta
 pub fn deserialize_respuesta_ypfruta(bytes: &[u8]) -> Result<RespuestaYpfRuta, String> {
-    let json: Value = serde_json::from_slice(bytes)
-        .map_err(|e| format!("Error parseando JSON: {}", e))?;
+    let json: Value =
+        serde_json::from_slice(bytes).map_err(|e| format!("Error parseando JSON: {}", e))?;
 
-    let tipo = json.get("tipo")
+    let tipo = json
+        .get("tipo")
         .and_then(|v| v.as_str())
         .ok_or_else(|| "Campo 'tipo' no encontrado o invÃ¡lido".to_string())?;
 
@@ -102,7 +101,11 @@ pub fn deserialize_respuesta_ypfruta(bytes: &[u8]) -> Result<RespuestaYpfRuta, S
         "ConfigurarLimite" => {
             let respuesta = RespuestaConfigurarLimite {
                 exito: json.get("exito").and_then(|v| v.as_bool()).unwrap_or(false),
-                mensaje: json.get("mensaje").and_then(|v| v.as_str()).unwrap_or("").to_string(),
+                mensaje: json
+                    .get("mensaje")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string(),
                 id_tarjeta: json.get("id_tarjeta").and_then(|v| v.as_u64()).unwrap_or(0) as usize,
                 id_empresa: json.get("id_empresa").and_then(|v| v.as_u64()).unwrap_or(0) as usize,
             };
@@ -111,7 +114,11 @@ pub fn deserialize_respuesta_ypfruta(bytes: &[u8]) -> Result<RespuestaYpfRuta, S
         "ConfigurarLimiteGeneral" => {
             let respuesta = RespuestaConfigurarLimiteGeneral {
                 exito: json.get("exito").and_then(|v| v.as_bool()).unwrap_or(false),
-                mensaje: json.get("mensaje").and_then(|v| v.as_str()).unwrap_or("").to_string(),
+                mensaje: json
+                    .get("mensaje")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_string(),
                 id_empresa: json.get("id_empresa").and_then(|v| v.as_u64()).unwrap_or(0) as usize,
             };
             Ok(RespuestaYpfRuta::ConfigurarLimiteGeneral(respuesta))
@@ -119,7 +126,10 @@ pub fn deserialize_respuesta_ypfruta(bytes: &[u8]) -> Result<RespuestaYpfRuta, S
         "GastosEmpresa" => {
             let respuesta = RespuestaGastosEmpresa {
                 exito: json.get("exito").and_then(|v| v.as_bool()).unwrap_or(false),
-                mensaje: json.get("mensaje").and_then(|v| v.as_str()).map(|s| s.to_string()),
+                mensaje: json
+                    .get("mensaje")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string()),
                 empresa: json.get("empresa").cloned(),
                 tarjetas: json.get("tarjetas").cloned(),
             };
@@ -128,4 +138,3 @@ pub fn deserialize_respuesta_ypfruta(bytes: &[u8]) -> Result<RespuestaYpfRuta, S
         _ => Err(format!("Tipo de mensaje desconocido: {}", tipo)),
     }
 }
-

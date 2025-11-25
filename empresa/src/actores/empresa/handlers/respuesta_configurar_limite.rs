@@ -1,6 +1,6 @@
-use actix::{Context, Handler};
-use crate::actores::empresa::Empresa;
 use crate::actores::empresa::messages::RespuestaConfigurarLimite;
+use crate::actores::empresa::Empresa;
+use actix::{Context, Handler};
 
 impl Handler<RespuestaConfigurarLimite> for Empresa {
     type Result = ();
@@ -19,4 +19,3 @@ impl Handler<RespuestaConfigurarLimite> for Empresa {
         }
     }
 }
-

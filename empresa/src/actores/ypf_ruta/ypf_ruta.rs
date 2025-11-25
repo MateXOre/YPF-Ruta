@@ -1,22 +1,24 @@
+use crate::actores::empresa::Empresa;
 use actix::{Actor, Addr, Context};
 use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
 use tokio::net::tcp::{OwnedReadHalf, OwnedWriteHalf};
 use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
-use crate::actores::empresa::{Empresa};
 
-use crate::actores::empresa::{
-    messages::{ProcesarMensajeSocket},
-};
+use crate::actores::empresa::messages::ProcesarMensajeSocket;
 
 pub struct YpfRuta {
     pub empresa_local: Addr<Empresa>,
     pub socket_ypf_ruta: UnboundedSender<Vec<u8>>,
-    reader: Option<OwnedReadHalf>
+    reader: Option<OwnedReadHalf>,
 }
 
 impl YpfRuta {
-    pub fn new(empresa_local: Addr<Empresa>, reader: OwnedReadHalf, mut writer: OwnedWriteHalf) -> Self {
+    pub fn new(
+        empresa_local: Addr<Empresa>,
+        reader: OwnedReadHalf,
+        mut writer: OwnedWriteHalf,
+    ) -> Self {
         let (tx, mut rx) = unbounded_channel::<Vec<u8>>();
 
         tokio::spawn(async move {
@@ -41,13 +43,9 @@ impl Actor for YpfRuta {
     type Context = Context<Self>;
 
     fn started(&mut self, _ctx: &mut Self::Context) {
-
         let reader = self.reader.take().expect("reader debería estar");
 
-        YpfRuta::read_from_socket(
-            reader,
-            self.empresa_local.clone(),
-        );
+        YpfRuta::read_from_socket(reader, self.empresa_local.clone());
     }
 }
 
@@ -63,15 +61,10 @@ impl YpfRuta {
                 match reader.read(&mut buf).await {
                     Ok(bytes) => {
                         if bytes == 0 {
-                            println!(
-                                "Reader detectó fin de conexión (0 bytes)",
-                            );
+                            println!("Reader detectó fin de conexión (0 bytes)",);
                             return;
                         }
-                        println!(
-                            "Recibimos mensaje del socket: {} bytes",
-                            bytes
-                        );
+                        println!("Recibimos mensaje del socket: {} bytes", bytes);
 
                         empresa_local.do_send(ProcesarMensajeSocket {
                             bytes: buf[..bytes].to_vec(),
@@ -86,17 +79,11 @@ impl YpfRuta {
         })
     }
 
-
     pub fn enviar_por_socket(&mut self, buf: Vec<u8>) {
         if let Err(e) = self.socket_ypf_ruta.send(buf.clone()) {
-            println!(
-                "Error al enviar mensaje al socket de YPF Ruta: {}",
-                e
-            );
+            println!("Error al enviar mensaje al socket de YPF Ruta: {}", e);
         } else {
-            println!(
-                "Enviamos mensaje al socket de YPF Ruta",
-            )
+            println!("Enviamos mensaje al socket de YPF Ruta",)
         }
     }
 }

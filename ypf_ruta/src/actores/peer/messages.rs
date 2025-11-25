@@ -21,7 +21,6 @@ impl Eleccion {
             return Eleccion(0);
         }
 
-        // Extraer los bytes del ID (desde posición 2 hasta el final, sin el \n)
         let id_bytes = if bytes[bytes.len() - 1] == b'\n' {
             &bytes[2..bytes.len() - 1]
         } else {
@@ -53,7 +52,6 @@ impl Eleccion {
     }
 }
 
-// Respuesta OK a una elección (usado en algoritmo Bully)
 #[derive(Message)]
 #[rtype(result = "()")]
 pub struct EleccionOk(pub(crate) usize);
@@ -69,7 +67,6 @@ impl EleccionOk {
             return EleccionOk(0);
         }
 
-        // Extraer los bytes del ID (desde posición 2 hasta el final, sin el \n)
         let id_bytes = if bytes[bytes.len() - 1] == b'\n' {
             &bytes[2..bytes.len() - 1]
         } else {
@@ -109,7 +106,6 @@ pub struct VentaRegistrada {
 
 impl VentaRegistrada {
     pub fn from_bytes(bytes: &[u8]) -> Self {
-        // Formato: b'5' + JSON de Venta + b'\n'
         if bytes.len() < 3 || bytes[0] != b'5' {
             println!("Error: formato incorrecto para VentaRegistrada (falta prefijo b'5')");
             return VentaRegistrada {
@@ -124,14 +120,12 @@ impl VentaRegistrada {
             };
         }
 
-        // Extraer el JSON (desde posición 1 hasta el final, ignorando el \n final si existe)
         let json_bytes = if bytes[bytes.len() - 1] == b'\n' {
             &bytes[1..bytes.len() - 1]
         } else {
             &bytes[1..]
         };
 
-        // Deserializar el JSON
         match serde_json::from_slice::<Venta>(json_bytes) {
             Ok(venta) => VentaRegistrada { venta },
             Err(e) => {
@@ -152,7 +146,6 @@ impl VentaRegistrada {
     }
 
     pub fn to_bytes(&self) -> Result<Vec<u8>, serde_json::Error> {
-        // Formato: b'5' + JSON de Venta + b'\n'
         let mut bytes = vec![b'5'];
         let venta_bytes = serde_json::to_vec(&self.venta)?;
         bytes.extend(venta_bytes);

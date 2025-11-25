@@ -13,14 +13,14 @@ impl Handler<VentaRegistrada> for YpfPeer {
             return;
         };
         log_debug!(self.logger, "YpfPeer: encolando venta registrada");
-        self.cola_envio.as_mut().map(|tx| {
-            if tx.send(mensaje).is_err() {
-                log_error!(
-                    self.logger,
-                    "YpfPeer {}: Fallo al enviar VentaRegistrada a la cola de envio",
-                    self.peer_id
-                );
-            }
-        });
+        if let Some(tx) = self.cola_envio.as_mut()
+            && tx.send(mensaje).is_err()
+        {
+            log_error!(
+                self.logger,
+                "YpfPeer {}: Fallo al enviar VentaRegistrada a la cola de envio",
+                self.peer_id
+            );
+        }
     }
 }

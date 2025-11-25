@@ -9,13 +9,26 @@ const ARCHIVO_NOMBRE: &str = "estaciones.csv";
 
 pub struct AddrLoader {}
 
+impl Default for AddrLoader {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AddrLoader {
     pub fn new() -> Self {
         Self {}
     }
 
-    pub fn load_all(&self, rango_minimo: usize, rango_maximo: usize) -> Result<Vec<SocketAddr>, Error> {
-        println!("Cargando estaciones desde {} hasta {}", rango_minimo, rango_maximo);
+    pub fn load_all(
+        &self,
+        rango_minimo: usize,
+        rango_maximo: usize,
+    ) -> Result<Vec<SocketAddr>, Error> {
+        println!(
+            "Cargando estaciones desde {} hasta {}",
+            rango_minimo, rango_maximo
+        );
         let file = match fs::File::open(ARCHIVO_NOMBRE) {
             Ok(file) => file,
             Err(e) => return Err(Error::ErrorString(e.to_string())),
@@ -40,6 +53,7 @@ impl AddrLoader {
         Ok(addresses)
     }
 
+    #[allow(dead_code)]
     pub fn load_line(&self, line_number: usize) -> Result<SocketAddr, Error> {
         let file = match fs::File::open(ARCHIVO_NOMBRE) {
             Ok(file) => file,

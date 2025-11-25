@@ -75,8 +75,6 @@ impl YpfPeer {
         let (tx, rx) = unbounded_channel::<Vec<u8>>();
 
         let local_clone = local_addr.clone();
-
-        // Task que posee el writer y serializa las escrituras
         Self::escribir_a_socket(rx, writer, peer_id, local_clone, logger.clone());
 
         YpfPeer {
@@ -169,7 +167,12 @@ impl YpfPeer {
         ctx.run_interval(Duration::from_secs(PING_INTERVAL_SECS), move |act, _ctx| {
             act.last_ping_sent = Instant::now();
             if let Err(e) = socket.send(b"0\n".to_vec()) {
-                log_error!(act.logger, "YpfPeer {}: Error enviando PING: {}", act.peer_id, e);
+                log_error!(
+                    act.logger,
+                    "YpfPeer {}: Error enviando PING: {}",
+                    act.peer_id,
+                    e
+                );
             } else {
                 log_debug!(act.logger, "YpfPeer {}: PING enviado.", act.peer_id);
             }
@@ -191,7 +194,11 @@ impl YpfPeer {
                 let mut line = Vec::new();
                 match buf_reader.read_until(b'\n', &mut line).await {
                     Ok(0) => {
-                        log_warning!(logger, "YpfPeer {}: Conexión cerrada por el peer remoto.", id);
+                        log_warning!(
+                            logger,
+                            "YpfPeer {}: Conexión cerrada por el peer remoto.",
+                            id
+                        );
                         local_addr.do_send(PeerDesconectado { id });
                         break;
                     }
@@ -212,14 +219,8 @@ impl YpfPeer {
 impl Actor for YpfPeer {
     type Context = Context<Self>;
     fn started(&mut self, ctx: &mut Self::Context) {
-
         let logger = self.logger.clone();
-        log_info!(
-            logger,
-            "YpfPeer {}: Iniciado correctamente.",
-            self.peer_id
-        );
-        // Notificar que el socket está listo solo si ya tenemos cola_envio
+        log_info!(logger, "YpfPeer {}: Iniciado correctamente.", self.peer_id);
         if self.cola_envio.is_some() {
             self.ypf_local_addr
                 .do_send(crate::actores::ypf::messages::SocketListo {
@@ -244,10 +245,6 @@ impl Actor for YpfPeer {
     }
 
     fn stopped(&mut self, _ctx: &mut Self::Context) {
-        log_warning!(
-            self.logger,
-            "YpfPeer {}: Deteniéndose...",
-            self.peer_id
-        );
+        log_warning!(self.logger, "YpfPeer {}: Deteniéndose...", self.peer_id);
     }
 }

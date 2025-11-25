@@ -16,25 +16,25 @@ impl Handler<InformarVentasOffline> for Estacion {
             self.estoy_conectada = true;
             self.lider_actual = Some(msg.id_lider);
         }
-        if self.lider_actual == None {
+        if self.lider_actual.is_none() {
             self.lider_actual = Some(msg.id_lider);
         }
         if self.id == msg.id_lider {
             println!("[{}] Soy el lider, y me guardo las ventas offline acumuladas para informar a YPF RUTA", self.id);
-            if self.ventas_por_informar.is_empty() && !msg.ventas.is_empty() {
-                // iniciar temporizador
-                if !self.temporizador_activo {
-                    self.temporizador_activo = true;
+            if self.ventas_por_informar.is_empty()
+                && !msg.ventas.is_empty()
+                && !self.temporizador_activo
+            {
+                self.temporizador_activo = true;
 
-                    let addr = ctx.address();
-                    ctx.spawn(
-                        async move {
-                            sleep(Duration::from_secs(10)).await;
-                            addr.do_send(EnviarVentasAgrupadas);
-                        }
-                        .into_actor(self),
-                    );
-                }
+                let addr = ctx.address();
+                ctx.spawn(
+                    async move {
+                        sleep(Duration::from_secs(10)).await;
+                        addr.do_send(EnviarVentasAgrupadas);
+                    }
+                    .into_actor(self),
+                );
             }
             self.ventas_por_informar = self.agregar_ventas_acumuladas(msg.ventas);
             self.guardar_ventas_sin_informar();

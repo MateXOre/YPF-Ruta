@@ -1,8 +1,8 @@
-use actix::{AsyncContext, Handler};
 use crate::actores::estacion::{DesconexionDetectada, Eleccion, Estacion, EstacionDesconectada};
 use crate::actores::estacion_cercana::Enviar;
+use actix::{AsyncContext, Handler};
 
-impl Handler<DesconexionDetectada> for Estacion{
+impl Handler<DesconexionDetectada> for Estacion {
     type Result = ();
 
     fn handle(&mut self, msg: DesconexionDetectada, ctx: &mut Self::Context) -> Self::Result {
@@ -62,7 +62,6 @@ impl Handler<DesconexionDetectada> for Estacion{
                         mensaje: mensaje.to_bytes(),
                     });
                 }
-
             } else {
                 println!(
                     "[{}] Desconexión detectada de la estación {} que no es líder actual.",

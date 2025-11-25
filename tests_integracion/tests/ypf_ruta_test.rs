@@ -18,10 +18,7 @@ const TEST_INDEX_4: usize = 9999;
 
 fn crear_logger_test() -> mpsc::Sender<Vec<u8>> {
     let (tx, rx) = mpsc::channel();
-    std::thread::spawn(move || {
-        while rx.recv().is_ok() {
-        }
-    });
+    std::thread::spawn(move || while rx.recv().is_ok() {});
     tx
 }
 

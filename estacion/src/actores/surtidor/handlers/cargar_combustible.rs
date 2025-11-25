@@ -11,7 +11,6 @@ impl Handler<CargarCombustible> for Surtidor {
         let estacion_id = self.estacion_id;
         let venta = msg.venta;
 
-        // simulación de carga
         ctx.spawn(
             async move {
                 println!(

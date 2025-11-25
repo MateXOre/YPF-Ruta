@@ -18,7 +18,6 @@ impl Handler<Eleccion> for YpfRuta {
         );
 
         if sender_id < self.id {
-            // Responder OK al nodo con ID menor
             log_info!(
                 self.logger,
                 "YpfRuta {}: Enviando OK al nodo {} e iniciando mi propia elección",
@@ -30,7 +29,6 @@ impl Handler<Eleccion> for YpfRuta {
                 peer_addr.do_send(EleccionOk(self.id));
             }
 
-            // Iniciar mi propia elección si no estoy en una
             if !self.en_eleccion {
                 ctx.address().do_send(IniciarEleccion);
             }
@@ -49,13 +47,8 @@ impl YpfRuta {
     pub(crate) fn declarar_lider(&mut self, _ctx: &mut Context<Self>) {
         self.lider = Some(self.id);
         self.en_eleccion = false;
-        log_info!(
-            self.logger,
-            "YpfRuta {}: Soy el nuevo LÍDER",
-            self.id
-        );
+        log_info!(self.logger, "YpfRuta {}: Soy el nuevo LÍDER", self.id);
 
-        // Enviar COORDINATOR a todos los nodos
         for (peer_id, peer_addr) in self.ypf_peers.iter() {
             log_info!(
                 self.logger,

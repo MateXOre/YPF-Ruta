@@ -15,6 +15,5 @@ impl Handler<EleccionOk> for YpfRuta {
             responder_id
         );
         self.respuestas_recibidas += 1;
-        // No me declaro líder, espero que el nodo con mayor ID lo haga
     }
 }

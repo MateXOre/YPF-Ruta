@@ -29,7 +29,6 @@ impl Handler<LiderCaido> for Estacion {
             .push(msg.mensaje.venta);
         self.guardar_ventas_sin_informar();
 
-
         println!("[{}] Iniciando elección de nuevo líder", self.id);
 
         let mensaje = Eleccion {

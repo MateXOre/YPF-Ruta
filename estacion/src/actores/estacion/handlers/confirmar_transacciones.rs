@@ -14,7 +14,7 @@ impl Handler<ConfirmarTransacciones> for Estacion {
         for (id_surtidor, resultados_ventas) in msg.transacciones {
             if let Some(_venta) = self.ventas_a_confirmar.get(&id_surtidor) {
                 self.ventas_a_confirmar.remove(&id_surtidor);
-            } // borro las ventas no offline que tenia a confirmar
+            }
             if let Some(surtidor) = self.surtidores.get(&id_surtidor) {
                 if let Some(resultado_venta) = resultados_ventas.first() {
                     surtidor.do_send(ResultadoVenta {

@@ -9,13 +9,13 @@ use std::collections::HashMap;
 use std::net::SocketAddr;
 use tokio::net::{TcpListener, TcpStream};
 
+use crate::loader::estacion_loader::EstacionLoader;
 use std::collections::VecDeque;
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
 };
 use util::structs::venta::Venta;
-use crate::loader::estacion_loader::EstacionLoader;
 
 pub struct Estacion {
     pub(crate) desconectada: bool,
@@ -81,7 +81,6 @@ impl Estacion {
         let _ = Estacion::intentar_conectar(target, actor_addr, id, id_destino).await;
     }
 
-    /// Intenta conectar a una estación (no bloquea, ejecuta en background)
     pub(crate) async fn intentar_conectar(
         target: SocketAddr,
         actor_addr: Addr<Estacion>,
@@ -153,7 +152,6 @@ impl Estacion {
         &mut self,
         mut ventas_acumuladas: HashMap<usize, HashMap<usize, Vec<Venta>>>,
     ) -> HashMap<usize, HashMap<usize, Vec<Venta>>> {
-        // Combinar las ventas de esta estación con las acumuladas
         let ventas_por_informar = self.ventas_por_informar.clone();
         for (id_estacion, surtidores_acumuladas) in ventas_por_informar {
             let entry_estacion_acumulada = ventas_acumuladas.entry(id_estacion).or_default();
@@ -167,8 +165,7 @@ impl Estacion {
         ventas_acumuladas
     }
 
-
-    pub(crate) fn cargar_ventas_sin_informar(&mut self){
+    pub(crate) fn cargar_ventas_sin_informar(&mut self) {
         let ventas_sin_informar = EstacionLoader::new(self.id_global).load_ventas_sin_informar();
         match ventas_sin_informar {
             Ok(ventas_sin_informar) => {
@@ -181,7 +178,8 @@ impl Estacion {
     }
 
     pub(crate) fn guardar_ventas_sin_informar(&mut self) {
-        let ventas_sin_informar = EstacionLoader::new(self.id_global).save_ventas_sin_informar(&self.ventas_por_informar);
+        let ventas_sin_informar =
+            EstacionLoader::new(self.id_global).save_ventas_sin_informar(&self.ventas_por_informar);
         match ventas_sin_informar {
             Ok(_) => {
                 println!("Ventas sin informar guardadas correctamente");
@@ -203,9 +201,6 @@ impl Estacion {
             }
         }
     }
-
-
-
 }
 
 impl Actor for Estacion {
@@ -238,7 +233,6 @@ impl Actor for Estacion {
                             "[{}] conexión de cliente entrante desde {:?}",
                             id, peer_addr
                         );
-                        // se inicia un actor de surtidor por cada conexión entrante
                         addr_self_clone.do_send(AceptarCliente { stream, peer_addr });
                     }
                     Err(e) => {
@@ -318,7 +312,6 @@ impl Actor for Estacion {
                 }
             }
         });
-
 
         let addr_self_clone = ctx.address();
         let sig_addr = *self

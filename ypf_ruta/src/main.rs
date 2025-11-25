@@ -32,7 +32,7 @@ async fn main() {
         eprintln!("Error al inicializar el logger en {:?}", log_path);
         std::process::exit(1);
     });
-    
+
     let f = File::open(&file_path).unwrap_or_else(|e| {
         eprintln!(
             "Error al abrir archivo de configuración {:?}: {}",
@@ -75,7 +75,7 @@ async fn main() {
 
     let log_gestor = logger.get_log_channel();
     let log_ypf = log_gestor.clone();
-    
+
     let gestor = Gestor::new(index, log_gestor).start();
 
     let _ypf_server = YpfRuta::new(local.0, local.1, lider, peers, gestor, log_ypf).start();

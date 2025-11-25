@@ -1,4 +1,3 @@
-#[allow(dead_code)]
 pub mod logger;
 /*
 A continuación se definen macros para enviar logs a través del logger.
@@ -13,7 +12,6 @@ log_info!(logger, "Este es un mensaje informativo con un valor: {}", valor);
 
 El log debug lo pueden usar mientras crean nuevas features para después poder eliminarlos
 más fácil buscando el 'log_debug!' en el código.
-
 */
 
 #[macro_export]

@@ -1,7 +1,7 @@
 use crate::actores::gestor::structs::{Empresa, Tarjeta};
 use actix::Message;
-use util::structs::venta::Venta;
 use util::structs::venta::EstadoVenta;
+use util::structs::venta::Venta;
 
 #[derive(Message)]
 #[rtype(result = "EstadoVenta")]

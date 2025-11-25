@@ -2,7 +2,6 @@ use actix::prelude::*;
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpStream;
 
-
 use crate::actores::estacion::messages::*;
 use crate::actores::estacion::Estacion;
 use crate::actores::estacion_cercana::EstacionCercana;

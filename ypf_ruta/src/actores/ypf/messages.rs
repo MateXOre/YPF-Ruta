@@ -32,7 +32,6 @@ impl NuevoLider {
             return NuevoLider { id: 0 };
         }
 
-        // Extraer los bytes del ID (desde posición 2 hasta el final, sin el \n)
         let id_bytes = if bytes[bytes.len() - 1] == b'\n' {
             &bytes[2..bytes.len() - 1]
         } else {
@@ -64,17 +63,17 @@ impl NuevoLider {
     }
 }
 
-// Mensaje para manejar conexiones entrantes
 #[derive(Message)]
 #[rtype(result = "()")]
+/// Mensaje para manejar conexiones entrantes
 pub struct ConexionEntrante {
     pub peer_id: usize,
     pub socket: TcpStream,
 }
 
-// Mensaje para notificar que el socket de un peer está listo
 #[derive(Message)]
 #[rtype(result = "()")]
+/// Mensaje para notificar que el socket de un peer está listo
 pub struct SocketListo {
     pub peer_id: usize,
 }

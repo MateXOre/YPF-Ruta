@@ -106,11 +106,9 @@ impl Estacion {
 
 #[actix::main]
 async fn main() {
-    // Creamos la estación 1 que escucha en 7001
     let estacion = Estacion { id: 1 }.start();
     tokio::spawn(Estacion::escuchar_tcp(estacion.clone(), 7001));
 
-    // Ejemplo: luego de 2 segundos, enviamos un saludo a otro proceso (puerto 7002)
     let destino: SocketAddr = "127.0.0.1:7002".parse().unwrap();
     tokio::time::sleep(std::time::Duration::from_secs(2)).await;
     estacion.do_send(EnviarTCP {

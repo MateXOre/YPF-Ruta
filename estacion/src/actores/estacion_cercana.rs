@@ -4,8 +4,8 @@ use crate::actores::estacion::Eleccion;
 use crate::actores::estacion::Estacion;
 use crate::actores::estacion::NotificarLider;
 use crate::actores::estacion::{
-    deserialize_message, ConfirmarTransacciones, EnviarASiguiente, LiderCaido, MessageType,
-    ProcesarMensaje, DesconexionDetectada
+    deserialize_message, ConfirmarTransacciones, DesconexionDetectada, EnviarASiguiente,
+    LiderCaido, MessageType, ProcesarMensaje,
 };
 use actix::prelude::*;
 use actix::{Actor, Addr, Context, Handler, Message};
@@ -58,7 +58,6 @@ impl Actor for EstacionCercana {
     }
 }
 
-
 impl Handler<Enviar> for EstacionCercana {
     type Result = ();
 
@@ -83,7 +82,9 @@ impl Handler<EstacionCercanaCerroConexion> for EstacionCercana {
 
         self.desconectado = true;
 
-        self.estacion_local.do_send(DesconexionDetectada{estacion_id: self.estacion_id});
+        self.estacion_local.do_send(DesconexionDetectada {
+            estacion_id: self.estacion_id,
+        });
     }
 }
 
@@ -132,21 +133,16 @@ impl Handler<CerrarConexion> for EstacionCercana {
             self.estacion_local_id, self.estacion_id
         );
 
-        // SOLUCIÓN: Dropear el sender ORIGINAL, no un clone
-        // Creamos un channel dummy para reemplazar el original y poder dropearlo
         let (dummy_tx, _dummy_rx) = tokio::sync::mpsc::unbounded_channel::<Vec<u8>>();
         let sender_original = std::mem::replace(&mut self.socket_estacion_cercana, dummy_tx);
-        // Ahora dropeamos el sender ORIGINAL, lo que cierra el channel
         drop(sender_original);
 
-        // Abortar el task de lectura para cerrar el reader explícitamente
         if let Some(reader_task) = self.reader_task.take() {
             println!("[{}] Abortando task de lectura para cerrar reader y notificar desconexión a estación {}", 
                      self.estacion_local_id, self.estacion_id);
-            reader_task.abort(); // Abortar el task, lo que dropeará el reader y cerrará el socket TCP
+            reader_task.abort();
         }
 
-        // Detener el actor
         ctx.stop();
     }
 }
@@ -201,10 +197,7 @@ impl EstacionCercana {
                     break;
                 }
             }
-            // aquí puedes notificar desconexión si es necesario
         });
-
-        //let reader_task = EstacionCercana::read_from_socket(reader, estacion_local.clone(), estacion_id);
 
         EstacionCercana {
             estacion_id,

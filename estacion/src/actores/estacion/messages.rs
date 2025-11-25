@@ -78,7 +78,6 @@ fn read_bool(buf: &[u8], offset: &mut usize) -> Result<bool, String> {
     Ok(value != 0)
 }
 
-
 fn write_venta(buf: &mut Vec<u8>, venta: &Venta) {
     write_usize(buf, venta.id_venta);
     write_usize(buf, venta.id_tarjeta);
@@ -293,7 +292,6 @@ impl InformarVenta {
         // Leer id_estacion
         let id_estacion = read_usize(bytes, &mut offset)?;
 
-
         Ok(InformarVenta {
             venta,
             id_surtidor,
@@ -371,8 +369,8 @@ pub struct EnviarASiguiente {
 
 #[derive(Message, Clone)]
 #[rtype(result = "()")]
-pub struct DesconexionDetectada{
- pub estacion_id:  usize, 
+pub struct DesconexionDetectada {
+    pub estacion_id: usize,
 }
 
 #[derive(Message, Clone)]
@@ -380,7 +378,6 @@ pub struct DesconexionDetectada{
 pub struct LiderCaido {
     pub mensaje: InformarVenta,
 }
-
 
 #[derive(Message, Clone)]
 #[rtype(result = "()")]

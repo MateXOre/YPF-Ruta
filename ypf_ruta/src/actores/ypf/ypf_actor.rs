@@ -11,7 +11,10 @@ use std::collections::{HashMap, VecDeque};
 use std::net::SocketAddr;
 use std::sync::mpsc::Sender;
 use util::logs::log_info;
-use util::{log_debug, log_error, structs::venta::{Venta, EstadoVenta}};
+use util::{
+    log_debug, log_error,
+    structs::venta::{EstadoVenta, Venta},
+};
 
 const DIRECCION_IP: &str = "127.0.0.1";
 const OFFSET_ESTACIONES: usize = 10000;
@@ -108,17 +111,22 @@ impl YpfRuta {
             let self_addr = ctx.address().clone();
             let logger_clone = self.logger.clone();
             let logger_clone2 = self.logger.clone();
-            
+
             let fut = async move {
-                YpfPeer::new(peer_id.clone(), self_id, None, Some(addr), self_addr, logger_clone).await
+                YpfPeer::new(peer_id, self_id, None, Some(addr), self_addr, logger_clone).await
             };
-            let id = peer_id.clone();
-            let self_id_clone = self_id.clone();
-            
+            let id = peer_id;
+            let self_id_clone = self_id;
+
             let fut = fut.into_actor(self).map(move |peer, act, _ctx| {
                 let addr = peer.start();
-                act.ypf_peers.insert(id.clone(), addr);
-                log_info!(logger_clone2, "YpfRuta {}: Peer {} iniciado.", self_id_clone, id);
+                act.ypf_peers.insert(id, addr);
+                log_info!(
+                    logger_clone2,
+                    "YpfRuta {}: Peer {} iniciado.",
+                    self_id_clone,
+                    id
+                );
             });
 
             ctx.spawn(fut);
@@ -162,10 +170,7 @@ impl YpfRuta {
                                             peer_id
                                         );
 
-                                        // obtener el socket interno del reader
                                         let socket = reader.into_inner();
-
-                                        // enviar el socket al actor YpfRuta para que lo maneje
                                         self_addr.do_send(ConexionEntrante { peer_id, socket });
                                     } else {
                                         log_error!(
@@ -267,7 +272,6 @@ impl YpfRuta {
     }
 
     fn procesar_ventas(&mut self, ctx: &mut actix::Context<Self>) {
-        // Tarea periódica que procesa la cola de ventas
         let logger = self.logger.clone();
 
         log_debug!(
@@ -284,12 +288,11 @@ impl YpfRuta {
                     ventas.len()
                 );
 
-                // Procesar ventas y guardar resultados
                 let gestor = act.gestor_addr.clone();
                 let ypf_id = act.id;
                 let ypfs_addr: Vec<Addr<YpfPeer>> = act.ypf_peers.values().cloned().collect();
                 let log = logger.clone();
-                // procesar todas las ventas
+
                 actix::spawn(async move {
                     let mut ventas_aprobadas = Vec::new();
                     let mut resultados_por_estacion = HashMap::new();
@@ -305,13 +308,13 @@ impl YpfRuta {
                                     venta.id_venta
                                 );
 
-                                // Enviar al gestor y esperar respuesta
                                 match gestor.send(ValidarVenta(venta.clone())).await {
                                     Ok(estado) => {
-                                        let aprobada = match estado { 
-                                            EstadoVenta::Confirmada => true, 
+                                        let aprobada = match estado {
+                                            EstadoVenta::Confirmada => true,
                                             EstadoVenta::Rechazada => false,
-                                            _ => false };
+                                            _ => false,
+                                        };
                                         log_debug!(
                                             log,
                                             "YpfRuta {}: Venta {} - Resultado: {}",
@@ -320,7 +323,7 @@ impl YpfRuta {
                                             aprobada
                                         );
                                         if !venta.offline {
-                                            resultado_ventas.push((venta.id_venta.clone(), aprobada));
+                                            resultado_ventas.push((venta.id_venta, aprobada));
                                         }
                                         let venta_actualizada = Venta {
                                             id_venta: venta.id_venta,
@@ -330,14 +333,11 @@ impl YpfRuta {
                                             offline: venta.offline,
                                             estado: estado.clone(),
                                         };
-                                        if estado == EstadoVenta::Confirmada {
+                                        if estado == EstadoVenta::Confirmada
+                                            || venta_actualizada.offline
+                                        {
                                             ventas_aprobadas.push(venta_actualizada);
-                                        } else {
-                                            if venta_actualizada.offline {
-                                                ventas_aprobadas.push(venta_actualizada);
-                                            }
                                         }
-
                                     }
                                     Err(e) => {
                                         log_error!(
@@ -365,7 +365,6 @@ impl YpfRuta {
                         });
                     }
 
-                    // Enviar cada venta aprobada individualmente a todos los peers
                     for venta in ventas_aprobadas {
                         log_debug!(
                             log,
@@ -390,15 +389,10 @@ impl Actor for YpfRuta {
     type Context = actix::Context<Self>;
 
     fn started(&mut self, ctx: &mut Self::Context) {
-        // Conexion a peers
         self.intentar_conectar_peers(ctx);
         self.escuchar_peers(ctx);
 
-        // Abrimos un listener para empresas
-
-        // Abrimos un listener para estaciones lideres
         self.escuchar_estaciones(ctx);
-        // Iniciar procesador de cola de ventas
         self.procesar_ventas(ctx);
     }
 }

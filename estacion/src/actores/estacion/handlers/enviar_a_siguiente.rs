@@ -23,7 +23,6 @@ impl Handler<EnviarASiguiente> for Estacion {
             self.id, msg.estacion_cercana_id, siguiente_estacion
         );
 
-        // reviso que el mensaje no sea para el lider actual que se desdonectó, si es un levantar ventas offline no lo reenvio para que deje de circular sin parar. La eleccion ya va a dejar de circular si lo corta un nuevo lider elegido (no prestarle mucha atencion a este caso de uso, las chances son mínimas
         if self.lider_actual == Some(msg.estacion_cercana_id) {
             let mensaje = match deserialize_message(&msg.msg) {
                 Ok(mensaje) => mensaje,

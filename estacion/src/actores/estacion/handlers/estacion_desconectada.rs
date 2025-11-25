@@ -26,7 +26,7 @@ impl Handler<EstacionDesconectada> for Estacion {
             self.todas_las_estaciones.len()
         );
 
-        //primer reintento
+        // primer reintento
         self.siguiente_estacion = if self.id + 1 >= self.todas_las_estaciones.len() {
             0
         } else {

@@ -11,6 +11,8 @@ use crate::actores::empresa::{
 };
 
 
+
+
 pub struct YpfRuta {
     pub empresa_local: Addr<Empresa>,
     pub socket_ypf_ruta: UnboundedSender<Vec<u8>>,
@@ -53,7 +55,6 @@ impl Actor for YpfRuta {
         YpfRuta::read_from_socket(
             reader,
             self.empresa_local.clone(),
-            ypf_ruta_addr,
         );
     }
 }
@@ -62,7 +63,6 @@ impl YpfRuta {
     pub fn read_from_socket(
         mut reader: OwnedReadHalf,
         empresa_local: Addr<Empresa>,
-        ypf_ruta: Addr<YpfRuta>,
     ) -> tokio::task::JoinHandle<()> {
         tokio::spawn(async move {
             let mut buf = vec![0; 1024];
@@ -86,5 +86,19 @@ impl YpfRuta {
                 }
             }
         })
+    }
+
+
+    pub fn enviar_por_socket(&mut self, buf: Vec<u8>) {
+        if let Err(e) = self.socket_ypf_ruta.send(buf.clone()) {
+            println!(
+                "Error al enviar mensaje al socket de YPF Ruta: {}",
+                e
+            );
+        } else {
+            println!(
+                "Enviamos mensaje al socket de YPF Ruta",
+            )
+        }
     }
 }

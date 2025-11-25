@@ -3,7 +3,7 @@ use tokio::io::{self, AsyncBufReadExt, BufReader};
 use crate::actores::ypf_ruta::ypf_ruta::YpfRuta;
 use crate::actores::empresa::messages::{ConectadoAypfRuta, ResponderConsola};
 
-const YPF_ADDRS: [&str; 3] = ["127.0.0.1:18080", "127.0.0.1:18081", "127.0.0.1:18082"];
+const YPF_ADDRS: [&str; 3] = ["127.0.0.1:19080", "127.0.0.1:19081", "127.0.0.1:19082"];
 
 pub struct Empresa {
     pub id: usize,
@@ -47,7 +47,7 @@ impl Actor for Empresa {
                         Err(e) => {
                             eprintln!("No se pudo conectar a {}: {}", addr, e);
                         }
-                    }
+                    } 
                 }
             }
         });

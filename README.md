@@ -582,3 +582,362 @@ En caso de que una estacion pierda conexion, la misma intentará comunicarse con
 
 * **Estacion pierde conexion luego de informar venta al lider**. \
     Si una estación pierde la conexion luego de mandar el mensaje `informar_venta` a la Estacion Lider, eventualmente esta última intentará confirmarle las ventas, pero no lo logrará. Mientras esto ocurra, las ventas activas (aún en proceso de aceptarse) de esta estación pasarán a offline y los clientes podrán retirarse. Eventualmente la Estacion lider tendrá que confirmarle a cada estación otras ventas realizadas, y en ese momento revisará si tiene que confirmarle alguna venta a una estacion desconectada.
+
+---
+
+## Cambios en la Implementación
+
+A continuación, se detallarán los cambios correspondientes realizados desde la primer entrega de este trabajo. Estos cambios han sido solicitados tras nuestra primer entrega, o los hemos realizado a medida que nuestra ejecución fue avanzando.
+
+### Procesos y Threads
+
+Cliente finalmente no se encuentra representado como un Actor, sino que se puede realizar su simulacion desde un script o conectandose con netcat al puerto correspondiente
+
+
+**Procesos concurrentes**\
+Los programas de **Estación** y **YPF RUTA** serán concurrentes, ya que ambos deben manejar la recepción y gestión de múltiples conexiones en simultáneo. En el caso de las estaciones, deben atender a múltiples clientes así como comunicarse con otras estaciones y con YPF RUTA. Por otro lado, YPF RUTA debe manejar solicitudes concurrentes de múltiples estaciones y empresas.
+
+* **Estación**: Finalmente la comunicación con el surtidor es por medio de actores y sus respectivos mensajes internos.
+
+### Validación de Ventas Offline
+
+Finalmente, en el caso de que una venta realizada de forma offline se encuentre por fuera del límite de la empresa, se le cobrara lo que se pueda hasta llegar al límite y el resto de la venta será asumida por YPF.
+
+También se incorporó el guardado de dichas ventas en memoria para evitar su perdida en caso de un posible reinicio.
+
+
+### Ubicaciones de las estaciones
+
+Finalmente, las estaciones se organizan según tamaño de region (x), agrupandose de x en x.
+
+### YPF RUTA como Coordinador
+
+Para el servidor central de YPF RUTA tuvimos en cuenta la posible caída del sistema e implementamos un pseudo-cluster de tres nodos que mantienen una conexión constante entre todos para poder detectar cuando algún servidor se cae. En caso de detectar la caída del nodo líder se designa un nuevo líder mediante el _Bully Algorithm_.
+
+Para asegurar el estado actualizado del líder, cada venta aprobada es broadcasteada desde el nodo líder hacia los otros dos nodos de YPF RUTA.
+
+YPF RUTA cuenta con un gestor de empresas que carga en memoria la información de todas las empresas que participan del sistema para poder realizar validaciones y consultas en tiempo real. Dado las limitaciones del trabajo se decidió implementarlo de esta forma, usando archivos json para la persistencia. Sin embargo, un punto a mejorar sería la implementación de una base de datos que pueda ser consultada y modificada por cada nodo de YPF RUTA.
+
+Las estaciones líderes sólo pueden comunicarse con el nodo líder de YPF RUTA, por lo tanto los otros nodos no abren ningún puerto para la escucha de conexiones a menos que se conviertan en líderes. Es por esto que para que la estación líder pueda enviar las ventas a validar debe probar conectarse a todas las direcciones conocidas de los servidores de YPF RUTA. Se implementó de esta manera para evitar tener que mantener actualizadas a las estaciones constantemente de los posibles cambios de líderes en los servidores de YPF RUTA.
+
+Para el procesamiento de ventas se destinó una tarea específica dentro del servidor líder de YPF RUTA que lee solicitudes de parte de las estaciones líderes de forma secuencial en orden FIFO. Es decir, contamos con una cola de solicitudes de validación, cada vez que una estación se conecta envía un conjunto de ventas a validar que son encoladas en dicha estructura para posteriormente ser procesadas en orden de llegada. De esta forma una única tarea procesa continuamente las solicitudes para evitar posibles condiciones de carrera o bloqueos al momento de actualizar la información de las ventas para cada empresa/tarjeta.
+
+<figure>
+  <img src="./res/conexion_ypfs.svg" alt="Conexión inicial entre los nodos de ypf.">
+  <figcaption>Conexión inicial entre un nodo líder de YPF y otro nodo del sistema.</figcaption>
+</figure>
+
+## Entidades Actualizadas
+
+A lo largo del desarrollo hubieron varias entidades que se vieron modificadas. Tambien se agregaron nuevos actores para el manejo de la comunicacion via sockets.
+
+### Estación
+
+**Estado Interno**
+
+```rust
+pub struct Estacion {
+    desconectada: bool,
+    id: usize,
+    port: u16,
+    lider_actual: Option<usize>, 
+    siguiente_estacion: usize,  
+    estaciones_cercanas: HashMap<usize, Addr<EstacionCercana>>, 
+    total_estaciones: usize,
+    todas_las_estaciones: HashMap<usize, SocketAddr>,
+    primer_anillo_realizado: bool,
+    ventas_a_confirmar: HashMap<usize, Venta>,
+    surtidores: HashMap<usize, Addr<Surtidor>>,
+    max_surtidores: usize,
+    cola_espera: VecDeque<AceptarCliente>,
+    ventas_por_informar: HashMap<usize, HashMap<usize, Vec<Venta>>>,
+    temporizador_activo: bool,
+    listener_activo: Arc<AtomicBool>,
+    estoy_conectada: bool,
+    id_global: usize,
+}
+```
+
+---
+
+### Surtidor
+
+**Finalidad** \
+Simula una unidad de carga de combustible que atiende a un cliente por vez. Envía a la estación las solicitudes de venta cuando finaliza la carga.
+
+**Estado Interno**
+
+```rust
+pub struct Surtidor {
+    id: usize,
+    estacion: Addr<Estacion>,
+    estacion_id: usize,
+    reader: Option<OwnedReadHalf>,
+    writer_tx: UnboundedSender<Vec<u8>>,
+}
+```
+
+### Cliente
+
+El cliente ya no es una entidad representada como actor, sino que se puede simular su comportamiento por medio de un script o conectandose con netcat al puerto correspondiente.
+
+---
+
+### YPF RUTA
+
+**Finalidad** \
+Actúa como servidor central del sistema. Administra la comunicación entre estaciones y empresas, y mantiene el registro global de ventas y límites de tarjetas.
+
+**Estado Interno**
+```rust
+pub struct YpfRuta {
+    pub(crate) id: usize,
+    puerto: usize,
+
+    pub(crate) lider: Option<usize>,
+    pub(crate) ypf_peers: HashMap<usize, Addr<YpfPeer>>,
+    peer_addrs: HashMap<usize, SocketAddr>,
+    pub(crate) en_eleccion: bool,
+    pub(crate) respuestas_recibidas: usize,
+
+    pub(crate) gestor_addr: Addr<Gestor>,
+    pub(crate) ventas_por_confirmar: VecDeque<(Addr<Estacion>, Solicitud)>,
+    pub(crate) logger: Sender<Vec<u8>>,
+}
+```
+
+### YPF RUTA
+
+**Finalidad** \
+Actúa como servidor central del sistema. Administra la comunicación entre estaciones y empresas, y mantiene el registro global de ventas y límites de tarjetas.
+
+**Estado Interno**
+```rust
+pub struct YpfRuta {
+    pub(crate) id: usize,
+    puerto: usize,
+
+    pub(crate) lider: Option<usize>,
+    pub(crate) ypf_peers: HashMap<usize, Addr<YpfPeer>>,
+    peer_addrs: HashMap<usize, SocketAddr>,
+    pub(crate) en_eleccion: bool,
+    pub(crate) respuestas_recibidas: usize,
+
+    pub(crate) gestor_addr: Addr<Gestor>,
+    pub(crate) ventas_por_confirmar: VecDeque<(Addr<Estacion>, Solicitud)>,
+    pub(crate) logger: Sender<Vec<u8>>,
+}
+```
+
+**Mensajes que Recibe**
+* `conexion_entrante`: Recibe una conexión TCP entrante de otro nodo YPF. Si el peer ya existe, le envía el nuevo socket para reemplazar la conexión anterior. Si no existe, crea un nuevo actor YpfPeer con el socket recibido.
+
+* `eleccion`: Recibe un mensaje `eleccion` de otro nodo durante el algoritmo Bully. Si el ID del emisor es menor que el propio, responde con OK e inicia su propia elección (si no está ya en una). Si el ID es mayor o igual, ignora el mensaje.
+
+* `eleccion_ok`: Recibe una respuesta OK de un nodo con ID mayor durante una elección. Incrementa el contador de respuestas y cancela su candidatura como líder, esperando que el nodo con mayor ID se declare líder.
+
+* `eleccion_timeout`: Se activa después de un timeout de 2 segundos tras iniciar una elección. Si no recibió respuestas OK, se declara líder. Si recibió respuestas, simplemente sale del estado de elección y espera el anuncio del nuevo líder.
+
+* `iniciar_eleccion`: Inicia el proceso de elección Bully enviando mensajes `eleccion` a todos los nodos con ID mayor. Si no hay nodos con ID mayor, se declara líder inmediatamente. Marca el estado como "en_eleccion" y programa un timeout de 2 segundos.
+
+* `nuevo_lider`: Recibe el anuncio de un nuevo líder. Actualiza su estado interno con el nuevo líder, cancela cualquier elección en curso, y si el nuevo líder es el mismo nodo, comienza a escuchar conexiones de estaciones.
+
+* `peer_desconectado`: Notifica que un peer se ha desconectado. Remueve el peer del mapa de conexiones. Si el peer desconectado era el líder actual, pone el líder en None e inicia una nueva elección.
+
+* `socket_listo`: Notifica que el socket de un peer está completamente configurado y listo para usar. Si el nodo actual es el líder, envía un mensaje NuevoLider al peer para informarle quién es el líder actual.
+
+* `validar_ventas`: Recibe solicitudes de validación de ventas desde una estación líder. Agrega las ventas junto con la dirección de la estación emisora a la cola `ventas_por_confirmar` para ser procesadas secuencialmente por la tarea de procesamiento de ventas.
+
+* `venta_registrada`: Recibe una venta ya aprobada desde otro nodo líder de YPF (replicación). Reenvía la venta al Gestor para que la registre localmente, manteniendo así la consistencia entre los nodos del cluster.
+
+
+**Mensajes que Envía**
+
+<!-- MENSAJES INTERNOS (a sí mismo) -->
+* `conexion_entrante` -> `YpfRuta`
+* `iniciar_eleccion` -> `YpfRuta`
+* `eleccion_timeout` -> `YpfRuta`
+
+<!-- MENSAJES A PEERS (otros nodos YPF) -->
+* `eleccion` -> `YpfPeer`
+* `eleccion_ok` -> `YpfPeer`
+* `nuevo_lider` -> `YpfPeer`
+* `guardar_socket` -> `YpfPeer`
+* `venta_registrada` -> `YpfPeer`
+
+<!-- MENSAJES A ESTACIONES -->
+* `resultado_ventas` -> `Estacion`
+
+<!-- MENSAJES A GESTOR -->
+* `validar_venta` -> `Gestor`
+* `registrar_venta` -> `Gestor`
+
+
+### Mensajes de YPF RUTA
+
+* `conexion_entrante`
+
+Mensaje interno para procesar una nueva conexión TCP entrante de otro nodo YPF.
+
+```rust
+struct ConexionEntrante {
+    peer_id: usize,
+    socket: TcpStream,
+}
+```
+
+* `iniciar_eleccion`
+
+Mensaje interno que dispara el inicio del proceso de elección Bully. No tiene payload.
+
+```rust
+struct IniciarEleccion;
+```
+
+* `eleccion_timeout`
+
+Mensaje interno enviado después de 2 segundos para evaluar si declararse líder. No tiene payload.
+
+```rust
+struct EleccionTimeout;
+```
+
+* `eleccion`
+
+Mensaje ELECTION del algoritmo Bully enviado a peers con ID mayor. Se serializa como `b'3' + '+' + id + '\n'`.
+
+```rust
+struct Eleccion(usize); // ID del nodo que inicia la elección
+```
+
+* `eleccion_ok`
+
+Respuesta OK enviada a un nodo con ID menor durante una elección. Se serializa como `b'6' + '+' + id + '\n'`.
+
+```rust
+struct EleccionOk(usize); // ID del nodo que responde
+```
+
+* `nuevo_lider`
+
+Mensaje COORDINATOR que anuncia el nuevo líder del cluster. Se serializa como `b'4' + '+' + id + '\n'`.
+
+```rust
+struct NuevoLider {
+    id: usize, // ID del nuevo líder
+}
+```
+
+* `guardar_socket`
+
+Mensaje para actualizar el socket de un peer existente con una nueva conexión.
+
+```rust
+struct GuardarSocket(TcpStream);
+```
+
+* `venta_registrada`
+
+Mensaje de replicación que contiene una venta aprobada para sincronizar entre nodos. Se serializa como `b'5' + JSON(Venta) + '\n'`.
+
+```rust
+struct VentaRegistrada {
+    venta: Venta,
+}
+```
+
+* `resultado_ventas`
+
+Respuesta enviada a la estación con los resultados de validación de sus ventas.
+
+```rust
+struct ResultadoVentas {
+    ventas: HashMap<usize, HashMap<usize, Vec<(usize, bool)>>>,
+}
+```
+
+* `validar_venta`
+
+Solicitud al Gestor para validar una venta individual contra los límites de empresa y tarjeta.
+
+```rust
+struct ValidarVenta(Venta);
+```
+
+* `registrar_venta`
+
+Comando al Gestor para registrar localmente una venta replicada desde otro nodo YPF.
+
+```rust
+struct RegistrarVenta(Venta);
+```
+
+* `socket_listo`
+
+Notificación interna que indica que el socket de un peer está configurado y listo para comunicación.
+
+```rust
+struct SocketListo {
+    peer_id: usize,
+}
+```
+
+* `peer_desconectado`
+
+Notificación interna sobre la desconexión de un peer del cluster.
+
+```rust
+struct PeerDesconectado {
+    id: usize,
+}
+```
+
+
+## Listado de Comandos
+
+### Comandos de Rust:
+
+Para compilar la totalidad del proyecto:
+
+    cargo compile
+
+Para ejecutar el linter completo en el proyecto:
+
+    cargo linter
+
+Para ejecutar los tests implementados:
+
+    cargo tests_integracion
+
+### Aclaraciones de Ejecución
+
+Se decidio que el tamaño del anillo regional de estaciones sea de 5, se pueden agregar mas al csv del mismo,
+sin embargo se deben agregar de a grupos de a 5 (aunque no sea necesario prender todas las estaciones del anillo
+para que funcione el sistema). Las estaciones no es necesario prenderlas en orden.
+
+### Comandos de Ejecución
+
+1. Levantar los nodos de YPF RUTA: En el directorio ypf_ruta ejecutar:
+   - `cargo run 3 lider`
+   - `cargo run 2`
+   - `cargo run 1`
+2. Levantar las estaciones: En el directorio estacion ejecutar:
+   - `cargo run 0`
+   - `cargo run 1`
+   - `cargo run 2`
+   - `cargo run 3`
+   - `cargo run 4`
+3. Levantar la empresa: En el directorio empresa ejecutar:
+   - `cargo run {id_de_empresa}`
+        - Luego escribir en la misma terminal segun se quiera:
+            - `gastos_empresa`
+              - Ej: `gastos_empresa`
+            - `configurar_limite {id_tarjeta},{nuevo_limite}`
+              - Ej: `configurar_limite 4,20000`
+            - `configurar_limite_general {nuevo_limite}`
+              - Ej: `configurar_limite_general 250000`
+
+4. Simular clientes: Se puede utilizar netcat o similares para simular clientes que se conecten a las estaciones.
+   - 'nc 127.0.0.1 10000' (Elegir estacion a conectarse desde el csv)
+     - Luego escribir la tarjeta y monto a cargar `{id_tarjeta=monto}`. Ej: `4=5000`
+5. Para simular la caida de la conexion se puede mandar un mensaje a {puerto_estacion + 2000}. Ej `nc 127.0.0.1 12000`

@@ -1,9 +1,10 @@
 use crate::actores::gestor::structs::{Empresa, Tarjeta};
 use actix::Message;
 use util::structs::venta::Venta;
+use util::structs::venta::EstadoVenta;
 
 #[derive(Message)]
-#[rtype(result = "bool")]
+#[rtype(result = "EstadoVenta")]
 pub struct ValidarVenta(pub Venta);
 
 #[derive(Message)]

@@ -16,5 +16,5 @@ pub struct Venta {
 pub enum EstadoVenta {
     Pendiente,
     Confirmada,
-    Fallida,
+    Rechazada,
 }

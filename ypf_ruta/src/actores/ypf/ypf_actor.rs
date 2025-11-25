@@ -11,7 +11,7 @@ use std::collections::{HashMap, VecDeque};
 use std::net::SocketAddr;
 use std::sync::mpsc::Sender;
 use util::logs::log_info;
-use util::{log_debug, log_error};
+use util::{log_debug, log_error, structs::venta::{Venta, EstadoVenta}};
 
 const DIRECCION_IP: &str = "127.0.0.1";
 const OFFSET_ESTACIONES: usize = 10000;
@@ -307,7 +307,11 @@ impl YpfRuta {
 
                                 // Enviar al gestor y esperar respuesta
                                 match gestor.send(ValidarVenta(venta.clone())).await {
-                                    Ok(aprobada) => {
+                                    Ok(estado) => {
+                                        let aprobada = match estado { 
+                                            EstadoVenta::Confirmada => true, 
+                                            EstadoVenta::Rechazada => false,
+                                            _ => false };
                                         log_debug!(
                                             log,
                                             "YpfRuta {}: Venta {} - Resultado: {}",
@@ -315,12 +319,25 @@ impl YpfRuta {
                                             venta.id_venta,
                                             aprobada
                                         );
-
-                                        if aprobada {
-                                            ventas_aprobadas.push(venta.clone());
+                                        if !venta.offline {
+                                            resultado_ventas.push((venta.id_venta.clone(), aprobada));
+                                        }
+                                        let venta_actualizada = Venta {
+                                            id_venta: venta.id_venta,
+                                            id_tarjeta: venta.id_tarjeta,
+                                            id_estacion: venta.id_estacion,
+                                            monto: venta.monto,
+                                            offline: venta.offline,
+                                            estado: estado.clone(),
+                                        };
+                                        if estado == EstadoVenta::Confirmada {
+                                            ventas_aprobadas.push(venta_actualizada);
+                                        } else {
+                                            if venta_actualizada.offline {
+                                                ventas_aprobadas.push(venta_actualizada);
+                                            }
                                         }
 
-                                        resultado_ventas.push((venta.id_venta, aprobada));
                                     }
                                     Err(e) => {
                                         log_error!(
@@ -333,15 +350,20 @@ impl YpfRuta {
                                     }
                                 }
                             }
-                            resultado_por_surtidor.insert(surtidor, resultado_ventas);
+                            if !resultado_ventas.is_empty() {
+                                resultado_por_surtidor.insert(surtidor, resultado_ventas);
+                            }
                         }
 
-                        resultados_por_estacion.insert(estacion, resultado_por_surtidor);
+                        if !resultado_por_surtidor.is_empty() {
+                            resultados_por_estacion.insert(estacion, resultado_por_surtidor);
+                        }
                     }
-
-                    estacion_addr.do_send(ResultadoVentas {
-                        ventas: resultados_por_estacion,
-                    });
+                    if !resultados_por_estacion.is_empty() {
+                        estacion_addr.do_send(ResultadoVentas {
+                            ventas: resultados_por_estacion,
+                        });
+                    }
 
                     // Enviar cada venta aprobada individualmente a todos los peers
                     for venta in ventas_aprobadas {

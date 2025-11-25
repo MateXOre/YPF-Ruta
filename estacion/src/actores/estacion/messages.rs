@@ -108,7 +108,7 @@ fn write_venta(buf: &mut Vec<u8>, venta: &Venta) {
     let estado_byte = match venta.estado {
         util::structs::venta::EstadoVenta::Pendiente => 0u8,
         util::structs::venta::EstadoVenta::Confirmada => 1u8,
-        util::structs::venta::EstadoVenta::Fallida => 2u8,
+        util::structs::venta::EstadoVenta::Rechazada => 2u8,
     };
     buf.push(estado_byte);
 }
@@ -127,7 +127,7 @@ fn read_venta(buf: &[u8], offset: &mut usize) -> Result<Venta, String> {
     let estado = match estado_byte {
         0 => util::structs::venta::EstadoVenta::Pendiente,
         1 => util::structs::venta::EstadoVenta::Confirmada,
-        2 => util::structs::venta::EstadoVenta::Fallida,
+        2 => util::structs::venta::EstadoVenta::Rechazada,
         _ => util::structs::venta::EstadoVenta::Pendiente,
     };
     Ok(Venta {

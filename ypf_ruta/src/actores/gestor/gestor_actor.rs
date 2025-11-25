@@ -5,9 +5,10 @@ use std::fs::File;
 use std::path::Path;
 use std::time::Duration;
 
+
 use crate::actores::gestor::structs::{Empresa, Tarjeta};
 use actix::prelude::*;
-use util::{log_error, log_info, log_warning, structs::venta::Venta};
+use util::{log_error, log_info, log_warning, structs::venta::{Venta, EstadoVenta}};
 
 const PERSISTENCE_INTERVAL_SECS: u64 = 30;
 
@@ -136,48 +137,74 @@ impl Gestor {
             return;
         }
         if let Some(t) = self.tarjetas.get_mut(&venta.id_tarjeta) {
-            t.consumo_actual += venta.monto;
+            let mut consumo = venta.monto.clone();
+            if t.consumo_actual + consumo > t.limite_particular as f32 {
+                consumo = (t.limite_particular as f32) - (t.consumo_actual as f32);
+                t.consumo_actual = t.limite_particular as f32;
+            } else {
+                t.consumo_actual += consumo;
+            }
             let empresa_id = t.empresa_id;
             if let Some(e) = self.empresas.get_mut(&empresa_id) {
-                e.consumo_actual += venta.monto;
+                if e.consumo_actual + consumo > e.limite_general as f32 {
+                    e.consumo_actual = e.limite_general as f32;
+                } else {
+                    e.consumo_actual += consumo;
+                }
             }
         }
         self.ventas.push(venta);
     }
 
-    pub fn procesar_venta_internal(&mut self, venta: &Venta) -> bool {
+    pub fn procesar_venta_internal(&mut self, venta: &Venta) -> EstadoVenta {
+        let mut estado = EstadoVenta::Confirmada;
+
         if let Some(nueva_venta) = self.ventas.iter().find(|v| v.id_venta == venta.id_venta){
             log_info!(self.logger, "Venta con ID {} ya procesada previamente", nueva_venta.id_venta);
-            return true;
+            return estado;
         }
         let tarjeta = match self.tarjetas.get(&venta.id_tarjeta) {
             Some(t) => t.clone(),
             None => {
                 log_warning!(self.logger, "Tarjeta con ID {} no encontrada", venta.id_tarjeta);
-                return false;
+                return EstadoVenta::Rechazada;
             }
         };
-
         let empresa = match self.empresas.get(&tarjeta.empresa_id) {
             Some(e) => e.clone(),
             None => {
                 log_warning!(self.logger, "Empresa con ID {} no encontrada", tarjeta.empresa_id);
-                return false;
+                return EstadoVenta::Rechazada;
             }
         };
 
         if tarjeta.consumo_actual + venta.monto > tarjeta.limite_particular as f32 {
-            log_warning!(self.logger, "Venta rechazada: excede el límite particular de la tarjeta (ID {})", tarjeta.id);
-            return false;
+            if !venta.offline {
+                log_warning!(self.logger, "Venta rechazada: excede el límite particular de la tarjeta (ID {})", tarjeta.id);
+                return EstadoVenta::Rechazada;
+            } else {
+                estado = EstadoVenta::Rechazada;
+            }
         }
 
         if empresa.consumo_actual + venta.monto > empresa.limite_general as f32 {
-            log_warning!(self.logger, "Venta rechazada: excede el límite general de la empresa (ID {})", empresa.id);   
-            return false;
+            if !venta.offline {
+                log_warning!(self.logger, "Venta rechazada: excede el límite general de la empresa (ID {})", empresa.id);   
+                return EstadoVenta::Rechazada;
+            } else {
+                estado = EstadoVenta::Rechazada;
+            }
         }
-
-        self.crear_venta(venta.clone());
-        true
+        let venta = Venta {
+            id_venta: venta.id_venta,
+            id_tarjeta: venta.id_tarjeta,
+            id_estacion: venta.id_estacion,
+            monto: venta.monto,
+            offline: venta.offline,
+            estado: estado.clone(),
+        };
+        self.crear_venta(venta);
+        estado
     }
 
     pub fn persistir_estado_actual(&self) {

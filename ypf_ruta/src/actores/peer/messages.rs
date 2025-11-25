@@ -119,7 +119,7 @@ impl VentaRegistrada {
                     id_tarjeta: 0,
                     monto: 0.0,
                     offline: false,
-                    estado: util::structs::venta::EstadoVenta::Fallida,
+                    estado: util::structs::venta::EstadoVenta::Rechazada,
                 },
             };
         }
@@ -144,7 +144,7 @@ impl VentaRegistrada {
                         id_tarjeta: 0,
                         monto: 0.0,
                         offline: false,
-                        estado: util::structs::venta::EstadoVenta::Fallida,
+                        estado: util::structs::venta::EstadoVenta::Rechazada,
                     },
                 }
             }

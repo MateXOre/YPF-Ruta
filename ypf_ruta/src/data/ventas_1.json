@@ -78,5 +78,13 @@
     "monto": 542.0,
     "offline": false,
     "estado": "Pendiente"
+  },
+  {
+    "id_venta": 1764095422258,
+    "id_tarjeta": 1,
+    "id_estacion": 0,
+    "monto": 67.0,
+    "offline": false,
+    "estado": "Confirmada"
   }
 ]

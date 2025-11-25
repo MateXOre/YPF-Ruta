@@ -9,8 +9,6 @@ use crate::actores::empresa::messages::{
 impl Handler<ProcesarMensajeSocket> for Empresa {
     type Result = ();
     fn handle(&mut self, msg: ProcesarMensajeSocket, ctx: &mut Context<Self>) {
-        println!("[Empresa {}] Mensaje recibido del socket: {} bytes", self.id, msg.bytes.len());
-        
         match deserialize_respuesta_ypfruta(&msg.bytes) {
             Ok(respuesta) => match respuesta {
                 RespuestaYpfRuta::ConfigurarLimite(m) => ctx.address().do_send(m),

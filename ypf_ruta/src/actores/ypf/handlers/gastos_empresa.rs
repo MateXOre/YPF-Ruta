@@ -31,6 +31,15 @@ impl Handler<GastosEmpresa> for YpfRuta {
                         ypf_ruta_id,
                         empresa_id
                     );
+
+                    log_info!(
+                        logger,
+                        "YpfRuta {}: Estado de empresa {} consultado exitosamente: empresa:{:?}, tarjetas:{:?}",
+                        ypf_ruta_id,
+                        empresa_id,
+                        empresa,
+                        tarjetas
+                    );
                     
                     serde_json::json!({
                         "tipo": "GastosEmpresa",

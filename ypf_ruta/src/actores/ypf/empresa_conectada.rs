@@ -69,6 +69,12 @@ impl EmpresaConectada {
             loop {
                 match reader.read(&mut buf).await {
                     Ok(bytes) => {
+                        if bytes == 0 {
+                            println!(
+                                "Reader detectó fin de conexión (0 bytes)",
+                            );
+                            return;
+                        }
                         println!(
                             "Recibimos mensaje del socket: {} bytes",
                             bytes

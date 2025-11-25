@@ -392,6 +392,17 @@ impl YpfRuta {
     }
 
     fn escuchar_empresas(&mut self, ctx: &mut actix::Context<Self>) {
+        if let Some(lider) = self.lider
+            && lider == self.id
+        {
+            log_debug!(
+                self.logger,
+                "YpfRuta {}: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...",
+                self.id
+            );
+        } else {
+            return;
+        }
 
 
         let puerto = (self.puerto + OFFSET_EMPRESAS) as u16;

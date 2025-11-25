@@ -102,9 +102,9 @@ pub struct RespuestaConfigurarLimiteGeneral {
 #[rtype(result = "()")]
 pub struct RespuestaGastosEmpresa {
     pub exito: bool,
-    pub mensaje: String,
-    pub id_empresa: usize,
-    pub data: Value,
+    pub mensaje: Option<String>,
+    pub empresa: Option<Value>,
+    pub tarjetas: Option<Value>,
 }
 
 /// Enum con todos los tipos de respuesta posibles de YpfRuta
@@ -118,11 +118,11 @@ pub enum RespuestaYpfRuta {
 pub fn deserialize_respuesta_ypfruta(bytes: &[u8]) -> Result<RespuestaYpfRuta, String> {
     let json: Value = serde_json::from_slice(bytes)
         .map_err(|e| format!("Error parseando JSON: {}", e))?;
-    
+
     let tipo = json.get("tipo")
         .and_then(|v| v.as_str())
-        .ok_or_else(|| "Campo 'tipo' no encontrado o inválido".to_string())?;
-    
+        .ok_or_else(|| "Campo 'tipo' no encontrado o invÃ¡lido".to_string())?;
+
     match tipo {
         "ConfigurarLimite" => {
             let respuesta = RespuestaConfigurarLimite {
@@ -144,9 +144,9 @@ pub fn deserialize_respuesta_ypfruta(bytes: &[u8]) -> Result<RespuestaYpfRuta, S
         "GastosEmpresa" => {
             let respuesta = RespuestaGastosEmpresa {
                 exito: json.get("exito").and_then(|v| v.as_bool()).unwrap_or(false),
-                mensaje: json.get("mensaje").and_then(|v| v.as_str()).unwrap_or("").to_string(),
-                id_empresa: json.get("id_empresa").and_then(|v| v.as_u64()).unwrap_or(0) as usize,
-                data: json.get("data").cloned().unwrap_or(Value::Null),
+                mensaje: json.get("mensaje").and_then(|v| v.as_str()).map(|s| s.to_string()),
+                empresa: json.get("empresa").cloned(),
+                tarjetas: json.get("tarjetas").cloned(),
             };
             Ok(RespuestaYpfRuta::GastosEmpresa(respuesta))
         }

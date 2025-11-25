@@ -473,3 +473,1155 @@
 25/11/2025 - 15:11:00 [DEBUG] YpfPeer 2: Ping recibido.
 25/11/2025 - 15:11:00 [DEBUG] YpfPeer 2: Pong enviado exitosamente
 25/11/2025 - 15:11:00 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:17:11 [INFO] YpfRuta 3: Creando instancia
+25/11/2025 - 15:17:11 [INFO] Gestor actor iniciado
+25/11/2025 - 15:17:11 [INFO] YpfRuta 3: Intentando conectar a peers...
+25/11/2025 - 15:17:11 [INFO] YpfRuta 3: Escuchando conexiones entrantes de peers...
+25/11/2025 - 15:17:11 [DEBUG] YpfRuta 3: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...
+25/11/2025 - 15:17:11 [DEBUG] YpfRuta 3: Iniciando procesador de cola de ventas...
+25/11/2025 - 15:17:11 [DEBUG] YpfRuta 3: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...
+25/11/2025 - 15:17:11 [INFO] YpfRuta 3: Escuchando conexiones entrantes de empresas en puerto 19082
+25/11/2025 - 15:17:11 [INFO] YpfRuta 3: Listener de estaciones activo en puerto 18082
+25/11/2025 - 15:17:11 [ERROR] YpfPeer 1: Error al obtener socket - No se pudo conectar al YpfPeer 1: Connection refused (os error 111)
+25/11/2025 - 15:17:11 [INFO] YpfRuta 3: Peer 1 iniciado.
+25/11/2025 - 15:17:11 [ERROR] YpfPeer 2: Error al obtener socket - No se pudo conectar al YpfPeer 2: Connection refused (os error 111)
+25/11/2025 - 15:17:11 [INFO] YpfRuta 3: Peer 2 iniciado.
+25/11/2025 - 15:17:11 [INFO] YpfPeer 1: Iniciado correctamente.
+25/11/2025 - 15:17:11 [WARN] YpfPeer 1: No se puede iniciar el ping loop sin un socket válido.
+25/11/2025 - 15:17:11 [INFO] YpfPeer 2: Iniciado correctamente.
+25/11/2025 - 15:17:11 [WARN] YpfPeer 2: No se puede iniciar el ping loop sin un socket válido.
+25/11/2025 - 15:17:11 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: 
+25/11/2025 - 15:17:11 [ERROR] YpfRuta 3: Formato de mensaje inválido. Se esperaba: ID_LOCAL:<ID>, recibido: 
+25/11/2025 - 15:17:11 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: ID_LOCAL:2
+25/11/2025 - 15:17:11 [DEBUG] YpfRuta 3: Conexión entrante del peer 2
+25/11/2025 - 15:17:11 [DEBUG] YpfRuta 3: Peer 2 ya existe, enviando socket
+25/11/2025 - 15:17:11 [DEBUG] YpfPeer 2: Guardando socket entrante...
+25/11/2025 - 15:17:11 [DEBUG] YpfPeer 2: Iniciando ping loop...
+25/11/2025 - 15:17:11 [DEBUG] YpfPeer 2: Socket guardado exitosamente.
+25/11/2025 - 15:17:11 [DEBUG] YpfRuta 3: Socket del peer 2 está listo
+25/11/2025 - 15:17:11 [DEBUG] YpfRuta 3: Enviando NuevoLider al peer 2 (socket listo)
+25/11/2025 - 15:17:11 [DEBUG] YpfPeer 2: Recibido nuevo líder: 3
+25/11/2025 - 15:17:11 [DEBUG] YpfPeer 2: Enviando nuevo líder al socket: byte[0] = 52
+25/11/2025 - 15:17:11 [DEBUG] YpfPeer 2: Iniciando tarea de escritura del socket...
+25/11/2025 - 15:17:11 [DEBUG] YpfPeer 2: Iniciando tarea de lectura del socket...
+25/11/2025 - 15:17:11 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: 
+25/11/2025 - 15:17:11 [ERROR] YpfRuta 3: Formato de mensaje inválido. Se esperaba: ID_LOCAL:<ID>, recibido: 
+25/11/2025 - 15:17:11 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: ID_LOCAL:1
+25/11/2025 - 15:17:11 [DEBUG] YpfRuta 3: Conexión entrante del peer 1
+25/11/2025 - 15:17:11 [DEBUG] YpfRuta 3: Peer 1 ya existe, enviando socket
+25/11/2025 - 15:17:11 [DEBUG] YpfPeer 1: Guardando socket entrante...
+25/11/2025 - 15:17:11 [DEBUG] YpfPeer 1: Iniciando ping loop...
+25/11/2025 - 15:17:11 [DEBUG] YpfPeer 1: Socket guardado exitosamente.
+25/11/2025 - 15:17:11 [DEBUG] YpfRuta 3: Socket del peer 1 está listo
+25/11/2025 - 15:17:11 [DEBUG] YpfRuta 3: Enviando NuevoLider al peer 1 (socket listo)
+25/11/2025 - 15:17:11 [DEBUG] YpfPeer 1: Recibido nuevo líder: 3
+25/11/2025 - 15:17:11 [DEBUG] YpfPeer 1: Enviando nuevo líder al socket: byte[0] = 52
+25/11/2025 - 15:17:11 [DEBUG] YpfPeer 1: Iniciando tarea de escritura del socket...
+25/11/2025 - 15:17:11 [DEBUG] YpfPeer 1: Iniciando tarea de lectura del socket...
+25/11/2025 - 15:17:41 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:17:41 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:17:41 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:17:41 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:17:41 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:17:41 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:17:41 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:17:41 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:17:41 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:18:04 [INFO] YpfRuta 3: Nueva conexión de empresa desde 127.0.0.1:52304
+25/11/2025 - 15:18:11 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:18:11 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:18:11 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:18:11 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:18:11 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:18:11 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:18:11 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:18:11 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:18:11 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:18:33 [INFO] YpfRuta 3: Recibido GastosEmpresa para empresa 1
+25/11/2025 - 15:18:33 [INFO] YpfRuta 3: Estado de empresa 1 consultado exitosamente
+25/11/2025 - 15:18:41 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:18:41 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:18:41 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:18:41 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:18:41 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:18:41 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:18:41 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:18:41 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:18:41 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:19:11 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:19:11 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:19:11 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:19:11 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:19:11 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:19:11 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:19:11 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:19:11 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:19:11 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:19:41 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:19:41 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:19:41 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:19:41 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:19:41 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:19:41 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:19:41 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:19:41 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:19:41 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:20:11 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:20:11 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:20:11 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:20:11 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:20:11 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:20:11 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:20:11 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:20:11 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:20:11 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:20:41 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:20:41 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:20:41 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:20:41 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:20:41 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:20:41 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:20:41 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:20:41 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:20:41 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:21:11 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:21:11 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:21:11 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:21:11 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:21:11 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:21:11 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:21:11 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:21:11 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:21:11 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:21:41 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:21:41 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:21:41 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:21:41 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:21:41 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:21:41 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:21:41 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:21:41 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:21:41 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:21:45 [INFO] YpfRuta 3: Recibido GastosEmpresa para empresa 1
+25/11/2025 - 15:21:45 [INFO] YpfRuta 3: Estado de empresa 1 consultado exitosamente
+25/11/2025 - 15:22:11 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:22:11 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:22:11 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:22:11 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:22:11 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:22:11 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:22:11 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:22:11 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:22:11 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:22:19 [INFO] YpfRuta 3: Creando instancia
+25/11/2025 - 15:22:19 [INFO] Gestor actor iniciado
+25/11/2025 - 15:22:19 [INFO] YpfRuta 3: Intentando conectar a peers...
+25/11/2025 - 15:22:19 [INFO] YpfRuta 3: Escuchando conexiones entrantes de peers...
+25/11/2025 - 15:22:19 [DEBUG] YpfRuta 3: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...
+25/11/2025 - 15:22:19 [DEBUG] YpfRuta 3: Iniciando procesador de cola de ventas...
+25/11/2025 - 15:22:19 [DEBUG] YpfRuta 3: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...
+25/11/2025 - 15:22:19 [INFO] YpfRuta 3: Escuchando conexiones entrantes de empresas en puerto 19082
+25/11/2025 - 15:22:19 [INFO] YpfRuta 3: Listener de estaciones activo en puerto 18082
+25/11/2025 - 15:22:19 [ERROR] YpfPeer 1: Error al obtener socket - No se pudo conectar al YpfPeer 1: Connection refused (os error 111)
+25/11/2025 - 15:22:19 [INFO] YpfRuta 3: Peer 1 iniciado.
+25/11/2025 - 15:22:19 [ERROR] YpfPeer 2: Error al obtener socket - No se pudo conectar al YpfPeer 2: Connection refused (os error 111)
+25/11/2025 - 15:22:19 [INFO] YpfRuta 3: Peer 2 iniciado.
+25/11/2025 - 15:22:19 [INFO] YpfPeer 1: Iniciado correctamente.
+25/11/2025 - 15:22:19 [WARN] YpfPeer 1: No se puede iniciar el ping loop sin un socket válido.
+25/11/2025 - 15:22:19 [INFO] YpfPeer 2: Iniciado correctamente.
+25/11/2025 - 15:22:19 [WARN] YpfPeer 2: No se puede iniciar el ping loop sin un socket válido.
+25/11/2025 - 15:22:20 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: 
+25/11/2025 - 15:22:20 [ERROR] YpfRuta 3: Formato de mensaje inválido. Se esperaba: ID_LOCAL:<ID>, recibido: 
+25/11/2025 - 15:22:20 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: ID_LOCAL:2
+25/11/2025 - 15:22:20 [DEBUG] YpfRuta 3: Conexión entrante del peer 2
+25/11/2025 - 15:22:20 [DEBUG] YpfRuta 3: Peer 2 ya existe, enviando socket
+25/11/2025 - 15:22:20 [DEBUG] YpfPeer 2: Guardando socket entrante...
+25/11/2025 - 15:22:20 [DEBUG] YpfPeer 2: Iniciando ping loop...
+25/11/2025 - 15:22:20 [DEBUG] YpfPeer 2: Socket guardado exitosamente.
+25/11/2025 - 15:22:20 [DEBUG] YpfRuta 3: Socket del peer 2 está listo
+25/11/2025 - 15:22:20 [DEBUG] YpfRuta 3: Enviando NuevoLider al peer 2 (socket listo)
+25/11/2025 - 15:22:20 [DEBUG] YpfPeer 2: Recibido nuevo líder: 3
+25/11/2025 - 15:22:20 [DEBUG] YpfPeer 2: Enviando nuevo líder al socket: byte[0] = 52
+25/11/2025 - 15:22:20 [DEBUG] YpfPeer 2: Iniciando tarea de escritura del socket...
+25/11/2025 - 15:22:20 [DEBUG] YpfPeer 2: Iniciando tarea de lectura del socket...
+25/11/2025 - 15:22:21 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: 
+25/11/2025 - 15:22:21 [ERROR] YpfRuta 3: Formato de mensaje inválido. Se esperaba: ID_LOCAL:<ID>, recibido: 
+25/11/2025 - 15:22:21 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: ID_LOCAL:1
+25/11/2025 - 15:22:21 [DEBUG] YpfRuta 3: Conexión entrante del peer 1
+25/11/2025 - 15:22:21 [DEBUG] YpfRuta 3: Peer 1 ya existe, enviando socket
+25/11/2025 - 15:22:21 [DEBUG] YpfPeer 1: Guardando socket entrante...
+25/11/2025 - 15:22:21 [DEBUG] YpfPeer 1: Iniciando ping loop...
+25/11/2025 - 15:22:21 [DEBUG] YpfPeer 1: Socket guardado exitosamente.
+25/11/2025 - 15:22:21 [DEBUG] YpfRuta 3: Socket del peer 1 está listo
+25/11/2025 - 15:22:21 [DEBUG] YpfRuta 3: Enviando NuevoLider al peer 1 (socket listo)
+25/11/2025 - 15:22:21 [DEBUG] YpfPeer 1: Recibido nuevo líder: 3
+25/11/2025 - 15:22:21 [DEBUG] YpfPeer 1: Enviando nuevo líder al socket: byte[0] = 52
+25/11/2025 - 15:22:21 [DEBUG] YpfPeer 1: Iniciando tarea de escritura del socket...
+25/11/2025 - 15:22:21 [DEBUG] YpfPeer 1: Iniciando tarea de lectura del socket...
+25/11/2025 - 15:22:35 [INFO] YpfRuta 3: Nueva conexión de empresa desde 127.0.0.1:41774
+25/11/2025 - 15:22:41 [INFO] YpfRuta 3: Recibido GastosEmpresa para empresa 1
+25/11/2025 - 15:22:41 [INFO] YpfRuta 3: Estado de empresa 1 consultado exitosamente
+25/11/2025 - 15:22:49 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:22:50 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:22:50 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:22:50 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:22:50 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:22:51 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:22:51 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:22:51 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:22:51 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:23:42 [INFO] YpfRuta 3: Creando instancia
+25/11/2025 - 15:23:42 [INFO] Gestor actor iniciado
+25/11/2025 - 15:23:42 [INFO] YpfRuta 3: Intentando conectar a peers...
+25/11/2025 - 15:23:42 [INFO] YpfRuta 3: Escuchando conexiones entrantes de peers...
+25/11/2025 - 15:23:42 [DEBUG] YpfRuta 3: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...
+25/11/2025 - 15:23:42 [DEBUG] YpfRuta 3: Iniciando procesador de cola de ventas...
+25/11/2025 - 15:23:42 [DEBUG] YpfRuta 3: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...
+25/11/2025 - 15:23:42 [INFO] YpfRuta 3: Escuchando conexiones entrantes de empresas en puerto 19082
+25/11/2025 - 15:23:42 [INFO] YpfRuta 3: Listener de estaciones activo en puerto 18082
+25/11/2025 - 15:23:42 [ERROR] YpfPeer 2: Error al obtener socket - No se pudo conectar al YpfPeer 2: Connection refused (os error 111)
+25/11/2025 - 15:23:42 [INFO] YpfRuta 3: Peer 2 iniciado.
+25/11/2025 - 15:23:42 [ERROR] YpfPeer 1: Error al obtener socket - No se pudo conectar al YpfPeer 1: Connection refused (os error 111)
+25/11/2025 - 15:23:42 [INFO] YpfRuta 3: Peer 1 iniciado.
+25/11/2025 - 15:23:42 [INFO] YpfPeer 2: Iniciado correctamente.
+25/11/2025 - 15:23:42 [WARN] YpfPeer 2: No se puede iniciar el ping loop sin un socket válido.
+25/11/2025 - 15:23:42 [INFO] YpfPeer 1: Iniciado correctamente.
+25/11/2025 - 15:23:42 [WARN] YpfPeer 1: No se puede iniciar el ping loop sin un socket válido.
+25/11/2025 - 15:23:44 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: 
+25/11/2025 - 15:23:44 [ERROR] YpfRuta 3: Formato de mensaje inválido. Se esperaba: ID_LOCAL:<ID>, recibido: 
+25/11/2025 - 15:23:44 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: ID_LOCAL:2
+25/11/2025 - 15:23:44 [DEBUG] YpfRuta 3: Conexión entrante del peer 2
+25/11/2025 - 15:23:44 [DEBUG] YpfRuta 3: Peer 2 ya existe, enviando socket
+25/11/2025 - 15:23:44 [DEBUG] YpfPeer 2: Guardando socket entrante...
+25/11/2025 - 15:23:44 [DEBUG] YpfPeer 2: Iniciando ping loop...
+25/11/2025 - 15:23:44 [DEBUG] YpfPeer 2: Socket guardado exitosamente.
+25/11/2025 - 15:23:44 [DEBUG] YpfRuta 3: Socket del peer 2 está listo
+25/11/2025 - 15:23:44 [DEBUG] YpfRuta 3: Enviando NuevoLider al peer 2 (socket listo)
+25/11/2025 - 15:23:44 [DEBUG] YpfPeer 2: Recibido nuevo líder: 3
+25/11/2025 - 15:23:44 [DEBUG] YpfPeer 2: Enviando nuevo líder al socket: byte[0] = 52
+25/11/2025 - 15:23:44 [DEBUG] YpfPeer 2: Iniciando tarea de escritura del socket...
+25/11/2025 - 15:23:44 [DEBUG] YpfPeer 2: Iniciando tarea de lectura del socket...
+25/11/2025 - 15:23:45 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: 
+25/11/2025 - 15:23:45 [ERROR] YpfRuta 3: Formato de mensaje inválido. Se esperaba: ID_LOCAL:<ID>, recibido: 
+25/11/2025 - 15:23:45 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: ID_LOCAL:1
+25/11/2025 - 15:23:45 [DEBUG] YpfRuta 3: Conexión entrante del peer 1
+25/11/2025 - 15:23:45 [DEBUG] YpfRuta 3: Peer 1 ya existe, enviando socket
+25/11/2025 - 15:23:45 [DEBUG] YpfPeer 1: Guardando socket entrante...
+25/11/2025 - 15:23:45 [DEBUG] YpfPeer 1: Iniciando ping loop...
+25/11/2025 - 15:23:45 [DEBUG] YpfPeer 1: Socket guardado exitosamente.
+25/11/2025 - 15:23:45 [DEBUG] YpfRuta 3: Socket del peer 1 está listo
+25/11/2025 - 15:23:45 [DEBUG] YpfRuta 3: Enviando NuevoLider al peer 1 (socket listo)
+25/11/2025 - 15:23:45 [DEBUG] YpfPeer 1: Recibido nuevo líder: 3
+25/11/2025 - 15:23:45 [DEBUG] YpfPeer 1: Enviando nuevo líder al socket: byte[0] = 52
+25/11/2025 - 15:23:45 [DEBUG] YpfPeer 1: Iniciando tarea de escritura del socket...
+25/11/2025 - 15:23:45 [DEBUG] YpfPeer 1: Iniciando tarea de lectura del socket...
+25/11/2025 - 15:23:54 [INFO] YpfRuta 3: Nueva conexión de empresa desde 127.0.0.1:40808
+25/11/2025 - 15:24:00 [INFO] YpfRuta 3: Recibido GastosEmpresa para empresa 1
+25/11/2025 - 15:24:00 [INFO] YpfRuta 3: Estado de empresa 1 consultado exitosamente
+25/11/2025 - 15:24:12 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:24:14 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:24:14 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:24:14 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:24:14 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:24:15 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:24:15 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:24:16 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:24:16 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:24:42 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:24:44 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:24:44 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:24:44 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:24:44 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:24:45 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:24:45 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:24:45 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:24:45 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:25:12 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:25:14 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:25:14 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:25:14 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:25:14 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:25:15 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:25:15 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:25:15 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:25:15 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:25:42 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:25:44 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:25:44 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:25:44 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:25:44 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:25:45 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:25:45 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:25:45 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:25:45 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:26:12 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:26:14 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:26:14 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:26:14 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:26:14 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:26:15 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:26:15 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:26:16 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:26:16 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:29:56 [INFO] YpfRuta 3: Creando instancia
+25/11/2025 - 15:29:56 [INFO] Gestor actor iniciado
+25/11/2025 - 15:29:56 [INFO] YpfRuta 3: Intentando conectar a peers...
+25/11/2025 - 15:29:56 [INFO] YpfRuta 3: Escuchando conexiones entrantes de peers...
+25/11/2025 - 15:29:56 [DEBUG] YpfRuta 3: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...
+25/11/2025 - 15:29:56 [DEBUG] YpfRuta 3: Iniciando procesador de cola de ventas...
+25/11/2025 - 15:29:56 [DEBUG] YpfRuta 3: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...
+25/11/2025 - 15:29:56 [INFO] YpfRuta 3: Escuchando conexiones entrantes de empresas en puerto 19082
+25/11/2025 - 15:29:56 [INFO] YpfRuta 3: Listener de estaciones activo en puerto 18082
+25/11/2025 - 15:29:56 [ERROR] YpfPeer 2: Error al obtener socket - No se pudo conectar al YpfPeer 2: Connection refused (os error 111)
+25/11/2025 - 15:29:56 [INFO] YpfRuta 3: Peer 2 iniciado.
+25/11/2025 - 15:29:56 [ERROR] YpfPeer 1: Error al obtener socket - No se pudo conectar al YpfPeer 1: Connection refused (os error 111)
+25/11/2025 - 15:29:56 [INFO] YpfRuta 3: Peer 1 iniciado.
+25/11/2025 - 15:29:56 [INFO] YpfPeer 2: Iniciado correctamente.
+25/11/2025 - 15:29:56 [WARN] YpfPeer 2: No se puede iniciar el ping loop sin un socket válido.
+25/11/2025 - 15:29:56 [INFO] YpfPeer 1: Iniciado correctamente.
+25/11/2025 - 15:29:56 [WARN] YpfPeer 1: No se puede iniciar el ping loop sin un socket válido.
+25/11/2025 - 15:29:58 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: 
+25/11/2025 - 15:29:58 [ERROR] YpfRuta 3: Formato de mensaje inválido. Se esperaba: ID_LOCAL:<ID>, recibido: 
+25/11/2025 - 15:29:58 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: ID_LOCAL:2
+25/11/2025 - 15:29:58 [DEBUG] YpfRuta 3: Conexión entrante del peer 2
+25/11/2025 - 15:29:58 [DEBUG] YpfRuta 3: Peer 2 ya existe, enviando socket
+25/11/2025 - 15:29:58 [DEBUG] YpfPeer 2: Guardando socket entrante...
+25/11/2025 - 15:29:58 [DEBUG] YpfPeer 2: Iniciando ping loop...
+25/11/2025 - 15:29:58 [DEBUG] YpfPeer 2: Socket guardado exitosamente.
+25/11/2025 - 15:29:58 [DEBUG] YpfRuta 3: Socket del peer 2 está listo
+25/11/2025 - 15:29:58 [DEBUG] YpfRuta 3: Enviando NuevoLider al peer 2 (socket listo)
+25/11/2025 - 15:29:58 [DEBUG] YpfPeer 2: Recibido nuevo líder: 3
+25/11/2025 - 15:29:58 [DEBUG] YpfPeer 2: Enviando nuevo líder al socket: byte[0] = 52
+25/11/2025 - 15:29:58 [DEBUG] YpfPeer 2: Iniciando tarea de escritura del socket...
+25/11/2025 - 15:29:58 [DEBUG] YpfPeer 2: Iniciando tarea de lectura del socket...
+25/11/2025 - 15:29:59 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: 
+25/11/2025 - 15:29:59 [ERROR] YpfRuta 3: Formato de mensaje inválido. Se esperaba: ID_LOCAL:<ID>, recibido: 
+25/11/2025 - 15:29:59 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: ID_LOCAL:1
+25/11/2025 - 15:29:59 [DEBUG] YpfRuta 3: Conexión entrante del peer 1
+25/11/2025 - 15:29:59 [DEBUG] YpfRuta 3: Peer 1 ya existe, enviando socket
+25/11/2025 - 15:29:59 [DEBUG] YpfPeer 1: Guardando socket entrante...
+25/11/2025 - 15:29:59 [DEBUG] YpfPeer 1: Iniciando ping loop...
+25/11/2025 - 15:29:59 [DEBUG] YpfPeer 1: Socket guardado exitosamente.
+25/11/2025 - 15:29:59 [DEBUG] YpfRuta 3: Socket del peer 1 está listo
+25/11/2025 - 15:29:59 [DEBUG] YpfRuta 3: Enviando NuevoLider al peer 1 (socket listo)
+25/11/2025 - 15:29:59 [DEBUG] YpfPeer 1: Recibido nuevo líder: 3
+25/11/2025 - 15:29:59 [DEBUG] YpfPeer 1: Enviando nuevo líder al socket: byte[0] = 52
+25/11/2025 - 15:29:59 [DEBUG] YpfPeer 1: Iniciando tarea de escritura del socket...
+25/11/2025 - 15:29:59 [DEBUG] YpfPeer 1: Iniciando tarea de lectura del socket...
+25/11/2025 - 15:30:26 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:30:28 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:30:28 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:30:28 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:30:28 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:30:29 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:30:29 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:30:29 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:30:29 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:30:37 [INFO] YpfRuta 3: Nueva conexión de estación desde 127.0.0.1:44002
+25/11/2025 - 15:30:37 [DEBUG] YpfRuta 3: Actor de Estacion creado para 127.0.0.1:44002
+25/11/2025 - 15:30:37 [INFO] Estacion actor iniciado.
+25/11/2025 - 15:30:37 [INFO] Estacion: envié ValidarVentas a YpfRuta.
+25/11/2025 - 15:30:37 [DEBUG] YpfRuta 3: Recibidas 1 ventas para validar
+25/11/2025 - 15:30:37 [DEBUG] YpfRuta 3: Ventas agregadas a la cola. Total en cola: 1
+25/11/2025 - 15:30:37 [DEBUG] YpfRuta 3: Procesando 1 ventas de la cola
+25/11/2025 - 15:30:37 [DEBUG] YpfRuta 3: Validando venta 1764095422258 en el gestor
+25/11/2025 - 15:30:37 [DEBUG] YpfRuta 3: Venta 1764095422258 - Resultado: true
+25/11/2025 - 15:30:37 [DEBUG] YpfRuta 3: Replicando venta 1764095422258 a 2 peers
+25/11/2025 - 15:30:37 [DEBUG] Estacion: recibí ResultadoVentas
+25/11/2025 - 15:30:37 [DEBUG] YpfPeer: encolando venta registrada
+25/11/2025 - 15:30:37 [DEBUG] YpfPeer: encolando venta registrada
+25/11/2025 - 15:30:56 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:30:58 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:30:58 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:30:58 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:30:58 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:30:59 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:30:59 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:30:59 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:30:59 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:31:22 [INFO] YpfRuta 3: Nueva conexión de empresa desde 127.0.0.1:40932
+25/11/2025 - 15:31:26 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:31:28 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:31:28 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:31:28 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:31:28 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:31:29 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:31:29 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:31:29 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:31:29 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:31:32 [INFO] YpfRuta 3: Recibido GastosEmpresa para empresa 1
+25/11/2025 - 15:31:32 [INFO] YpfRuta 3: Estado de empresa 1 consultado exitosamente
+25/11/2025 - 15:31:56 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:31:58 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:31:58 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:31:58 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:31:58 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:31:59 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:31:59 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:31:59 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:31:59 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:32:26 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:32:28 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:32:28 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:32:28 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:32:28 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:32:29 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:32:29 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:32:29 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:32:29 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:32:56 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:32:58 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:32:58 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:32:58 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:32:58 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:32:59 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:32:59 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:32:59 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:32:59 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:33:26 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:33:28 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:33:28 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:33:28 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:33:28 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:33:29 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:33:29 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:33:29 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:33:29 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:35:47 [INFO] YpfRuta 3: Creando instancia
+25/11/2025 - 15:35:47 [INFO] Gestor actor iniciado
+25/11/2025 - 15:35:47 [INFO] YpfRuta 3: Intentando conectar a peers...
+25/11/2025 - 15:35:47 [INFO] YpfRuta 3: Escuchando conexiones entrantes de peers...
+25/11/2025 - 15:35:47 [DEBUG] YpfRuta 3: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...
+25/11/2025 - 15:35:47 [DEBUG] YpfRuta 3: Iniciando procesador de cola de ventas...
+25/11/2025 - 15:35:47 [DEBUG] YpfRuta 3: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...
+25/11/2025 - 15:35:47 [INFO] YpfRuta 3: Escuchando conexiones entrantes de empresas en puerto 19082
+25/11/2025 - 15:35:47 [INFO] YpfRuta 3: Listener de estaciones activo en puerto 18082
+25/11/2025 - 15:35:47 [ERROR] YpfPeer 2: Error al obtener socket - No se pudo conectar al YpfPeer 2: Connection refused (os error 111)
+25/11/2025 - 15:35:47 [INFO] YpfRuta 3: Peer 2 iniciado.
+25/11/2025 - 15:35:47 [INFO] YpfPeer 2: Iniciado correctamente.
+25/11/2025 - 15:35:47 [WARN] YpfPeer 2: No se puede iniciar el ping loop sin un socket válido.
+25/11/2025 - 15:35:47 [INFO] YpfRuta 3: Peer 1 iniciado.
+25/11/2025 - 15:35:47 [INFO] YpfPeer 1: Iniciado correctamente.
+25/11/2025 - 15:35:47 [DEBUG] YpfPeer 1: Iniciando ping loop...
+25/11/2025 - 15:35:47 [DEBUG] YpfRuta 3: Socket del peer 1 está listo
+25/11/2025 - 15:35:47 [DEBUG] YpfRuta 3: Enviando NuevoLider al peer 1 (socket listo)
+25/11/2025 - 15:35:47 [DEBUG] YpfPeer 1: Recibido nuevo líder: 3
+25/11/2025 - 15:35:47 [DEBUG] YpfPeer 1: Enviando nuevo líder al socket: byte[0] = 52
+25/11/2025 - 15:35:47 [DEBUG] YpfPeer 1: Iniciando tarea de escritura del socket...
+25/11/2025 - 15:35:47 [DEBUG] YpfPeer 1: Iniciando tarea de lectura del socket...
+25/11/2025 - 15:35:47 [DEBUG] YpfRuta 3: Recibido anuncio de COORDINATOR del nodo 1
+25/11/2025 - 15:35:47 [INFO] YpfRuta 3: Nodo 1 es el nuevo líder.
+25/11/2025 - 15:35:47 [WARN] YpfPeer 1: Conexión cerrada por el peer remoto.
+25/11/2025 - 15:35:47 [WARN] YpfRuta 3: Peer 1 desconectado.
+25/11/2025 - 15:35:47 [INFO] YpfRuta 3: El líder 1 se ha desconectado. Iniciando elección Bully.
+25/11/2025 - 15:35:47 [INFO] YpfRuta 3: Iniciando elección Bully
+25/11/2025 - 15:35:47 [INFO] YpfRuta 3: No hay nodos con ID mayor. Me declaro líder.
+25/11/2025 - 15:35:47 [INFO] YpfRuta 3: Soy el nuevo LÍDER
+25/11/2025 - 15:35:47 [INFO] YpfRuta 3: Enviando COORDINATOR al peer 2
+25/11/2025 - 15:35:47 [DEBUG] YpfPeer 2: Recibido nuevo líder: 3
+25/11/2025 - 15:35:51 [INFO] YpfRuta 3: Creando instancia
+25/11/2025 - 15:35:51 [INFO] Gestor actor iniciado
+25/11/2025 - 15:35:51 [INFO] YpfRuta 3: Intentando conectar a peers...
+25/11/2025 - 15:35:51 [INFO] YpfRuta 3: Escuchando conexiones entrantes de peers...
+25/11/2025 - 15:35:51 [DEBUG] YpfRuta 3: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...
+25/11/2025 - 15:35:51 [DEBUG] YpfRuta 3: Iniciando procesador de cola de ventas...
+25/11/2025 - 15:35:51 [DEBUG] YpfRuta 3: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...
+25/11/2025 - 15:35:51 [INFO] YpfRuta 3: Escuchando conexiones entrantes de empresas en puerto 19082
+25/11/2025 - 15:35:51 [INFO] YpfRuta 3: Listener de estaciones activo en puerto 18082
+25/11/2025 - 15:35:51 [ERROR] YpfPeer 1: Error al obtener socket - No se pudo conectar al YpfPeer 1: Connection refused (os error 111)
+25/11/2025 - 15:35:51 [INFO] YpfRuta 3: Peer 1 iniciado.
+25/11/2025 - 15:35:51 [ERROR] YpfPeer 2: Error al obtener socket - No se pudo conectar al YpfPeer 2: Connection refused (os error 111)
+25/11/2025 - 15:35:51 [INFO] YpfRuta 3: Peer 2 iniciado.
+25/11/2025 - 15:35:51 [INFO] YpfPeer 1: Iniciado correctamente.
+25/11/2025 - 15:35:51 [WARN] YpfPeer 1: No se puede iniciar el ping loop sin un socket válido.
+25/11/2025 - 15:35:51 [INFO] YpfPeer 2: Iniciado correctamente.
+25/11/2025 - 15:35:51 [WARN] YpfPeer 2: No se puede iniciar el ping loop sin un socket válido.
+25/11/2025 - 15:35:52 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: 
+25/11/2025 - 15:35:52 [ERROR] YpfRuta 3: Formato de mensaje inválido. Se esperaba: ID_LOCAL:<ID>, recibido: 
+25/11/2025 - 15:35:52 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: ID_LOCAL:2
+25/11/2025 - 15:35:52 [DEBUG] YpfRuta 3: Conexión entrante del peer 2
+25/11/2025 - 15:35:52 [DEBUG] YpfRuta 3: Peer 2 ya existe, enviando socket
+25/11/2025 - 15:35:52 [DEBUG] YpfPeer 2: Guardando socket entrante...
+25/11/2025 - 15:35:52 [DEBUG] YpfPeer 2: Iniciando ping loop...
+25/11/2025 - 15:35:52 [DEBUG] YpfPeer 2: Socket guardado exitosamente.
+25/11/2025 - 15:35:52 [DEBUG] YpfRuta 3: Socket del peer 2 está listo
+25/11/2025 - 15:35:52 [DEBUG] YpfRuta 3: Enviando NuevoLider al peer 2 (socket listo)
+25/11/2025 - 15:35:52 [DEBUG] YpfPeer 2: Recibido nuevo líder: 3
+25/11/2025 - 15:35:52 [DEBUG] YpfPeer 2: Enviando nuevo líder al socket: byte[0] = 52
+25/11/2025 - 15:35:52 [DEBUG] YpfPeer 2: Iniciando tarea de escritura del socket...
+25/11/2025 - 15:35:52 [DEBUG] YpfPeer 2: Iniciando tarea de lectura del socket...
+25/11/2025 - 15:35:54 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: 
+25/11/2025 - 15:35:54 [ERROR] YpfRuta 3: Formato de mensaje inválido. Se esperaba: ID_LOCAL:<ID>, recibido: 
+25/11/2025 - 15:35:54 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: ID_LOCAL:1
+25/11/2025 - 15:35:54 [DEBUG] YpfRuta 3: Conexión entrante del peer 1
+25/11/2025 - 15:35:54 [DEBUG] YpfRuta 3: Peer 1 ya existe, enviando socket
+25/11/2025 - 15:35:54 [DEBUG] YpfPeer 1: Guardando socket entrante...
+25/11/2025 - 15:35:54 [DEBUG] YpfPeer 1: Iniciando ping loop...
+25/11/2025 - 15:35:54 [DEBUG] YpfPeer 1: Socket guardado exitosamente.
+25/11/2025 - 15:35:54 [DEBUG] YpfRuta 3: Socket del peer 1 está listo
+25/11/2025 - 15:35:54 [DEBUG] YpfRuta 3: Enviando NuevoLider al peer 1 (socket listo)
+25/11/2025 - 15:35:54 [DEBUG] YpfPeer 1: Recibido nuevo líder: 3
+25/11/2025 - 15:35:54 [DEBUG] YpfPeer 1: Enviando nuevo líder al socket: byte[0] = 52
+25/11/2025 - 15:35:54 [DEBUG] YpfPeer 1: Iniciando tarea de escritura del socket...
+25/11/2025 - 15:35:54 [DEBUG] YpfPeer 1: Iniciando tarea de lectura del socket...
+25/11/2025 - 15:36:21 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:36:22 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:36:22 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:36:22 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:36:22 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:36:24 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:36:24 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:36:24 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:36:24 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:36:51 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:36:52 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:36:52 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:36:52 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:36:52 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:36:54 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:36:54 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:36:54 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:36:54 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:37:08 [INFO] YpfRuta 3: Nueva conexión de empresa desde 127.0.0.1:53130
+25/11/2025 - 15:37:21 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:37:22 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:37:22 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:37:22 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:37:22 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:37:23 [INFO] YpfRuta 3: Recibido GastosEmpresa para empresa 1
+25/11/2025 - 15:37:23 [INFO] YpfRuta 3: Estado de empresa 1 consultado exitosamente
+25/11/2025 - 15:37:24 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:37:24 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:37:24 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:37:24 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:37:51 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:37:52 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:37:52 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:37:52 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:37:52 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:37:54 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:37:54 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:37:54 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:37:54 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:38:21 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:38:22 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:38:22 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:38:22 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:38:22 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:38:24 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:38:24 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:38:24 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:38:24 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:38:51 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:38:52 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:38:52 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:38:52 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:38:52 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:38:54 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:38:54 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:38:54 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:38:54 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:39:21 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:39:22 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:39:22 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:39:22 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:39:22 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:39:24 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:39:24 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:39:24 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:39:24 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:39:51 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:39:52 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:39:52 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:39:52 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:39:52 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:39:54 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:39:54 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:39:54 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:39:54 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:40:21 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:40:22 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:40:22 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:40:22 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:40:22 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:40:24 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:40:24 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:40:24 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:40:24 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:40:42 [INFO] YpfRuta 3: Creando instancia
+25/11/2025 - 15:40:42 [INFO] Gestor actor iniciado
+25/11/2025 - 15:40:42 [INFO] YpfRuta 3: Intentando conectar a peers...
+25/11/2025 - 15:40:42 [INFO] YpfRuta 3: Escuchando conexiones entrantes de peers...
+25/11/2025 - 15:40:42 [DEBUG] YpfRuta 3: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...
+25/11/2025 - 15:40:42 [DEBUG] YpfRuta 3: Iniciando procesador de cola de ventas...
+25/11/2025 - 15:40:42 [DEBUG] YpfRuta 3: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...
+25/11/2025 - 15:40:42 [INFO] YpfRuta 3: Escuchando conexiones entrantes de empresas en puerto 19082
+25/11/2025 - 15:40:42 [INFO] YpfRuta 3: Listener de estaciones activo en puerto 18082
+25/11/2025 - 15:40:42 [ERROR] YpfPeer 2: Error al obtener socket - No se pudo conectar al YpfPeer 2: Connection refused (os error 111)
+25/11/2025 - 15:40:42 [INFO] YpfRuta 3: Peer 2 iniciado.
+25/11/2025 - 15:40:42 [INFO] YpfPeer 2: Iniciado correctamente.
+25/11/2025 - 15:40:42 [WARN] YpfPeer 2: No se puede iniciar el ping loop sin un socket válido.
+25/11/2025 - 15:40:42 [INFO] YpfRuta 3: Peer 1 iniciado.
+25/11/2025 - 15:40:42 [INFO] YpfPeer 1: Iniciado correctamente.
+25/11/2025 - 15:40:42 [DEBUG] YpfPeer 1: Iniciando ping loop...
+25/11/2025 - 15:40:42 [DEBUG] YpfRuta 3: Socket del peer 1 está listo
+25/11/2025 - 15:40:42 [DEBUG] YpfRuta 3: Enviando NuevoLider al peer 1 (socket listo)
+25/11/2025 - 15:40:42 [DEBUG] YpfPeer 1: Recibido nuevo líder: 3
+25/11/2025 - 15:40:42 [DEBUG] YpfPeer 1: Enviando nuevo líder al socket: byte[0] = 52
+25/11/2025 - 15:40:42 [DEBUG] YpfPeer 1: Iniciando tarea de escritura del socket...
+25/11/2025 - 15:40:42 [DEBUG] YpfPeer 1: Iniciando tarea de lectura del socket...
+25/11/2025 - 15:40:42 [DEBUG] YpfRuta 3: Recibido anuncio de COORDINATOR del nodo 1
+25/11/2025 - 15:40:42 [INFO] YpfRuta 3: Nodo 1 es el nuevo líder.
+25/11/2025 - 15:40:44 [WARN] YpfPeer 1: Conexión cerrada por el peer remoto.
+25/11/2025 - 15:40:44 [WARN] YpfRuta 3: Peer 1 desconectado.
+25/11/2025 - 15:40:44 [INFO] YpfRuta 3: El líder 1 se ha desconectado. Iniciando elección Bully.
+25/11/2025 - 15:40:44 [INFO] YpfRuta 3: Iniciando elección Bully
+25/11/2025 - 15:40:44 [INFO] YpfRuta 3: No hay nodos con ID mayor. Me declaro líder.
+25/11/2025 - 15:40:44 [INFO] YpfRuta 3: Soy el nuevo LÍDER
+25/11/2025 - 15:40:44 [INFO] YpfRuta 3: Enviando COORDINATOR al peer 2
+25/11/2025 - 15:40:44 [DEBUG] YpfPeer 2: Recibido nuevo líder: 3
+25/11/2025 - 15:40:50 [INFO] YpfRuta 3: Creando instancia
+25/11/2025 - 15:40:50 [INFO] Gestor actor iniciado
+25/11/2025 - 15:40:50 [INFO] YpfRuta 3: Intentando conectar a peers...
+25/11/2025 - 15:40:50 [INFO] YpfRuta 3: Escuchando conexiones entrantes de peers...
+25/11/2025 - 15:40:50 [DEBUG] YpfRuta 3: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...
+25/11/2025 - 15:40:50 [DEBUG] YpfRuta 3: Iniciando procesador de cola de ventas...
+25/11/2025 - 15:40:50 [DEBUG] YpfRuta 3: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...
+25/11/2025 - 15:40:50 [INFO] YpfRuta 3: Escuchando conexiones entrantes de empresas en puerto 19082
+25/11/2025 - 15:40:50 [INFO] YpfRuta 3: Listener de estaciones activo en puerto 18082
+25/11/2025 - 15:40:50 [ERROR] YpfPeer 2: Error al obtener socket - No se pudo conectar al YpfPeer 2: Connection refused (os error 111)
+25/11/2025 - 15:40:50 [INFO] YpfRuta 3: Peer 2 iniciado.
+25/11/2025 - 15:40:50 [ERROR] YpfPeer 1: Error al obtener socket - No se pudo conectar al YpfPeer 1: Connection refused (os error 111)
+25/11/2025 - 15:40:50 [INFO] YpfRuta 3: Peer 1 iniciado.
+25/11/2025 - 15:40:50 [INFO] YpfPeer 2: Iniciado correctamente.
+25/11/2025 - 15:40:50 [WARN] YpfPeer 2: No se puede iniciar el ping loop sin un socket válido.
+25/11/2025 - 15:40:50 [INFO] YpfPeer 1: Iniciado correctamente.
+25/11/2025 - 15:40:50 [WARN] YpfPeer 1: No se puede iniciar el ping loop sin un socket válido.
+25/11/2025 - 15:40:54 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: 
+25/11/2025 - 15:40:54 [ERROR] YpfRuta 3: Formato de mensaje inválido. Se esperaba: ID_LOCAL:<ID>, recibido: 
+25/11/2025 - 15:40:54 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: ID_LOCAL:2
+25/11/2025 - 15:40:54 [DEBUG] YpfRuta 3: Conexión entrante del peer 2
+25/11/2025 - 15:40:54 [DEBUG] YpfRuta 3: Peer 2 ya existe, enviando socket
+25/11/2025 - 15:40:54 [DEBUG] YpfPeer 2: Guardando socket entrante...
+25/11/2025 - 15:40:54 [DEBUG] YpfPeer 2: Iniciando ping loop...
+25/11/2025 - 15:40:54 [DEBUG] YpfPeer 2: Socket guardado exitosamente.
+25/11/2025 - 15:40:54 [DEBUG] YpfRuta 3: Socket del peer 2 está listo
+25/11/2025 - 15:40:54 [DEBUG] YpfRuta 3: Enviando NuevoLider al peer 2 (socket listo)
+25/11/2025 - 15:40:54 [DEBUG] YpfPeer 2: Recibido nuevo líder: 3
+25/11/2025 - 15:40:54 [DEBUG] YpfPeer 2: Enviando nuevo líder al socket: byte[0] = 52
+25/11/2025 - 15:40:54 [DEBUG] YpfPeer 2: Iniciando tarea de escritura del socket...
+25/11/2025 - 15:40:54 [DEBUG] YpfPeer 2: Iniciando tarea de lectura del socket...
+25/11/2025 - 15:40:56 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: 
+25/11/2025 - 15:40:56 [ERROR] YpfRuta 3: Formato de mensaje inválido. Se esperaba: ID_LOCAL:<ID>, recibido: 
+25/11/2025 - 15:40:56 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: ID_LOCAL:1
+25/11/2025 - 15:40:56 [DEBUG] YpfRuta 3: Conexión entrante del peer 1
+25/11/2025 - 15:40:56 [DEBUG] YpfRuta 3: Peer 1 ya existe, enviando socket
+25/11/2025 - 15:40:56 [DEBUG] YpfPeer 1: Guardando socket entrante...
+25/11/2025 - 15:40:56 [DEBUG] YpfPeer 1: Iniciando ping loop...
+25/11/2025 - 15:40:56 [DEBUG] YpfPeer 1: Socket guardado exitosamente.
+25/11/2025 - 15:40:56 [DEBUG] YpfRuta 3: Socket del peer 1 está listo
+25/11/2025 - 15:40:56 [DEBUG] YpfRuta 3: Enviando NuevoLider al peer 1 (socket listo)
+25/11/2025 - 15:40:56 [DEBUG] YpfPeer 1: Recibido nuevo líder: 3
+25/11/2025 - 15:40:56 [DEBUG] YpfPeer 1: Enviando nuevo líder al socket: byte[0] = 52
+25/11/2025 - 15:40:56 [DEBUG] YpfPeer 1: Iniciando tarea de escritura del socket...
+25/11/2025 - 15:40:56 [DEBUG] YpfPeer 1: Iniciando tarea de lectura del socket...
+25/11/2025 - 15:41:07 [INFO] YpfRuta 3: Nueva conexión de empresa desde 127.0.0.1:59402
+25/11/2025 - 15:41:13 [INFO] YpfRuta 3: Recibido GastosEmpresa para empresa 1
+25/11/2025 - 15:41:13 [INFO] YpfRuta 3: Estado de empresa 1 consultado exitosamente
+25/11/2025 - 15:41:13 [INFO] YpfRuta 3: Estado de empresa 1 consultado exitosamente
+25/11/2025 - 15:41:13 [INFO] YpfRuta 3: Estado de empresa 1 consultado exitosamente: empresa:Empresa { id: 1, nombre: "Transportes Argentinos S.A.", limite_general: 1000000, consumo_actual: 79667.0 }, tarjetas:[Tarjeta { id: 3, empresa_id: 1, limite_particular: 100000, consumo_actual: 25000.0 }, Tarjeta { id: 2, empresa_id: 1, limite_particular: 30000, consumo_actual: 30000.0 }, Tarjeta { id: 1, empresa_id: 1, limite_particular: 50000, consumo_actual: 24667.0 }]
+25/11/2025 - 15:41:20 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:41:24 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:41:24 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:41:24 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:41:24 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:41:26 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:41:26 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:41:26 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:41:26 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:41:50 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:41:54 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:41:54 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:41:54 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:41:54 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:41:56 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:41:56 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:41:56 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:41:56 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:42:20 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:42:24 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:42:24 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:42:24 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:42:24 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:42:26 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:42:26 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:42:26 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:42:26 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:42:50 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:42:54 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:42:54 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:42:54 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:42:54 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:42:56 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:42:56 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:42:56 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:42:56 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:43:20 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:43:24 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:43:24 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:43:24 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:43:24 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:43:26 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:43:26 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:43:26 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:43:26 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:43:50 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:43:54 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:43:54 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:43:54 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:43:54 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:43:56 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:43:56 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:43:56 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:43:56 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:44:20 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:44:24 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:44:24 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:44:24 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:44:24 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:44:26 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:44:26 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:44:26 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:44:26 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:44:50 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:44:54 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:44:54 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:44:54 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:44:54 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:44:56 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:44:56 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:44:56 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:44:56 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:45:20 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:45:22 [INFO] YpfRuta 3: Nueva conexión de empresa desde 127.0.0.1:58624
+25/11/2025 - 15:45:24 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:45:24 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:45:24 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:45:24 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:45:26 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:45:26 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:45:26 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:45:26 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:45:27 [INFO] YpfRuta 3: Recibido GastosEmpresa para empresa 1
+25/11/2025 - 15:45:27 [INFO] YpfRuta 3: Estado de empresa 1 consultado exitosamente
+25/11/2025 - 15:45:27 [INFO] YpfRuta 3: Estado de empresa 1 consultado exitosamente
+25/11/2025 - 15:45:27 [INFO] YpfRuta 3: Estado de empresa 1 consultado exitosamente: empresa:Empresa { id: 1, nombre: "Transportes Argentinos S.A.", limite_general: 1000000, consumo_actual: 79667.0 }, tarjetas:[Tarjeta { id: 3, empresa_id: 1, limite_particular: 100000, consumo_actual: 25000.0 }, Tarjeta { id: 2, empresa_id: 1, limite_particular: 30000, consumo_actual: 30000.0 }, Tarjeta { id: 1, empresa_id: 1, limite_particular: 50000, consumo_actual: 24667.0 }]
+25/11/2025 - 15:45:50 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:45:54 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:45:54 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:45:54 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:45:54 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:45:56 [INFO] YpfRuta 3: Nueva conexión de empresa desde 127.0.0.1:45254
+25/11/2025 - 15:45:56 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:45:56 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:45:56 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:45:56 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:46:00 [INFO] YpfRuta 3: Recibido GastosEmpresa para empresa 1
+25/11/2025 - 15:46:00 [INFO] YpfRuta 3: Estado de empresa 1 consultado exitosamente
+25/11/2025 - 15:46:00 [INFO] YpfRuta 3: Estado de empresa 1 consultado exitosamente
+25/11/2025 - 15:46:00 [INFO] YpfRuta 3: Estado de empresa 1 consultado exitosamente: empresa:Empresa { id: 1, nombre: "Transportes Argentinos S.A.", limite_general: 1000000, consumo_actual: 79667.0 }, tarjetas:[Tarjeta { id: 3, empresa_id: 1, limite_particular: 100000, consumo_actual: 25000.0 }, Tarjeta { id: 2, empresa_id: 1, limite_particular: 30000, consumo_actual: 30000.0 }, Tarjeta { id: 1, empresa_id: 1, limite_particular: 50000, consumo_actual: 24667.0 }]
+25/11/2025 - 15:46:20 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:46:24 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:46:24 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:46:24 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:46:24 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:46:26 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:46:26 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:46:26 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:46:26 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:46:50 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:46:54 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:46:54 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:46:54 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:46:54 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:46:56 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:46:56 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:46:56 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:46:56 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:47:20 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:47:24 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:47:24 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:47:24 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:47:24 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:47:26 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:47:26 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:47:26 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:47:26 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:47:50 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:47:54 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:47:54 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:47:54 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:47:54 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:47:56 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:47:56 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:47:56 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:47:56 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:48:20 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:48:24 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:48:24 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:48:24 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:48:24 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:48:26 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:48:26 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:48:26 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:48:26 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:48:50 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:48:54 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:48:54 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:48:54 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:48:54 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:48:56 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:48:56 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:48:56 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:48:56 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:49:20 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:49:24 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:49:24 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:49:24 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:49:24 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:49:26 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:49:26 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:49:26 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:49:26 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:49:50 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:49:54 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:49:54 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:49:54 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:49:54 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:49:56 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:49:56 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:49:56 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:49:56 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:50:20 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:50:24 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:50:24 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:50:24 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:50:24 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:50:26 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:50:26 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:50:26 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:50:26 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:50:50 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:50:54 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:50:54 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:50:54 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:50:54 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:50:56 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:50:56 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:50:56 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:50:56 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:51:20 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:51:24 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:51:24 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:51:24 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:51:24 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:51:26 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:51:26 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:51:26 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:51:26 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:51:50 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:51:54 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:51:54 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:51:54 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:51:54 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:51:56 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:51:56 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:51:56 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:51:56 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:52:20 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:52:24 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:52:24 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:52:24 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:52:24 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:52:26 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:52:26 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:52:26 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:52:26 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:52:50 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:52:54 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:52:54 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:52:54 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:52:54 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:52:56 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:52:56 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:52:56 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:52:56 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:53:20 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:53:24 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:53:24 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:53:24 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:53:24 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:53:26 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:53:26 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:53:26 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:53:26 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:53:50 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:53:54 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:53:54 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:53:54 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:53:54 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:53:56 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:53:56 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:53:56 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:53:56 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:54:20 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:54:24 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:54:24 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:54:24 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:54:24 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:54:26 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:54:26 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:54:26 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:54:26 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:54:50 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:54:54 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:54:54 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:54:54 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:54:54 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:54:56 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:54:56 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:54:56 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:54:56 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:55:20 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:55:24 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:55:24 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:55:24 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:55:24 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:55:26 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:55:26 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:55:26 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:55:26 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:55:50 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:55:54 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:55:54 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:55:54 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:55:54 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:55:56 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:55:56 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:55:56 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:55:56 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:56:20 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:56:24 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:56:24 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:56:24 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:56:24 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:56:26 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:56:26 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:56:26 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:56:26 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:56:42 [WARN] YpfPeer 1: Conexión cerrada por el peer remoto.
+25/11/2025 - 15:56:42 [WARN] YpfRuta 3: Peer 1 desconectado.
+25/11/2025 - 15:56:43 [WARN] YpfPeer 2: Conexión cerrada por el peer remoto.
+25/11/2025 - 15:56:43 [WARN] YpfRuta 3: Peer 2 desconectado.
+25/11/2025 - 15:57:07 [INFO] YpfRuta 3: Creando instancia
+25/11/2025 - 15:57:07 [INFO] Gestor actor iniciado
+25/11/2025 - 15:57:07 [INFO] YpfRuta 3: Intentando conectar a peers...
+25/11/2025 - 15:57:07 [INFO] YpfRuta 3: Escuchando conexiones entrantes de peers...
+25/11/2025 - 15:57:07 [DEBUG] YpfRuta 3: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...
+25/11/2025 - 15:57:07 [DEBUG] YpfRuta 3: Iniciando procesador de cola de ventas...
+25/11/2025 - 15:57:07 [DEBUG] YpfRuta 3: SOY LIDER, Escuchando conexiones entrantes de estaciones líderes...
+25/11/2025 - 15:57:07 [INFO] YpfRuta 3: Escuchando conexiones entrantes de empresas en puerto 19082
+25/11/2025 - 15:57:07 [INFO] YpfRuta 3: Listener de estaciones activo en puerto 18082
+25/11/2025 - 15:57:07 [ERROR] YpfPeer 2: Error al obtener socket - No se pudo conectar al YpfPeer 2: Connection refused (os error 111)
+25/11/2025 - 15:57:07 [INFO] YpfRuta 3: Peer 2 iniciado.
+25/11/2025 - 15:57:07 [ERROR] YpfPeer 1: Error al obtener socket - No se pudo conectar al YpfPeer 1: Connection refused (os error 111)
+25/11/2025 - 15:57:07 [INFO] YpfRuta 3: Peer 1 iniciado.
+25/11/2025 - 15:57:07 [INFO] YpfPeer 2: Iniciado correctamente.
+25/11/2025 - 15:57:07 [WARN] YpfPeer 2: No se puede iniciar el ping loop sin un socket válido.
+25/11/2025 - 15:57:07 [INFO] YpfPeer 1: Iniciado correctamente.
+25/11/2025 - 15:57:07 [WARN] YpfPeer 1: No se puede iniciar el ping loop sin un socket válido.
+25/11/2025 - 15:57:07 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: 
+25/11/2025 - 15:57:07 [ERROR] YpfRuta 3: Formato de mensaje inválido. Se esperaba: ID_LOCAL:<ID>, recibido: 
+25/11/2025 - 15:57:07 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: ID_LOCAL:2
+25/11/2025 - 15:57:07 [DEBUG] YpfRuta 3: Conexión entrante del peer 2
+25/11/2025 - 15:57:07 [DEBUG] YpfRuta 3: Peer 2 ya existe, enviando socket
+25/11/2025 - 15:57:07 [DEBUG] YpfPeer 2: Guardando socket entrante...
+25/11/2025 - 15:57:07 [DEBUG] YpfPeer 2: Iniciando ping loop...
+25/11/2025 - 15:57:07 [DEBUG] YpfPeer 2: Socket guardado exitosamente.
+25/11/2025 - 15:57:07 [DEBUG] YpfRuta 3: Socket del peer 2 está listo
+25/11/2025 - 15:57:07 [DEBUG] YpfRuta 3: Enviando NuevoLider al peer 2 (socket listo)
+25/11/2025 - 15:57:07 [DEBUG] YpfPeer 2: Recibido nuevo líder: 3
+25/11/2025 - 15:57:07 [DEBUG] YpfPeer 2: Enviando nuevo líder al socket: byte[0] = 52
+25/11/2025 - 15:57:07 [DEBUG] YpfPeer 2: Iniciando tarea de escritura del socket...
+25/11/2025 - 15:57:07 [DEBUG] YpfPeer 2: Iniciando tarea de lectura del socket...
+25/11/2025 - 15:57:07 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: 
+25/11/2025 - 15:57:07 [ERROR] YpfRuta 3: Formato de mensaje inválido. Se esperaba: ID_LOCAL:<ID>, recibido: 
+25/11/2025 - 15:57:07 [DEBUG] YpfRuta 3: Línea recibida del socket entrante: ID_LOCAL:1
+25/11/2025 - 15:57:07 [DEBUG] YpfRuta 3: Conexión entrante del peer 1
+25/11/2025 - 15:57:07 [DEBUG] YpfRuta 3: Peer 1 ya existe, enviando socket
+25/11/2025 - 15:57:07 [DEBUG] YpfPeer 1: Guardando socket entrante...
+25/11/2025 - 15:57:07 [DEBUG] YpfPeer 1: Iniciando ping loop...
+25/11/2025 - 15:57:07 [DEBUG] YpfPeer 1: Socket guardado exitosamente.
+25/11/2025 - 15:57:07 [DEBUG] YpfRuta 3: Socket del peer 1 está listo
+25/11/2025 - 15:57:07 [DEBUG] YpfRuta 3: Enviando NuevoLider al peer 1 (socket listo)
+25/11/2025 - 15:57:07 [DEBUG] YpfPeer 1: Recibido nuevo líder: 3
+25/11/2025 - 15:57:07 [DEBUG] YpfPeer 1: Enviando nuevo líder al socket: byte[0] = 52
+25/11/2025 - 15:57:07 [DEBUG] YpfPeer 1: Iniciando tarea de escritura del socket...
+25/11/2025 - 15:57:07 [DEBUG] YpfPeer 1: Iniciando tarea de lectura del socket...
+25/11/2025 - 15:57:21 [INFO] YpfRuta 3: Nueva conexión de empresa desde 127.0.0.1:36970
+25/11/2025 - 15:57:25 [INFO] YpfRuta 3: Recibido GastosEmpresa para empresa 1
+25/11/2025 - 15:57:25 [INFO] YpfRuta 3: Estado de empresa 1 consultado exitosamente
+25/11/2025 - 15:57:25 [INFO] YpfRuta 3: Estado de empresa 1 consultado exitosamente: empresa:Empresa { id: 1, nombre: "Transportes Argentinos S.A.", limite_general: 1000000, consumo_actual: 79667.0 }, tarjetas:[Tarjeta { id: 1, empresa_id: 1, limite_particular: 50000, consumo_actual: 24667.0 }, Tarjeta { id: 3, empresa_id: 1, limite_particular: 100000, consumo_actual: 25000.0 }, Tarjeta { id: 2, empresa_id: 1, limite_particular: 30000, consumo_actual: 30000.0 }]
+25/11/2025 - 15:57:37 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:57:37 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:57:37 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:57:37 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:57:37 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:57:37 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:57:37 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:57:37 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:57:37 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:58:07 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:58:07 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:58:07 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:58:07 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:58:07 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:58:07 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:58:07 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:58:07 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:58:07 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:58:37 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:58:37 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:58:37 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:58:37 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:58:37 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:58:37 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:58:37 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:58:37 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:58:37 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:59:07 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:59:07 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:59:07 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:59:07 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:59:07 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:59:07 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:59:07 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:59:07 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:59:07 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 15:59:37 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 15:59:37 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 15:59:37 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 15:59:37 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 15:59:37 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 15:59:37 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 15:59:37 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 15:59:37 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 15:59:37 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 16:00:07 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 16:00:07 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 16:00:07 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 16:00:07 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 16:00:07 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 16:00:07 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 16:00:07 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 16:00:07 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 16:00:07 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 16:00:37 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 16:00:37 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 16:00:37 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 16:00:37 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 16:00:37 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 16:00:37 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 16:00:37 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 16:00:37 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 16:00:37 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 16:01:07 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 16:01:07 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 16:01:07 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 16:01:07 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 16:01:07 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 16:01:07 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 16:01:07 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 16:01:07 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 16:01:07 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 16:01:37 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 16:01:37 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 16:01:37 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 16:01:37 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 16:01:37 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 16:01:37 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 16:01:37 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 16:01:37 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 16:01:37 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 16:02:05 [INFO] YpfRuta 3: Nueva conexión de empresa desde 127.0.0.1:34900
+25/11/2025 - 16:02:07 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 16:02:07 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 16:02:07 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 16:02:07 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 16:02:07 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 16:02:07 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 16:02:07 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 16:02:07 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 16:02:07 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 16:02:09 [INFO] YpfRuta 3: Recibido GastosEmpresa para empresa 1
+25/11/2025 - 16:02:09 [INFO] YpfRuta 3: Estado de empresa 1 consultado exitosamente
+25/11/2025 - 16:02:09 [INFO] YpfRuta 3: Estado de empresa 1 consultado exitosamente: empresa:Empresa { id: 1, nombre: "Transportes Argentinos S.A.", limite_general: 1000000, consumo_actual: 79667.0 }, tarjetas:[Tarjeta { id: 1, empresa_id: 1, limite_particular: 50000, consumo_actual: 24667.0 }, Tarjeta { id: 3, empresa_id: 1, limite_particular: 100000, consumo_actual: 25000.0 }, Tarjeta { id: 2, empresa_id: 1, limite_particular: 30000, consumo_actual: 30000.0 }]
+25/11/2025 - 16:02:31 [INFO] YpfRuta 3: Nueva conexión de empresa desde 127.0.0.1:39476
+25/11/2025 - 16:02:37 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 16:02:37 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 16:02:37 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 16:02:37 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 16:02:37 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 16:02:37 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 16:02:37 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 16:02:37 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 16:02:37 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 16:03:07 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 16:03:07 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 16:03:07 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 16:03:07 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 16:03:07 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 16:03:07 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 16:03:07 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 16:03:07 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 16:03:07 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 16:03:30 [INFO] YpfRuta 3: Recibido ConfigurarLimite para tarjeta 1 con monto 0
+25/11/2025 - 16:03:30 [WARN] No se puede establecer el nuevo límite particular 0 para la tarjeta con ID 1 ya que el consumo actual 24667 lo supera
+25/11/2025 - 16:03:37 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 16:03:37 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 16:03:37 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 16:03:37 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 16:03:37 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 16:03:37 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 16:03:37 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 16:03:37 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 16:03:37 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 16:03:52 [INFO] YpfRuta 3: Recibido ConfigurarLimiteGeneral para empresa 1 con monto 1000
+25/11/2025 - 16:03:52 [WARN] No se puede establecer el nuevo límite general 1000 para la empresa con ID 1 ya que el consumo actual 79667 lo supera
+25/11/2025 - 16:04:07 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 16:04:07 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 16:04:07 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 16:04:07 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 16:04:07 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 16:04:07 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 16:04:07 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 16:04:07 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 16:04:07 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 16:04:37 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 16:04:37 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 16:04:37 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 16:04:37 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 16:04:37 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 16:04:37 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 16:04:37 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 16:04:37 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 16:04:37 [DEBUG] YpfPeer 1: Pong recibido.
+25/11/2025 - 16:05:07 [INFO] Gestor: estado persistido periódicamente
+25/11/2025 - 16:05:07 [DEBUG] YpfPeer 2: PING enviado.
+25/11/2025 - 16:05:07 [DEBUG] YpfPeer 2: Ping recibido.
+25/11/2025 - 16:05:07 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+25/11/2025 - 16:05:07 [DEBUG] YpfPeer 2: Pong recibido.
+25/11/2025 - 16:05:07 [DEBUG] YpfPeer 1: PING enviado.
+25/11/2025 - 16:05:07 [DEBUG] YpfPeer 1: Ping recibido.
+25/11/2025 - 16:05:07 [DEBUG] YpfPeer 1: Pong enviado exitosamente
+25/11/2025 - 16:05:07 [DEBUG] YpfPeer 1: Pong recibido.

@@ -1,23 +1,24 @@
 use crate::actores::surtidor::messages::Detenerme;
 use crate::actores::surtidor::{messages::ResultadoVenta, surtidor::Surtidor};
 use actix::{AsyncContext, Context, Handler};
+use util::{log_error, log_info, log_warning};
 
 impl Handler<ResultadoVenta> for Surtidor {
     type Result = ();
 
     fn handle(&mut self, msg: ResultadoVenta, ctx: &mut Context<Self>) {
         let respuesta = if msg.exito {
-            println!("Venta exitosa");
+            log_info!(self.logger, "[{}] ({}) Venta exitosa", self.estacion_id, self.id);
             "Venta exitosa.\n".to_string()
         } else {
-            println!("Venta Rechazada");
+            log_warning!(self.logger, "[{}] ({}) Venta Rechazada", self.estacion_id, self.id);
             "Venta fallida.\n".to_string()
         };
 
         if let Err(e) = self.writer_tx.send(respuesta.into_bytes()) {
-            println!("Error al enviar respuesta al writer: {:?}", e);
+            log_error!(self.logger, "Error al enviar respuesta al writer: {:?}", e);
         } else {
-            println!("Respuesta enviada al cliente");
+            log_info!(self.logger, "Respuesta enviada al cliente");
             ctx.address().do_send(Detenerme);
         }
     }

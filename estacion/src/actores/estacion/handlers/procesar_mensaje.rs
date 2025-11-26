@@ -1,6 +1,7 @@
 use crate::actores::estacion::messages::{deserialize_message, MessageType};
 use crate::actores::estacion::{Estacion, ProcesarMensaje};
 use actix::prelude::*;
+use util::log_error;
 
 impl Handler<ProcesarMensaje> for Estacion {
     type Result = ();
@@ -17,7 +18,7 @@ impl Handler<ProcesarMensaje> for Estacion {
                 MessageType::InformarVentasOffline(m) => ctx.address().do_send(m),
                 MessageType::TransaccionesPorEstacion(m) => ctx.address().do_send(m),
             },
-            Err(e) => eprintln!("(Procesar) Error deserializando: {}", e),
+            Err(e) => log_error!(self.logger, "(Procesar) Error deserializando: {}", e),
         }
     }
 }

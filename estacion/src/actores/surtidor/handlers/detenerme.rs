@@ -3,12 +3,13 @@ use crate::actores::surtidor::messages::*;
 use crate::actores::surtidor::surtidor::Surtidor;
 use actix::prelude::*;
 use actix::{Context, Handler};
+use util::log_info;
 
 impl Handler<Detenerme> for Surtidor {
     type Result = ();
 
     fn handle(&mut self, _msg: Detenerme, ctx: &mut Context<Self>) {
-        println!("[{}] Deteniendo Surtidor {}", self.estacion_id, self.id);
+        log_info!(self.logger, "[{}] Deteniendo Surtidor {}", self.estacion_id, self.id);
         self.estacion.do_send(SurtidorLibre {
             surtidor_id: self.id,
         });

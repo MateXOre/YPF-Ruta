@@ -2,12 +2,13 @@ use crate::actores::estacion::messages::LiberarClientesEnCola;
 use crate::actores::estacion::Estacion;
 use crate::actores::surtidor::messages::ResultadoVenta;
 use actix::{Context, Handler};
+use util::log_info;
 
 impl Handler<LiberarClientesEnCola> for Estacion {
     type Result = ();
 
     fn handle(&mut self, _msg: LiberarClientesEnCola, _ctx: &mut Context<Self>) {
-        println!("[{}] Liberando clientes en cola", self.id);
+        log_info!(self.logger, "[{}] Liberando clientes en cola", self.id);
         for (surtidor_id, venta) in self.ventas_a_confirmar.iter() {
             // pasamos las ventas online a offline
             let mut venta = venta.clone();

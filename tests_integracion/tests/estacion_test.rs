@@ -58,7 +58,16 @@ async fn test_estacion_maneja_clientes_concurrentes() {
     inicializar_storage_estacion(0);
     let base_port = 20000u16;
     let estaciones = vec![SocketAddr::from(([127, 0, 0, 1], base_port))];
-    let _estacion = Estacion::new(0, estaciones).start();
+    let log_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("src")
+        .join("logs")
+        .join("ypf_ruta_0.log");
+    let log_ypf = util::logs::logger::Logger::new(log_path.to_str().unwrap())
+        .unwrap_or_else(|| {
+            eprintln!("Error al inicializar el logger en {:?}", log_path);
+            std::process::exit(1);
+        });
+    let _estacion = Estacion::new(0, estaciones, log_ypf.get_log_channel()).start();
 
     tokio::time::sleep(Duration::from_millis(500)).await;
     let client_port = base_port + 1000;
@@ -91,7 +100,16 @@ async fn test_estacion_limite_surtidores() {
     inicializar_storage_estacion(0);
     let base_port = 20001u16;
     let estaciones = vec![SocketAddr::from(([127, 0, 0, 1], base_port))];
-    let _estacion = Estacion::new(0, estaciones).start();
+        let log_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("src")
+        .join("logs")
+        .join("ypf_ruta_0.log");
+    let log_ypf = util::logs::logger::Logger::new(log_path.to_str().unwrap())
+        .unwrap_or_else(|| {
+            eprintln!("Error al inicializar el logger en {:?}", log_path);
+            std::process::exit(1);
+        });
+    let _estacion = Estacion::new(0, estaciones, log_ypf.get_log_channel()).start();
 
     tokio::time::sleep(Duration::from_millis(500)).await;
     let client_port = base_port + 1000;
@@ -127,7 +145,16 @@ async fn test_estacion_procesamiento_ventas_concurrentes() {
     inicializar_storage_estacion(0);
     let base_port = 20002u16;
     let estaciones = vec![SocketAddr::from(([127, 0, 0, 1], base_port))];
-    let _estacion = Estacion::new(0, estaciones).start();
+        let log_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("src")
+        .join("logs")
+        .join("ypf_ruta_0.log");
+    let log_ypf = util::logs::logger::Logger::new(log_path.to_str().unwrap())
+        .unwrap_or_else(|| {
+            eprintln!("Error al inicializar el logger en {:?}", log_path);
+            std::process::exit(1);
+        });
+    let _estacion = Estacion::new(0, estaciones, log_ypf.get_log_channel()).start();
 
     tokio::time::sleep(Duration::from_millis(500)).await;
     let client_port = base_port + 1000;
@@ -179,7 +206,16 @@ async fn test_multiple_estaciones_concurrentes() {
 
     for i in 0..3 {
         let port = 20100 + i;
-        let estacion = Estacion::new(i, todas_las_estaciones.clone()).start();
+            let log_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("src")
+        .join("logs")
+        .join(format!("ypf_ruta_{}.log", i));
+    let log_ypf = util::logs::logger::Logger::new(log_path.to_str().unwrap())
+        .unwrap_or_else(|| {
+            eprintln!("Error al inicializar el logger en {:?}", log_path);
+            std::process::exit(1);
+        });
+        let estacion = Estacion::new(i, todas_las_estaciones.clone(), log_ypf.get_log_channel()).start();
         estaciones_addrs.push((port + 1000) as u16);
         estaciones_actors.push(estacion);
     }

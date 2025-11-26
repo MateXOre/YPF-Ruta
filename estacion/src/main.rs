@@ -23,7 +23,16 @@ async fn main() {
         }
     };
 
-    let _estacion = Estacion::new(index_estacion, estaciones).start();
+    let log_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("src")
+        .join("logs")
+        .join(format!("ypf_ruta_{}.log", index_estacion));
+    let log_ypf = util::logs::logger::Logger::new(log_path.to_str().unwrap()).unwrap_or_else(|| {
+        eprintln!("Error al inicializar el logger en {:?}", log_path);
+        std::process::exit(1);
+    });
+
+    let _estacion = Estacion::new(index_estacion, estaciones, log_ypf.get_log_channel()).start();
 
     tokio::signal::ctrl_c()
         .await

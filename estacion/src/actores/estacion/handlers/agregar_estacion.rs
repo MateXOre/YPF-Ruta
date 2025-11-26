@@ -2,14 +2,18 @@ use crate::actores::estacion::messages::*;
 use crate::actores::estacion::Estacion;
 use crate::actores::estacion_cercana::Enviar;
 use actix::{AsyncContext, Context, Handler};
+use util::log_info;
+use util::log_warning;
 
 impl Handler<AgregarEstacion> for Estacion {
     type Result = ();
 
     fn handle(&mut self, msg: AgregarEstacion, ctx: &mut Context<Self>) {
-        println!(
+        log_info!(
+            self.logger,
             "[{}] agregando estación conectada desde {}",
-            self.id, msg.estacion_id
+            self.id,
+            msg.estacion_id
         );
 
         self.estaciones_cercanas
@@ -17,16 +21,22 @@ impl Handler<AgregarEstacion> for Estacion {
         if msg.estacion_id == self.id + 1
             || (self.id == self.total_estaciones - 1 && msg.estacion_id == 0)
         {
-            println!(
+            log_info!(
+                self.logger,
                 "[{}] Conexión con siguiente estación {} establecida",
-                self.id, msg.estacion_id
+                self.id,
+                msg.estacion_id
             );
             self.siguiente_estacion = msg.estacion_id;
         }
 
         if !self.primer_anillo_realizado {
             self.primer_anillo_realizado = true;
-            println!("Iniciando ronda de mensajes de lider");
+            log_info!(
+                self.logger,
+                "[{}] Iniciando ronda de mensajes de lider",
+                self.id
+            );
             let id_estacion = self.id;
             let mensaje = Eleccion {
                 aspirantes_ids: vec![id_estacion],
@@ -38,7 +48,7 @@ impl Handler<AgregarEstacion> for Estacion {
                     .unwrap()
                     .clone()
             } else {
-                println!("[{}] La siguiente estación {} no está conectada, no se puede iniciar el anillo, reintentando conexion", self.id, siguiente_estacion);
+                log_warning!(self.logger, "[{}] La siguiente estación {} no está conectada, no se puede iniciar el anillo, reintentando conexion", self.id, siguiente_estacion);
                 ctx.address().do_send(EstacionDesconectada {
                     estacion_id: siguiente_estacion,
                     mensaje: mensaje.to_bytes(),
@@ -46,14 +56,17 @@ impl Handler<AgregarEstacion> for Estacion {
                 return;
             };
 
+            let logger = self.logger.clone();
             actix_rt::spawn(async move {
                 tokio::time::sleep(tokio::time::Duration::from_millis(1000)).await;
                 siguiente.do_send(Enviar {
                     bytes: mensaje.to_bytes(),
                 });
-                println!(
+                log_info!(
+                    logger,
                     "[{}] enviando mensaje inicial (via Reenviar) a siguiente estación en {}",
-                    id_estacion, siguiente_estacion
+                    id_estacion,
+                    siguiente_estacion
                 );
             });
         }

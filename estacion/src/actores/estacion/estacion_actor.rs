@@ -7,7 +7,9 @@ use actix::prelude::*;
 use actix::{Actor, Addr, Context};
 use std::collections::HashMap;
 use std::net::SocketAddr;
+use std::sync::mpsc::Sender;
 use tokio::net::{TcpListener, TcpStream};
+use util::{log_error, log_info, log_warning};
 
 use crate::loader::estacion_loader::EstacionLoader;
 use std::collections::VecDeque;
@@ -36,6 +38,8 @@ pub struct Estacion {
     pub(crate) listener_activo: Arc<AtomicBool>, // Controla si el listener debe seguir aceptando conexiones
     pub(crate) estoy_conectada: bool,
     pub(crate) id_global: usize,
+
+    pub(crate) logger: Sender<Vec<u8>>,
 }
 
 impl Estacion {
@@ -44,7 +48,11 @@ impl Estacion {
     pub const TIEMPO_INFORMAR_VENTAS_OFFLINE: u64 = 30;
     pub const MAX_ESTACIONES_REGISTRADAS: usize = 5;
 
-    pub fn new(index_estacion: usize, estaciones: Vec<SocketAddr>) -> Self {
+    pub fn new(
+        index_estacion: usize,
+        estaciones: Vec<SocketAddr>,
+        logger: Sender<Vec<u8>>,
+    ) -> Self {
         let mi_id_regional = index_estacion % Estacion::MAX_ESTACIONES_REGISTRADAS;
         let siguiente = if mi_id_regional + 1 < estaciones.len() {
             mi_id_regional + 1
@@ -71,6 +79,7 @@ impl Estacion {
             listener_activo: Arc::new(AtomicBool::new(true)),
             estoy_conectada: true,
             id_global: index_estacion,
+            logger,
         }
     }
 
@@ -79,8 +88,9 @@ impl Estacion {
         actor_addr: Addr<Estacion>,
         id: usize,
         id_destino: usize,
+        logger: Sender<Vec<u8>>,
     ) {
-        let _ = Estacion::intentar_conectar(target, actor_addr, id, id_destino).await;
+        let _ = Estacion::intentar_conectar(target, actor_addr, id, id_destino, logger).await;
     }
 
     pub(crate) async fn intentar_conectar(
@@ -88,21 +98,33 @@ impl Estacion {
         actor_addr: Addr<Estacion>,
         id: usize,
         id_destino: usize,
+        logger: Sender<Vec<u8>>,
     ) -> Result<(), std::io::Error> {
         match TcpStream::connect(target).await {
             Ok(stream) => {
-                println!(
+                log_info!(
+                    logger,
                     "[{}] conectado a {} con dirección:{}",
-                    id, id_destino, target
+                    id,
+                    id_destino,
+                    target
                 );
                 let addr_clone = actor_addr.clone();
-                if let Err(e) = handle_stream_outgoing(stream, id, addr_clone, id_destino).await {
-                    eprintln!("[{}] error al manejar conexión con {}: {:?}", id, target, e);
+                if let Err(e) =
+                    handle_stream_outgoing(stream, id, addr_clone, id_destino, logger.clone()).await
+                {
+                    log_error!(
+                        logger,
+                        "[{}] error al manejar conexión con {}: {:?}",
+                        id,
+                        target,
+                        e
+                    );
                 }
                 Ok(())
             }
             Err(e) => {
-                eprintln!("[{}] no pudo conectar a {}: {}", id, target, e);
+                log_error!(logger, "[{}] no pudo conectar a {}: {}", id, target, e);
                 Err(e)
             }
         }
@@ -114,9 +136,11 @@ impl Estacion {
                 bytes: mensaje.clone(),
             });
         } else {
-            println!(
+            log_warning!(
+                self.logger,
                 "[{}] La siguiente estación {} no está conectada, no se puede mandar el mensaje de anillo",
-                self.id, self.siguiente_estacion
+                self.id,
+                self.siguiente_estacion
             );
             ctx.address().do_send(EstacionDesconectada {
                 estacion_id: self.siguiente_estacion,
@@ -126,7 +150,12 @@ impl Estacion {
     }
 
     pub(crate) fn buscar_estacion_lider(&self) -> Option<Addr<EstacionCercana>> {
-        println!("Buscando lider actual: {:?}", self.lider_actual);
+        log_info!(
+            self.logger,
+            "[{}] Buscando lider actual: {:?}",
+            self.id,
+            self.lider_actual
+        );
         if let Some(lider) = self.lider_actual {
             if let Some(conexion) = self.estaciones_cercanas.get(&lider) {
                 return Some(conexion.clone());
@@ -159,7 +188,7 @@ impl Estacion {
                 self.ventas_por_informar = ventas_sin_informar;
             }
             Err(e) => {
-                eprintln!("Error al cargar ventas sin informar: {:?}", e);
+                log_error!(self.logger, "Error al cargar ventas sin informar: {:?}", e);
             }
         }
     }
@@ -169,10 +198,10 @@ impl Estacion {
             EstacionLoader::new(self.id_global).save_ventas_sin_informar(&self.ventas_por_informar);
         match ventas_sin_informar {
             Ok(_) => {
-                println!("Ventas sin informar guardadas correctamente");
+                log_info!(self.logger, "Ventas sin informar guardadas correctamente");
             }
             Err(e) => {
-                eprintln!("Error al guardar ventas sin informar: {:?}", e);
+                log_error!(self.logger, "Error al guardar ventas sin informar: {:?}", e);
             }
         }
     }
@@ -181,10 +210,10 @@ impl Estacion {
         let ventas_sin_informar = EstacionLoader::new(self.id_global).clear_ventas_sin_informar();
         match ventas_sin_informar {
             Ok(_) => {
-                println!("Ventas sin informar limpiadas correctamente");
+                log_info!(self.logger, "Ventas sin informar limpiadas correctamente");
             }
             Err(e) => {
-                eprintln!("Error al limpiar ventas sin informar: {:?}", e);
+                log_error!(self.logger, "Error al limpiar ventas sin informar: {:?}", e);
             }
         }
     }
@@ -199,7 +228,8 @@ impl Actor for Estacion {
         let addr_self = ctx.address();
         let addr_self_clone = addr_self.clone();
         let addr_self_clone_2 = addr_self.clone();
-        println!(
+        log_info!(
+            self.logger,
             "[{}] escuchando conexiones de clientes en 127.0.0.1:{}",
             id,
             port + Estacion::DESPLAZAMIENTO_PUERTO_ESCUCHA_CLIENTES
@@ -207,6 +237,7 @@ impl Actor for Estacion {
 
         self.cargar_ventas_sin_informar();
 
+        let logger1 = self.logger.clone();
         actix_rt::spawn(async move {
             if let Ok(listener) = TcpListener::bind((
                 "127.0.0.1",
@@ -217,31 +248,41 @@ impl Actor for Estacion {
                 loop {
                     match listener.accept().await {
                         Ok((stream, peer_addr)) => {
-                            println!(
+                            log_info!(
+                                logger1,
                                 "[{}] conexión de cliente entrante desde {:?}",
-                                id, peer_addr
+                                id,
+                                peer_addr
                             );
                             addr_self_clone.do_send(AceptarCliente { stream, peer_addr });
                         }
                         Err(e) => {
-                            eprintln!("Error al aceptar conexión de cliente: {:?}", e);
+                            log_error!(logger1, "Error al aceptar conexión de cliente: {:?}", e);
                         }
                     }
                 }
             }
         });
 
-        println!(
+        log_info!(
+            self.logger,
             "[{}] escuchando conexiones de estaciones en 127.0.0.1:{}",
-            id, port
+            id,
+            port
         );
 
         let listener_activo = Arc::clone(&self.listener_activo);
+        let logger2 = self.logger.clone();
         actix_rt::spawn(async move {
             let listener: TcpListener = match TcpListener::bind(("127.0.0.1", port)).await {
                 Ok(listener) => listener,
                 Err(e) => {
-                    eprintln!("Error al crear listener en puerto {}: {:?}", port, e);
+                    log_error!(
+                        logger2,
+                        "Error al crear listener en puerto {}: {:?}",
+                        port,
+                        e
+                    );
                     return;
                 }
             };
@@ -251,39 +292,49 @@ impl Actor for Estacion {
                     Ok((stream, peer_addr)) => {
                         let esta_activo = listener_activo.load(Ordering::Relaxed);
                         if !esta_activo {
-                            println!(
+                            log_info!(
+                                logger2,
                                 "[{}] Listener detenido (activo={}), rechazando conexión de {:?}",
-                                id, esta_activo, peer_addr
+                                id,
+                                esta_activo,
+                                peer_addr
                             );
                             drop(stream); // Cerrar la conexión
                             continue;
                         }
 
-                        println!(
+                        log_info!(
+                            logger2,
                             "[{}] conexión de estación entrante desde {:?}",
-                            id, peer_addr
+                            id,
+                            peer_addr
                         );
 
                         let addr_clone = addr_self.clone();
+                        let log = logger2.clone();
                         actix_rt::spawn(async move {
-                            if let Err(e) = handle_stream_incoming(stream, id, addr_clone).await {
-                                eprintln!("Error manejando conexión entrante: {:?}", e);
+                            if let Err(e) =
+                                handle_stream_incoming(stream, id, addr_clone, log.clone()).await
+                            {
+                                log_error!(log, "Error manejando conexión entrante: {:?}", e);
                             }
                         });
                     }
                     Err(e) => {
-                        eprintln!("Error al aceptar conexión: {:?}", e);
+                        log_error!(logger2, "Error al aceptar conexión: {:?}", e);
                     }
                 }
             }
         });
 
-        println!(
+        log_info!(
+            self.logger,
             "[{}] escuchando conexiones para cambiar conexión listener en 127.0.0.1:{}",
             id,
             port + Estacion::DESPLAZAMIENTO_PUERTO_ESCUCHA_CAMBIO_LISTENER
         );
 
+        let logger3 = self.logger.clone();
         actix_rt::spawn(async move {
             if let Ok(listener) = TcpListener::bind((
                 "127.0.0.1",
@@ -292,16 +343,20 @@ impl Actor for Estacion {
             .await
             {
                 loop {
+                    let log = logger3.clone();
                     match listener.accept().await {
                         Ok((stream, peer_addr)) => {
-                            println!(
+                            log_info!(
+                                log,
                                 "[{}] conexión entrante para cambiar conexión listener desde {:?}",
-                                id, peer_addr
+                                id,
+                                peer_addr
                             );
                             addr_self_clone_2.do_send(CambiarConexionListener { stream });
                         }
                         Err(e) => {
-                            eprintln!(
+                            log_error!(
+                                log,
                                 "Error al aceptar conexión para cambiar conexión listener: {:?}",
                                 e
                             );
@@ -312,19 +367,28 @@ impl Actor for Estacion {
         });
 
         let addr_self_clone = ctx.address();
+        let logger_clone = self.logger.clone();
+
         if let Some(sig_addr) = self
             .todas_las_estaciones
             .get(&self.siguiente_estacion)
             .cloned()
         {
-            println!(
+            log_info!(
+                logger_clone,
                 "Conectando con siguiente estación {}",
                 self.siguiente_estacion
             );
             let siguiente_estacion = self.siguiente_estacion;
             actix_rt::spawn(async move {
-                Estacion::connect_and_register(sig_addr, addr_self_clone, id, siguiente_estacion)
-                    .await;
+                Estacion::connect_and_register(
+                    sig_addr,
+                    addr_self_clone,
+                    id,
+                    siguiente_estacion,
+                    logger_clone,
+                )
+                .await;
             });
         }
     }

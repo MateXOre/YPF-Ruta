@@ -8,14 +8,13 @@ use crate::actores::ypf::ypf_actor::YpfRuta;
 
 #[actix::main]
 async fn main() {
-    println!("Hello, world!");
+    println!("Iniciando YPF RUTA...");
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 2 {
         eprintln!("Uso: {} <index> [<lider>]", args[0]);
         return;
     }
 
-    println!("Loading file {}", args[1]);
     let index: usize = args[1]
         .parse()
         .expect("El índice debe ser un número válido.");
@@ -80,5 +79,6 @@ async fn main() {
 
     let _ypf_server = YpfRuta::new(local.0, local.1, lider, peers, gestor, log_ypf).start();
 
+    println!("YPF RUTA {} iniciado en puerto {}", local.0, local.1);
     std::future::pending::<()>().await;
 }

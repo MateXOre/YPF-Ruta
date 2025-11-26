@@ -18,7 +18,7 @@ HOST="${2:-127.0.0.1}"
 TARJETAS=(4 6 7 3 5 1 2)
 
 # Puertos disponibles
-PUERTOS=(10000 10001 10002)
+PUERTOS=(10000 10001 10002 10003 10004 10005 10006 10007 10008 10009)
 
 echo "🚀 Ejecutando $NUM_CLIENTES clientes hacia $HOST"
 echo "================================================"

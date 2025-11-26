@@ -1,13 +1,16 @@
 use crate::actores::estacion::messages::*;
 use crate::actores::estacion::Estacion;
 use actix::{Context, Handler};
+use util::log_info;
 
 impl Handler<Reenviar> for Estacion {
     type Result = ();
 
     fn handle(&mut self, msg: Reenviar, ctx: &mut Context<Self>) {
-        println!(
-            "Recibimos un mensaje Reenviar a la siguiente estacion {}",
+        log_info!(
+            self.logger,
+            "[{}] Recibimos un mensaje Reenviar a la siguiente estación {}",
+            self.id,
             self.siguiente_estacion
         );
 
@@ -21,9 +24,6 @@ impl Handler<Reenviar> for Estacion {
 
         self.siguiente_estacion = siguiente_correcto;
 
-        println!(
-            "Actualizamos siguiente estación {}",
-            self.siguiente_estacion
-        );
+        log_info!(self.logger, "[{}] Actualizamos siguiente estación {}", self.id, self.siguiente_estacion);
     }
 }

@@ -1,6 +1,9 @@
 use actix::prelude::*;
+use std::sync::mpsc::Sender;
 use tokio::io::AsyncWriteExt;
 use tokio::net::TcpStream;
+use util::log_error;
+use util::log_info;
 
 use crate::actores::estacion::messages::*;
 use crate::actores::estacion::Estacion;
@@ -11,6 +14,7 @@ pub async fn handle_stream_outgoing(
     id: usize,
     server_addr: Addr<Estacion>,
     id_destino: usize,
+    logger: Sender<Vec<u8>>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let _peer_addr = stream.peer_addr()?;
 
@@ -21,11 +25,19 @@ pub async fn handle_stream_outgoing(
     let msg = crate::actores::estacion::IdentificarEstacion { id }.to_bytes();
 
     if let Err(e) = writer.write_all(&msg).await {
-        eprintln!("Error writing to socket: {}", e);
+        log_error!(logger, "Error writing to socket: {}", e);
     }
 
-    let estacion = EstacionCercana::new(id_destino, server_addr_clone, reader, writer, id).await;
-    println!("Se crea estacion cercana para {}", id_destino);
+    let estacion = EstacionCercana::new(
+        id_destino,
+        server_addr_clone,
+        reader,
+        writer,
+        id,
+        logger.clone(),
+    )
+    .await;
+    log_info!(logger, "Se crea estacion cercana para {}", id_destino);
 
     let estacion_addr = estacion.start();
     server_addr.do_send(AgregarEstacion {

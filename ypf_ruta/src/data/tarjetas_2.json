@@ -1,11 +1,5 @@
 [
   {
-    "id": 5,
-    "empresa_id": 2,
-    "limite_particular": 90000,
-    "consumo_actual": 30000.0
-  },
-  {
     "id": 6,
     "empresa_id": 3,
     "limite_particular": 60000,
@@ -40,5 +34,11 @@
     "empresa_id": 3,
     "limite_particular": 70000,
     "consumo_actual": 20000.0
+  },
+  {
+    "id": 5,
+    "empresa_id": 2,
+    "limite_particular": 90000,
+    "consumo_actual": 30000.0
   }
 ]

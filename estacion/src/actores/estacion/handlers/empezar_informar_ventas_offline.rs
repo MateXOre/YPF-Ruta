@@ -5,17 +5,23 @@ use actix::{AsyncContext, Context, Handler};
 use std::collections::HashMap;
 use std::time::Duration;
 use tokio::time::sleep;
+use util::log_info;
 
 impl Handler<EmpezarInformarVentasOffline> for Estacion {
     type Result = ();
 
     fn handle(&mut self, _msg: EmpezarInformarVentasOffline, ctx: &mut Context<Self>) {
-        println!(
+        log_info!(
+            self.logger,
             "[{}] Empezar a informar ventas offline solo si estoy online",
             self.id
         );
         if !self.estoy_conectada {
-            println!("[{}] No estoy online, no informo ventas offline", self.id);
+            log_info!(
+                self.logger,
+                "[{}] No estoy online, no informo ventas offline",
+                self.id
+            );
             return;
         }
         let ventas: HashMap<usize, HashMap<usize, Vec<util::structs::venta::Venta>>> =

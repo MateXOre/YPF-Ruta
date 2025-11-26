@@ -1,15 +1,15 @@
 [
   {
-    "id": 2,
-    "nombre": "Logística Global",
-    "limite_general": 2000000,
-    "consumo_actual": 148097.0
-  },
-  {
     "id": 1,
     "nombre": "Transportes Argentinos S.A.",
     "limite_general": 1000000,
     "consumo_actual": 79667.0
+  },
+  {
+    "id": 2,
+    "nombre": "Logística Global",
+    "limite_general": 2000000,
+    "consumo_actual": 148097.0
   },
   {
     "id": 3,

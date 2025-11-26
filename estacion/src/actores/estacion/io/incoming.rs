@@ -1,6 +1,9 @@
 use actix::prelude::*;
+use std::sync::mpsc::Sender;
 use tokio::io::AsyncReadExt;
 use tokio::net::TcpStream;
+use util::log_info;
+use util::log_warning;
 
 use crate::actores::estacion::messages::*;
 use crate::actores::estacion::Estacion;
@@ -10,6 +13,7 @@ pub async fn handle_stream_incoming(
     stream: TcpStream,
     id: usize,
     server_addr: Addr<Estacion>,
+    logger: Sender<Vec<u8>>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let _peer_addr = stream.peer_addr()?;
 
@@ -34,13 +38,19 @@ pub async fn handle_stream_incoming(
     let id_remoto = match mensaje_deserializado {
         Ok(MessageType::IdentificarEstacion(msg)) => msg.id,
         _ => {
-            println!("Mensaje inesperado recibido");
+            log_warning!(logger, "Mensaje inesperado recibido");
             return Ok(());
         }
     };
-    println!("[{}] estación remota identificada como {}", id, id_remoto);
+    log_info!(
+        logger,
+        "[{}] estación remota identificada como {}",
+        id,
+        id_remoto
+    );
     let server_addr_clone = server_addr.clone();
-    let estacion = EstacionCercana::new(id_remoto, server_addr_clone, reader, writer, id).await;
+    let estacion =
+        EstacionCercana::new(id_remoto, server_addr_clone, reader, writer, id, logger).await;
 
     let estacion_addr = estacion.start();
     server_addr.do_send(AgregarEstacion {

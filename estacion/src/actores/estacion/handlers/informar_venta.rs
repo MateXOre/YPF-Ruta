@@ -1,6 +1,7 @@
 use crate::actores::estacion::messages::InformarVenta;
 use crate::actores::estacion::{EnviarVentasAgrupadas, Estacion};
 use actix::{AsyncContext, Context, Handler, WrapFuture};
+use util::log_info;
 use std::time::Duration;
 use tokio::time::sleep;
 
@@ -8,14 +9,12 @@ impl Handler<InformarVenta> for Estacion {
     type Result = ();
 
     fn handle(&mut self, msg: InformarVenta, ctx: &mut Context<Self>) {
-        println!(
-            "[{}] Soy el lider y recibi la venta de {} para confirmar",
-            self.id, msg.id_estacion
-        );
+        log_info!(self.logger, "[{}] Soy el lider y recibi la venta de {} para confirmar", self.id, msg.id_estacion);
+
 
         if self.ventas_por_informar.is_empty() && !self.temporizador_activo {
             self.temporizador_activo = true;
-            println!("Iniciando temporizador para informar ventas agrupadas");
+            log_info!(self.logger, "[{}] Iniciando temporizador para informar ventas agrupadas", self.id);
 
             let addr = ctx.address();
             ctx.spawn(

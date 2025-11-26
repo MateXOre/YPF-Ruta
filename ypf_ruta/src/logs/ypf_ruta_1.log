@@ -1900,3 +1900,57 @@
 25/11/2025 - 16:05:07 [DEBUG] YpfPeer 2: Pong enviado exitosamente
 25/11/2025 - 16:05:07 [DEBUG] YpfPeer 2: Pong recibido.
 25/11/2025 - 16:05:07 [DEBUG] YpfPeer 3: Pong recibido.
+26/11/2025 - 08:52:15 [INFO] YpfRuta 1: Creando instancia
+26/11/2025 - 08:52:15 [INFO] Gestor actor iniciado
+26/11/2025 - 08:52:15 [INFO] YpfRuta 1: Intentando conectar a peers...
+26/11/2025 - 08:52:15 [INFO] YpfRuta 1: Escuchando conexiones entrantes de peers...
+26/11/2025 - 08:52:15 [DEBUG] YpfRuta 1: Iniciando procesador de cola de ventas...
+26/11/2025 - 08:52:15 [ERROR] YpfPeer 2: Error al obtener socket - No se pudo conectar al YpfPeer 2: Connection refused (os error 111)
+26/11/2025 - 08:52:15 [INFO] YpfRuta 1: Peer 2 iniciado.
+26/11/2025 - 08:52:15 [ERROR] YpfPeer 3: Error al obtener socket - No se pudo conectar al YpfPeer 3: Connection refused (os error 111)
+26/11/2025 - 08:52:15 [INFO] YpfRuta 1: Peer 3 iniciado.
+26/11/2025 - 08:52:15 [INFO] YpfPeer 2: Iniciado correctamente.
+26/11/2025 - 08:52:15 [WARN] YpfPeer 2: No se puede iniciar el ping loop sin un socket válido.
+26/11/2025 - 08:52:15 [INFO] YpfPeer 3: Iniciado correctamente.
+26/11/2025 - 08:52:15 [WARN] YpfPeer 3: No se puede iniciar el ping loop sin un socket válido.
+26/11/2025 - 08:52:15 [DEBUG] YpfRuta 1: Línea recibida del socket entrante: 
+26/11/2025 - 08:52:15 [ERROR] YpfRuta 1: Formato de mensaje inválido. Se esperaba: ID_LOCAL:<ID>, recibido: 
+26/11/2025 - 08:52:15 [DEBUG] YpfRuta 1: Línea recibida del socket entrante: ID_LOCAL:3
+26/11/2025 - 08:52:15 [DEBUG] YpfRuta 1: Conexión entrante del peer 3
+26/11/2025 - 08:52:15 [DEBUG] YpfRuta 1: Peer 3 ya existe, enviando socket
+26/11/2025 - 08:52:15 [DEBUG] YpfPeer 3: Guardando socket entrante...
+26/11/2025 - 08:52:15 [DEBUG] YpfPeer 3: Iniciando ping loop...
+26/11/2025 - 08:52:15 [DEBUG] YpfPeer 3: Socket guardado exitosamente.
+26/11/2025 - 08:52:15 [DEBUG] YpfRuta 1: Socket del peer 3 está listo
+26/11/2025 - 08:52:15 [DEBUG] YpfPeer 3: Iniciando tarea de escritura del socket...
+26/11/2025 - 08:52:15 [DEBUG] YpfPeer 3: Iniciando tarea de lectura del socket...
+26/11/2025 - 08:52:15 [DEBUG] YpfRuta 1: Línea recibida del socket entrante: 
+26/11/2025 - 08:52:15 [ERROR] YpfRuta 1: Formato de mensaje inválido. Se esperaba: ID_LOCAL:<ID>, recibido: 
+26/11/2025 - 08:52:15 [DEBUG] YpfRuta 1: Línea recibida del socket entrante: ID_LOCAL:2
+26/11/2025 - 08:52:15 [DEBUG] YpfRuta 1: Conexión entrante del peer 2
+26/11/2025 - 08:52:15 [DEBUG] YpfRuta 1: Peer 2 ya existe, enviando socket
+26/11/2025 - 08:52:15 [DEBUG] YpfPeer 2: Guardando socket entrante...
+26/11/2025 - 08:52:15 [DEBUG] YpfPeer 2: Iniciando ping loop...
+26/11/2025 - 08:52:15 [DEBUG] YpfPeer 2: Socket guardado exitosamente.
+26/11/2025 - 08:52:15 [DEBUG] YpfRuta 1: Socket del peer 2 está listo
+26/11/2025 - 08:52:15 [DEBUG] YpfPeer 2: Iniciando tarea de escritura del socket...
+26/11/2025 - 08:52:15 [DEBUG] YpfPeer 2: Iniciando tarea de lectura del socket...
+26/11/2025 - 08:52:45 [INFO] Gestor: estado persistido periódicamente
+26/11/2025 - 08:52:45 [DEBUG] YpfPeer 3: PING enviado.
+26/11/2025 - 08:52:45 [DEBUG] YpfPeer 2: PING enviado.
+26/11/2025 - 08:52:45 [DEBUG] YpfPeer 3: Ping recibido.
+26/11/2025 - 08:52:45 [DEBUG] YpfPeer 3: Pong enviado exitosamente
+26/11/2025 - 08:52:45 [DEBUG] YpfPeer 3: Pong recibido.
+26/11/2025 - 08:52:45 [DEBUG] YpfPeer 2: Ping recibido.
+26/11/2025 - 08:52:45 [DEBUG] YpfPeer 2: Pong enviado exitosamente
+26/11/2025 - 08:52:45 [DEBUG] YpfPeer 2: Pong recibido.
+26/11/2025 - 08:52:58 [WARN] YpfPeer 3: Conexión cerrada por el peer remoto.
+26/11/2025 - 08:52:58 [WARN] YpfRuta 1: Peer 3 desconectado.
+26/11/2025 - 08:52:58 [DEBUG] YpfRuta 1: Recibido anuncio de COORDINATOR del nodo 2
+26/11/2025 - 08:52:58 [INFO] YpfRuta 1: Nodo 2 es el nuevo líder.
+26/11/2025 - 08:52:59 [WARN] YpfPeer 2: Conexión cerrada por el peer remoto.
+26/11/2025 - 08:52:59 [WARN] YpfRuta 1: Peer 2 desconectado.
+26/11/2025 - 08:52:59 [INFO] YpfRuta 1: El líder 2 se ha desconectado. Iniciando elección Bully.
+26/11/2025 - 08:52:59 [INFO] YpfRuta 1: Iniciando elección Bully
+26/11/2025 - 08:52:59 [INFO] YpfRuta 1: No hay nodos con ID mayor. Me declaro líder.
+26/11/2025 - 08:52:59 [INFO] YpfRuta 1: Soy el nuevo LÍDER

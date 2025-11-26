@@ -2,20 +2,24 @@ use crate::actores::estacion::messages::*;
 use crate::actores::estacion::Estacion;
 use actix::prelude::*;
 use actix::{Context, Handler};
+use util::log_info;
 
 impl Handler<Eleccion> for Estacion {
     type Result = ();
 
     fn handle(&mut self, msg: Eleccion, ctx: &mut Context<Self>) {
-        println!(
+        log_info!(
+            self.logger,
             "[{}] recibió mensaje del anillo: {:?}",
-            self.id, msg.aspirantes_ids
+            self.id,
+            msg.aspirantes_ids
         );
         self.primer_anillo_realizado = true;
 
         if let Some(lider) = self.lider_actual {
             if lider == self.id {
-                println!(
+                log_info!(
+                    self.logger,
                     "[{}] Soy el líder, entonces no es necesario que siga el anillo",
                     self.id
                 );
@@ -25,9 +29,11 @@ impl Handler<Eleccion> for Estacion {
 
         if msg.aspirantes_ids.contains(&self.id) {
             if let Some(nuevo_lider) = msg.aspirantes_ids.iter().max().copied() {
-                println!(
+                log_info!(
+                    self.logger,
                     "[{}] Detecté que mi id está en la lista, el nuevo líder es {}.",
-                    self.id, nuevo_lider
+                    self.id,
+                    nuevo_lider
                 );
 
                 ctx.address().do_send(NotificarLider {
@@ -40,9 +46,11 @@ impl Handler<Eleccion> for Estacion {
 
         let mut nuevos_aspirantes = msg.aspirantes_ids.clone();
         nuevos_aspirantes.push(self.id);
-        println!(
+        log_info!(
+            self.logger,
             "[{}] agregue mi id. Nuevos aspirantes: {:?}",
-            self.id, nuevos_aspirantes
+            self.id,
+            nuevos_aspirantes
         );
 
         let mensaje_bytes = Eleccion {

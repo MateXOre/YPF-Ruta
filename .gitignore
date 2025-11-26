@@ -11,6 +11,12 @@ Cargo.lock
 *.swp
 *~
 
+# Archivos de ejecución
+/ypf_ruta/src/data/*
+/ypf_ruta/src/logs/*
+/estacion/storage/*
+/estacion/logs/*
+
 # Archivos temporales
 /tmp
 borrador.txt

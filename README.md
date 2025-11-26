@@ -43,6 +43,22 @@ Segundo Cuatrimestre 2025
     - [Casos de Interés Negativos](#casos-de-interés-negativos)
       - [Desconexion de Estacion Lider](#desconexion-de-estacion-lider)
       - [Casos bordes](#casos-bordes)
+  - [Cambios en la Implementación](#cambios-en-la-implementación)
+    - [Procesos y Threads](#procesos-y-threads-1)
+    - [Validación de Ventas Offline](#validación-de-ventas-offline-1)
+    - [Ubicaciones de las estaciones](#ubicaciones-de-las-estaciones-1)
+    - [YPF RUTA como Coordinador](#ypf-ruta-como-coordinador-1)
+  - [Entidades Actualizadas](#entidades-actualizadas)
+    - [Estación](#estación-1)
+    - [Surtidor](#surtidor-1)
+    - [Cliente](#cliente-1)
+    - [YPF RUTA](#ypf-ruta-2)
+    - [Mensajes de YPF RUTA](#mensajes-de-ypf-ruta-1)
+  - [Listado de Comandos](#listado-de-comandos)
+    - [Comandos de Rust:](#comandos-de-rust)
+    - [Aclaraciones de Ejecución](#aclaraciones-de-ejecución)
+    - [Comandos de Ejecución](#comandos-de-ejecución)
+    - [Comandos para la Demo](#comandos-para-la-demo)
 
 ---
 
@@ -706,29 +722,6 @@ pub struct YpfRuta {
 }
 ```
 
-### YPF RUTA
-
-**Finalidad** \
-Actúa como servidor central del sistema. Administra la comunicación entre estaciones y empresas, y mantiene el registro global de ventas y límites de tarjetas.
-
-**Estado Interno**
-```rust
-pub struct YpfRuta {
-    pub(crate) id: usize,
-    puerto: usize,
-
-    pub(crate) lider: Option<usize>,
-    pub(crate) ypf_peers: HashMap<usize, Addr<YpfPeer>>,
-    peer_addrs: HashMap<usize, SocketAddr>,
-    pub(crate) en_eleccion: bool,
-    pub(crate) respuestas_recibidas: usize,
-
-    pub(crate) gestor_addr: Addr<Gestor>,
-    pub(crate) ventas_por_confirmar: VecDeque<(Addr<Estacion>, Solicitud)>,
-    pub(crate) logger: Sender<Vec<u8>>,
-}
-```
-
 **Mensajes que Recibe**
 * `conexion_entrante`: Recibe una conexión TCP entrante de otro nodo YPF. Si el peer ya existe, le envía el nuevo socket para reemplazar la conexión anterior. Si no existe, crea un nuevo actor YpfPeer con el socket recibido.
 
@@ -941,3 +934,20 @@ para que funcione el sistema). Las estaciones no es necesario prenderlas en orde
    - 'nc 127.0.0.1 10000' (Elegir estacion a conectarse desde el csv)
      - Luego escribir la tarjeta y monto a cargar `{id_tarjeta=monto}`. Ej: `4=5000`
 5. Para simular la caida de la conexion se puede mandar un mensaje a {puerto_estacion + 2000}. Ej `nc 127.0.0.1 12000`
+
+### Comandos para la Demo
+
+Con el script de `start.sh` se pueden iniciar las 3 YPF RUTA y dos regiones de 5 estaciones cada una (se debe ejecutar en el root del repositorio):
+
+    ./start.sh
+
+Luego, dentro del directorio de empresa, se debe ejecutar mediante el siguiente comando:
+
+    cargo run
+
+Y posteriormente, se puede ejecutar un script automatico `ejecutar_clientes.sh` dentro del directorio clientes, el cual permite ingresar una cantidad de clientes y ejecuta las transacciones con las estaciones correspondientes.
+
+    cd clientes
+    ./ejecutar_clientes
+
+Toda la ejecución se ve visualizada desde los archivos de logs de la estación e YPF RUTA.

@@ -24,6 +24,11 @@ impl Handler<Reenviar> for Estacion {
 
         self.siguiente_estacion = siguiente_correcto;
 
-        log_info!(self.logger, "[{}] Actualizamos siguiente estación {}", self.id, self.siguiente_estacion);
+        log_info!(
+            self.logger,
+            "[{}] Actualizamos siguiente estación {}",
+            self.id,
+            self.siguiente_estacion
+        );
     }
 }

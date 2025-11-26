@@ -157,7 +157,13 @@ impl Actor for Surtidor {
                                 }
                             };
 
-                            log_debug!(logger, "[{}] ({}) ID de venta: {}", estacion_id, id_surtidor, id_venta);
+                            log_debug!(
+                                logger,
+                                "[{}] ({}) ID de venta: {}",
+                                estacion_id,
+                                id_surtidor,
+                                id_venta
+                            );
                             let venta = Venta {
                                 id_venta,
                                 id_tarjeta: id,
@@ -172,16 +178,33 @@ impl Actor for Surtidor {
                         } else {
                             let _ =
                                 writer_tx.send(b"Formato invalido, use tarjeta=monto\n".to_vec());
-                            log_warning!(logger, "[{}] ({}) Formato inválido: {}", estacion_id, id_surtidor, mensaje);
+                            log_warning!(
+                                logger,
+                                "[{}] ({}) Formato inválido: {}",
+                                estacion_id,
+                                id_surtidor,
+                                mensaje
+                            );
                         }
                     }
                     Ok(_) => {
-                        log_info!(logger, "[{}] ({}) Cliente desconectado", estacion_id, id_surtidor);
+                        log_info!(
+                            logger,
+                            "[{}] ({}) Cliente desconectado",
+                            estacion_id,
+                            id_surtidor
+                        );
                         surtidor_addr.do_send(Detenerme);
                         continuar = false;
                     }
                     Err(e) => {
-                        log_error!(logger, "[{}] ({}) Error al leer: {:?}", estacion_id, id_surtidor, e);
+                        log_error!(
+                            logger,
+                            "[{}] ({}) Error al leer: {:?}",
+                            estacion_id,
+                            id_surtidor,
+                            e
+                        );
                         surtidor_addr.do_send(Detenerme);
                         continuar = false;
                     }

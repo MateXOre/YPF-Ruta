@@ -1,15 +1,20 @@
 use crate::actores::estacion::messages::*;
 use crate::actores::estacion::Estacion;
 use actix::{AsyncContext, Context, Handler, WrapFuture};
-use util::log_info;
 use std::time::Duration;
 use tokio::time::sleep;
+use util::log_info;
 
 impl Handler<InformarVentasOffline> for Estacion {
     type Result = ();
 
     fn handle(&mut self, msg: InformarVentasOffline, ctx: &mut Context<Self>) {
-        log_info!(self.logger, "[{}] Informar ventas offline a lider: {}", self.id, msg.id_lider);
+        log_info!(
+            self.logger,
+            "[{}] Informar ventas offline a lider: {}",
+            self.id,
+            msg.id_lider
+        );
         if !self.estoy_conectada {
             self.estoy_conectada = true;
             self.lider_actual = Some(msg.id_lider);
@@ -37,12 +42,20 @@ impl Handler<InformarVentasOffline> for Estacion {
             self.ventas_por_informar = self.agregar_ventas_acumuladas(msg.ventas);
             self.guardar_ventas_sin_informar();
         } else {
-            log_info!(self.logger, "[{}] Soy no lider, y sigo ronda de informar ventas offline", self.id);
+            log_info!(
+                self.logger,
+                "[{}] Soy no lider, y sigo ronda de informar ventas offline",
+                self.id
+            );
 
             // Combinar las ventas de esta estación con las acumuladas
             let ventas_acumuladas = self.agregar_ventas_acumuladas(msg.ventas);
             if self.ventas_por_informar.is_empty() {
-                log_info!(self.logger, "[{}] No tengo ventas acumuladas offline", self.id);
+                log_info!(
+                    self.logger,
+                    "[{}] No tengo ventas acumuladas offline",
+                    self.id
+                );
             } else {
                 self.ventas_por_informar.clear();
                 self.limpiar_ventas_sin_informar();

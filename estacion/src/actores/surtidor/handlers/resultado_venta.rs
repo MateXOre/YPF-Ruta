@@ -8,10 +8,20 @@ impl Handler<ResultadoVenta> for Surtidor {
 
     fn handle(&mut self, msg: ResultadoVenta, ctx: &mut Context<Self>) {
         let respuesta = if msg.exito {
-            log_info!(self.logger, "[{}] ({}) Venta exitosa", self.estacion_id, self.id);
+            log_info!(
+                self.logger,
+                "[{}] ({}) Venta exitosa",
+                self.estacion_id,
+                self.id
+            );
             "Venta exitosa.\n".to_string()
         } else {
-            log_warning!(self.logger, "[{}] ({}) Venta Rechazada", self.estacion_id, self.id);
+            log_warning!(
+                self.logger,
+                "[{}] ({}) Venta Rechazada",
+                self.estacion_id,
+                self.id
+            );
             "Venta fallida.\n".to_string()
         };
 

@@ -2,8 +2,8 @@ use crate::actores::estacion::{EnviarVentasAgrupadas, Estacion};
 use crate::actores::ypf::messages::EnviarYpf;
 use crate::actores::ypf::ypf_ruta::Ypf;
 use actix::{Actor, AsyncContext, Context, Handler, WrapFuture};
-use util::log_error;
 use std::collections::HashMap;
+use util::log_error;
 use util::structs::venta::Venta;
 
 fn serializar_ventas(
@@ -43,12 +43,20 @@ impl Handler<EnviarVentasAgrupadas> for Estacion {
                                 let _ = addr.send(mensaje).await;
                             }
                             Err(e) => {
-                                log_error!(logger, "Error generando mensaje de ventas agrupadas: {}", e);
+                                log_error!(
+                                    logger,
+                                    "Error generando mensaje de ventas agrupadas: {}",
+                                    e
+                                );
                             }
                         }
                     }
                     Err(e) => {
-                        log_error!(logger, "Error creando Ypf para enviar ventas agrupadas: {:?}", e);
+                        log_error!(
+                            logger,
+                            "Error creando Ypf para enviar ventas agrupadas: {:?}",
+                            e
+                        );
                     }
                 }
             }

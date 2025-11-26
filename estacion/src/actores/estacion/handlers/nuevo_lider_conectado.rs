@@ -3,9 +3,9 @@ use crate::actores::estacion::{
 };
 use crate::actores::estacion_cercana::Enviar;
 use actix::{AsyncContext, Handler, WrapFuture};
-use util::log_info;
 use std::time::Duration;
 use tokio::time::sleep;
+use util::log_info;
 
 impl Handler<NuevoLiderConectado> for Estacion {
     type Result = ();
@@ -21,7 +21,11 @@ impl Handler<NuevoLiderConectado> for Estacion {
             if let Some(_ventas_pendientes) = self.ventas_por_informar.get(&self.id) {
                 if !self.temporizador_activo {
                     self.temporizador_activo = true;
-                    log_info!(self.logger, "[{}] Iniciando temporizador para informar ventas agrupadas", self.id);
+                    log_info!(
+                        self.logger,
+                        "[{}] Iniciando temporizador para informar ventas agrupadas",
+                        self.id
+                    );
 
                     let addr = ctx.address();
                     ctx.spawn(
@@ -35,7 +39,11 @@ impl Handler<NuevoLiderConectado> for Estacion {
             }
             return;
         }
-        log_info!(self.logger, "[{}] Nuevo líder conectado, Enviando ventas pendientes de confirmacion", self.id);
+        log_info!(
+            self.logger,
+            "[{}] Nuevo líder conectado, Enviando ventas pendientes de confirmacion",
+            self.id
+        );
         if let Some(ventas_pendientes) = self.ventas_por_informar.get(&self.id) {
             if let Some(lider) = self.buscar_estacion_lider() {
                 for (id_surtidor, ventas) in ventas_pendientes {

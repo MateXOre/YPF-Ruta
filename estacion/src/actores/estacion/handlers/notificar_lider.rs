@@ -3,30 +3,44 @@ use crate::actores::estacion::Estacion;
 use actix::prelude::*;
 use actix::ActorFutureExt;
 use actix::{Context, Handler};
-use util::log_error;
-use util::log_info;
 use std::time::Duration;
 use tokio::time::sleep;
+use util::log_error;
+use util::log_info;
 
 impl Handler<NotificarLider> for Estacion {
     type Result = ();
 
     fn handle(&mut self, msg: NotificarLider, ctx: &mut Context<Self>) {
         if self.id == msg.id_iniciador && self.lider_actual == Some(msg.id_lider) {
-            log_info!(self.logger, "[{}] Mensaje de líder {} completó el ciclo, fin de propagación.", self.id, msg.id_lider);
+            log_info!(
+                self.logger,
+                "[{}] Mensaje de líder {} completó el ciclo, fin de propagación.",
+                self.id,
+                msg.id_lider
+            );
             return;
         }
 
         if let Some(lider) = self.lider_actual {
             if lider == self.id {
-                log_info!(self.logger, "[{}] Soy el líder, entonces no es necesario que siga el anillo", self.id);
+                log_info!(
+                    self.logger,
+                    "[{}] Soy el líder, entonces no es necesario que siga el anillo",
+                    self.id
+                );
                 return;
             }
         }
 
         self.lider_actual = Some(msg.id_lider);
 
-        log_info!(self.logger, "[{}] Mi nuevo lider es : {} ", self.id, msg.id_lider);
+        log_info!(
+            self.logger,
+            "[{}] Mi nuevo lider es : {} ",
+            self.id,
+            msg.id_lider
+        );
 
         if self.id != msg.id_lider {
             if self.estaciones_cercanas.contains_key(&msg.id_lider) {
@@ -51,14 +65,23 @@ impl Handler<NotificarLider> for Estacion {
                             Ok(_) => {
                                 addr_self.do_send(NuevoLiderConectado);
                             }
-                            Err(_) => log_error!(logger, "[{}] no se pudo conectar con el líder {}", self_id, nuevo_lider),
+                            Err(_) => log_error!(
+                                logger,
+                                "[{}] no se pudo conectar con el líder {}",
+                                self_id,
+                                nuevo_lider
+                            ),
                         }
                     })
                     .map(|_, _, _| ()),
                 );
             }
         } else {
-            log_info!(self.logger, "[{}] Soy el nuevo líder, no necesito conectarme a mí mismo.", self.id);
+            log_info!(
+                self.logger,
+                "[{}] Soy el nuevo líder, no necesito conectarme a mí mismo.",
+                self.id
+            );
             ctx.address().do_send(NuevoLiderConectado);
             let addr = ctx.address();
             ctx.spawn(

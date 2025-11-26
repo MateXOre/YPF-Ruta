@@ -1,10 +1,10 @@
 use crate::actores::estacion::{Estacion, TransaccionesPorEstacion};
 use actix::{Actor, Addr, Context};
-use util::{log_error, log_info};
 use std::collections::HashMap;
 use std::sync::mpsc::Sender;
 use tokio::io::AsyncWriteExt;
 use tokio::net::tcp::{OwnedReadHalf, OwnedWriteHalf};
+use util::{log_error, log_info};
 
 const YPF_ADDRS: [&str; 3] = ["127.0.0.1:18080", "127.0.0.1:18081", "127.0.0.1:18082"];
 
@@ -42,10 +42,13 @@ impl Ypf {
         let mut writer_opt = if let Some(w) = self.writer.take() {
             w
         } else {
-            log_error!(self.logger, "No hay writer disponible para enviar datos a YPF.");
+            log_error!(
+                self.logger,
+                "No hay writer disponible para enviar datos a YPF."
+            );
             return;
         };
-        let logger  = self.logger.clone();
+        let logger = self.logger.clone();
         tokio::spawn(async move {
             if let Err(e) = writer_opt.write_all(&bytes).await {
                 log_error!(logger, "Error enviando datos a YPF: {}", e);
@@ -57,7 +60,10 @@ impl Ypf {
         let reader = if let Some(r) = self.reader.take() {
             r
         } else {
-            log_error!(self.logger, "No hay reader disponible para leer datos de YPF.");
+            log_error!(
+                self.logger,
+                "No hay reader disponible para leer datos de YPF."
+            );
             return;
         };
         let estacion = self.estacion_addr.clone();
@@ -82,7 +88,11 @@ impl Ypf {
                             Ok(data) => data,
                             Err(e) => {
                                 log_error!(logger, "Error deserializando datos de YPF: {}", e);
-                                log_error!(logger, "Datos recibidos: {:?}", String::from_utf8_lossy(&line));
+                                log_error!(
+                                    logger,
+                                    "Datos recibidos: {:?}",
+                                    String::from_utf8_lossy(&line)
+                                );
                                 return;
                             }
                         };

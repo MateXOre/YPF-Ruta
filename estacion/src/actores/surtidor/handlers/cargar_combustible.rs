@@ -15,12 +15,21 @@ impl Handler<CargarCombustible> for Surtidor {
         let logger = self.logger.clone();
         ctx.spawn(
             async move {
-
-                log_info!(logger, "[{}] ({}) Cargando combustible...", estacion_id, surtidor_id);
+                log_info!(
+                    logger,
+                    "[{}] ({}) Cargando combustible...",
+                    estacion_id,
+                    surtidor_id
+                );
 
                 tokio::time::sleep(std::time::Duration::from_secs(5)).await;
 
-                log_info!(logger, "[{}] ({}) Carga terminada", estacion_id, surtidor_id);
+                log_info!(
+                    logger,
+                    "[{}] ({}) Carga terminada",
+                    estacion_id,
+                    surtidor_id
+                );
 
                 estacion.do_send(CobrarACliente { venta, surtidor_id });
             }

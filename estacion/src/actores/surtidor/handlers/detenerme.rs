@@ -9,7 +9,12 @@ impl Handler<Detenerme> for Surtidor {
     type Result = ();
 
     fn handle(&mut self, _msg: Detenerme, ctx: &mut Context<Self>) {
-        log_info!(self.logger, "[{}] Deteniendo Surtidor {}", self.estacion_id, self.id);
+        log_info!(
+            self.logger,
+            "[{}] Deteniendo Surtidor {}",
+            self.estacion_id,
+            self.id
+        );
         self.estacion.do_send(SurtidorLibre {
             surtidor_id: self.id,
         });

@@ -7,7 +7,11 @@ impl Handler<LiderCaido> for Estacion {
     type Result = ();
 
     fn handle(&mut self, msg: LiderCaido, ctx: &mut actix::Context<Self>) -> Self::Result {
-        log_warning!(self.logger, "[{}] El líder ha caído, eliminándolo de estaciones cercanas", self.id);
+        log_warning!(
+            self.logger,
+            "[{}] El líder ha caído, eliminándolo de estaciones cercanas",
+            self.id
+        );
 
         if let Some(id_lider) = self.lider_actual {
             if let Some(estacion) = self.estaciones_cercanas.get(&id_lider) {
@@ -27,7 +31,11 @@ impl Handler<LiderCaido> for Estacion {
             .push(msg.mensaje.venta);
         self.guardar_ventas_sin_informar();
 
-        log_info!(self.logger, "[{}] Iniciando elección de nuevo líder", self.id);
+        log_info!(
+            self.logger,
+            "[{}] Iniciando elección de nuevo líder",
+            self.id
+        );
 
         let mensaje = Eleccion {
             aspirantes_ids: vec![self.id],
@@ -47,10 +55,20 @@ impl Handler<LiderCaido> for Estacion {
                 siguiente.do_send(Enviar {
                     bytes: mensaje.to_bytes(),
                 });
-                log_info!(logger, "[{}] Enviando mensaje inicial a estación {}", id, siguiente_estacion);
+                log_info!(
+                    logger,
+                    "[{}] Enviando mensaje inicial a estación {}",
+                    id,
+                    siguiente_estacion
+                );
             });
         } else {
-            log_warning!(self.logger, "[{}] Estación {} no conectada, reintentando conexión", id, siguiente_estacion);
+            log_warning!(
+                self.logger,
+                "[{}] Estación {} no conectada, reintentando conexión",
+                id,
+                siguiente_estacion
+            );
             ctx.address().do_send(EstacionDesconectada {
                 estacion_id: self.siguiente_estacion,
                 mensaje: mensaje.to_bytes(),

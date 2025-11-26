@@ -9,12 +9,17 @@ impl Handler<DesconexionDetectada> for Estacion {
     fn handle(&mut self, msg: DesconexionDetectada, ctx: &mut Self::Context) -> Self::Result {
         if let Some(lider_id) = self.lider_actual {
             if lider_id == msg.estacion_id {
-                log_info!(self.logger, "[{}] Desconexión detectada del líder actual: {}. Actualizando estado.", self.id, msg.estacion_id);
+                log_info!(
+                    self.logger,
+                    "[{}] Desconexión detectada del líder actual: {}. Actualizando estado.",
+                    self.id,
+                    msg.estacion_id
+                );
                 self.lider_actual = None;
 
                 for (id_surtidor, venta) in self.ventas_a_confirmar.iter() {
                     log_info!(self.logger, "[{}] Venta del surtidor {} no se pude confirmar debido a la desconexión del líder. Iniciando elección de lider", self.id, id_surtidor);
-                    
+
                     self.ventas_por_informar
                         .entry(self.id)
                         .or_default()
@@ -23,7 +28,11 @@ impl Handler<DesconexionDetectada> for Estacion {
                         .push(venta.clone());
                 }
                 self.ventas_a_confirmar.clear();
-                log_info!(self.logger, "[{}] Iniciando elección de nuevo líder", self.id);
+                log_info!(
+                    self.logger,
+                    "[{}] Iniciando elección de nuevo líder",
+                    self.id
+                );
 
                 let mensaje = Eleccion {
                     aspirantes_ids: vec![self.id],
@@ -43,20 +52,32 @@ impl Handler<DesconexionDetectada> for Estacion {
                         siguiente.do_send(Enviar {
                             bytes: mensaje.to_bytes(),
                         });
-                        log_info!(logger, "[{}] Enviando mensaje inicial a estación {}", id, siguiente_estacion);
+                        log_info!(
+                            logger,
+                            "[{}] Enviando mensaje inicial a estación {}",
+                            id,
+                            siguiente_estacion
+                        );
                     });
                 } else {
-                    log_info!(self.logger, "[{}] Estación {} no conectada, reintentando conexión", id, siguiente_estacion);
-                    
+                    log_info!(
+                        self.logger,
+                        "[{}] Estación {} no conectada, reintentando conexión",
+                        id,
+                        siguiente_estacion
+                    );
+
                     ctx.address().do_send(EstacionDesconectada {
                         estacion_id: self.siguiente_estacion,
                         mensaje: mensaje.to_bytes(),
                     });
                 }
             } else {
-                log_info!(self.logger,
+                log_info!(
+                    self.logger,
                     "[{}] Desconexión detectada de la estación {} que no es líder actual.",
-                    self.id, msg.estacion_id
+                    self.id,
+                    msg.estacion_id
                 );
             }
         }

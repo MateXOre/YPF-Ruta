@@ -12,10 +12,19 @@ impl Handler<EstacionDesconectada> for Estacion {
             return;
         }
 
-        log_info!(self.logger, "La estación {} se ha desconectado.", msg.estacion_id);
+        log_info!(
+            self.logger,
+            "La estación {} se ha desconectado.",
+            msg.estacion_id
+        );
         self.estaciones_cercanas.remove(&msg.estacion_id);
 
-        log_info!(self.logger, "[{}] sin conexión a {}, intentando reconectar...", self.id, msg.estacion_id);
+        log_info!(
+            self.logger,
+            "[{}] sin conexión a {}, intentando reconectar...",
+            self.id,
+            msg.estacion_id
+        );
 
         // primer reintento
         self.siguiente_estacion = if self.id + 1 >= self.todas_las_estaciones.len() {

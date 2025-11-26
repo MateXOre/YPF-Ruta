@@ -11,7 +11,13 @@ impl Handler<CobrarACliente> for Estacion {
     type Result = ();
 
     fn handle(&mut self, msg: CobrarACliente, ctx: &mut Context<Self>) {
-        log_info!(self.logger, "[{}] Cobranza informada: {:?} por surtidor: {}", self.id, msg.venta.id_venta, msg.surtidor_id);
+        log_info!(
+            self.logger,
+            "[{}] Cobranza informada: {:?} por surtidor: {}",
+            self.id,
+            msg.venta.id_venta,
+            msg.surtidor_id
+        );
         if self.buscar_estacion_lider().is_none() {
             self.estoy_conectada = false;
         }
@@ -27,7 +33,11 @@ impl Handler<CobrarACliente> for Estacion {
         } else {
             log_info!(self.logger, "[{}] validando venta con lider", self.id);
             if self.estoy_conectada {
-                log_info!(self.logger, "[{}] Estoy conectada, enviando venta al lider", self.id);
+                log_info!(
+                    self.logger,
+                    "[{}] Estoy conectada, enviando venta al lider",
+                    self.id
+                );
                 if let Some(lider_addr) = self.buscar_estacion_lider() {
                     let venta_mensaje = InformarVenta {
                         venta: msg.venta.clone(),
@@ -40,7 +50,11 @@ impl Handler<CobrarACliente> for Estacion {
                     self.ventas_a_confirmar.insert(msg.surtidor_id, msg.venta);
                 }
             } else {
-                log_warning!(self.logger, "[{}] Estoy desconectada, me guardo la venta como offline", self.id);
+                log_warning!(
+                    self.logger,
+                    "[{}] Estoy desconectada, me guardo la venta como offline",
+                    self.id
+                );
                 let mut venta = msg.venta.clone();
                 self.surtidores
                     .get(&msg.surtidor_id)

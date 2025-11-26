@@ -66,19 +66,18 @@ impl Handler<NuevoLiderConectado> for Estacion {
 
         if let Some(lider) = self.buscar_estacion_lider() {
             for (id_surtidor, venta) in ventas_pendientes {
-            let venta = venta.clone();
+                let venta = venta.clone();
                 let mensaje = InformarVenta {
                     venta,
-                    id_surtidor: id_surtidor,
-                        id_estacion: self.id,
+                    id_surtidor,
+                    id_estacion: self.id,
                 };
                 lider.do_send(Enviar {
                     bytes: mensaje.to_bytes(),
                 });
-                
             }
         }
-    
+
         self.ventas_por_informar.clear();
         self.limpiar_ventas_sin_informar();
     }

@@ -948,6 +948,6 @@ Luego, dentro del directorio de empresa, se debe ejecutar mediante el siguiente 
 Y posteriormente, se puede ejecutar un script automatico `ejecutar_clientes.sh` dentro del directorio clientes, el cual permite ingresar una cantidad de clientes y ejecuta las transacciones con las estaciones correspondientes.
 
     cd clientes
-    ./ejecutar_clientes
+    ./ejecutar_clientes <cantidad_clientes>
 
 Toda la ejecución se ve visualizada desde los archivos de logs de la estación e YPF RUTA.

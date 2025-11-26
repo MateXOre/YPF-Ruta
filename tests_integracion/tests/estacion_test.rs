@@ -61,7 +61,7 @@ async fn test_estacion_maneja_clientes_concurrentes() {
     let log_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("src")
         .join("logs")
-        .join("ypf_ruta_0.log");
+        .join("estacion_0.log");
     let log_ypf = util::logs::logger::Logger::new(log_path.to_str().unwrap())
         .unwrap_or_else(|| {
             eprintln!("Error al inicializar el logger en {:?}", log_path);
@@ -103,7 +103,7 @@ async fn test_estacion_limite_surtidores() {
         let log_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("src")
         .join("logs")
-        .join("ypf_ruta_0.log");
+        .join("estacion_0.log");
     let log_ypf = util::logs::logger::Logger::new(log_path.to_str().unwrap())
         .unwrap_or_else(|| {
             eprintln!("Error al inicializar el logger en {:?}", log_path);
@@ -148,7 +148,7 @@ async fn test_estacion_procesamiento_ventas_concurrentes() {
         let log_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("src")
         .join("logs")
-        .join("ypf_ruta_0.log");
+        .join("estacion_0.log");
     let log_ypf = util::logs::logger::Logger::new(log_path.to_str().unwrap())
         .unwrap_or_else(|| {
             eprintln!("Error al inicializar el logger en {:?}", log_path);
@@ -209,7 +209,7 @@ async fn test_multiple_estaciones_concurrentes() {
             let log_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("src")
         .join("logs")
-        .join(format!("ypf_ruta_{}.log", i));
+        .join(format!("estacion_{}.log", i));
     let log_ypf = util::logs::logger::Logger::new(log_path.to_str().unwrap())
         .unwrap_or_else(|| {
             eprintln!("Error al inicializar el logger en {:?}", log_path);

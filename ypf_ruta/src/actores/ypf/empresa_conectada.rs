@@ -82,6 +82,7 @@ impl EmpresaConectada {
                     Ok(bytes) => {
                         if bytes == 0 {
                             log_debug!(logger, "Reader detectó fin de conexión (0 bytes)");
+                            return;
                         }
                         ypf_ruta.do_send(ProcesarMensajeEmpresa {
                             bytes: buf[..bytes].to_vec(),

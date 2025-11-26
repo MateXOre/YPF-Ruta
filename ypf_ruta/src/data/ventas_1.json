@@ -86,5 +86,109 @@
     "monto": 67.0,
     "offline": false,
     "estado": "Confirmada"
+  },
+  {
+    "id_venta": 11764169463507,
+    "id_tarjeta": 1,
+    "id_estacion": 1,
+    "monto": 5073.0,
+    "offline": false,
+    "estado": "Confirmada"
+  },
+  {
+    "id_venta": 31764169463561,
+    "id_tarjeta": 6,
+    "id_estacion": 3,
+    "monto": 5956.0,
+    "offline": false,
+    "estado": "Confirmada"
+  },
+  {
+    "id_venta": 81764169463614,
+    "id_tarjeta": 1,
+    "id_estacion": 8,
+    "monto": 14757.0,
+    "offline": false,
+    "estado": "Confirmada"
+  },
+  {
+    "id_venta": 61764169952395,
+    "id_tarjeta": 1,
+    "id_estacion": 6,
+    "monto": 3078.0,
+    "offline": false,
+    "estado": "Confirmada"
+  },
+  {
+    "id_venta": 61764169952174,
+    "id_tarjeta": 3,
+    "id_estacion": 6,
+    "monto": 1799.0,
+    "offline": false,
+    "estado": "Confirmada"
+  },
+  {
+    "id_venta": 51764169989523,
+    "id_tarjeta": 5,
+    "id_estacion": 5,
+    "monto": 258.0,
+    "offline": false,
+    "estado": "Confirmada"
+  },
+  {
+    "id_venta": 21764169952232,
+    "id_tarjeta": 6,
+    "id_estacion": 2,
+    "monto": 19213.0,
+    "offline": true,
+    "estado": "Confirmada"
+  },
+  {
+    "id_venta": 41764170698581,
+    "id_tarjeta": 1,
+    "id_estacion": 4,
+    "monto": 1941.0,
+    "offline": false,
+    "estado": "Confirmada"
+  },
+  {
+    "id_venta": 41764186903519,
+    "id_tarjeta": 4,
+    "id_estacion": 4,
+    "monto": 29271.0,
+    "offline": false,
+    "estado": "Confirmada"
+  },
+  {
+    "id_venta": 21764186903628,
+    "id_tarjeta": 6,
+    "id_estacion": 2,
+    "monto": 13855.0,
+    "offline": false,
+    "estado": "Confirmada"
+  },
+  {
+    "id_venta": 51764186903574,
+    "id_tarjeta": 5,
+    "id_estacion": 5,
+    "monto": 2948.0,
+    "offline": false,
+    "estado": "Confirmada"
+  },
+  {
+    "id_venta": 81764186903683,
+    "id_tarjeta": 2,
+    "id_estacion": 8,
+    "monto": 842.0,
+    "offline": false,
+    "estado": "Confirmada"
+  },
+  {
+    "id_venta": 81764186903735,
+    "id_tarjeta": 1,
+    "id_estacion": 8,
+    "monto": 4289.0,
+    "offline": false,
+    "estado": "Confirmada"
   }
 ]

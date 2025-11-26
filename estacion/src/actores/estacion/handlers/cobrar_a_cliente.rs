@@ -11,14 +11,8 @@ impl Handler<CobrarACliente> for Estacion {
     type Result = ();
 
     fn handle(&mut self, msg: CobrarACliente, ctx: &mut Context<Self>) {
-        log_info!(
-            self.logger,
-            "[{}] Cobranza informada: {:?} por surtidor: {}",
-            self.id,
-            msg.venta.id_venta,
-            msg.surtidor_id
-        );
-        if self.buscar_estacion_lider().is_none() {
+        log_info!(self.logger, "[{}] Cobranza informada: {:?} por surtidor: {}", self.id, msg.venta.id_venta, msg.surtidor_id);
+        if self.lider_actual.is_none() {
             self.estoy_conectada = false;
         }
 

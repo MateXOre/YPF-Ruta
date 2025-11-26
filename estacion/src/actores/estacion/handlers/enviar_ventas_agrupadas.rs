@@ -29,6 +29,9 @@ impl Handler<EnviarVentasAgrupadas> for Estacion {
     type Result = ();
 
     fn handle(&mut self, _msg: EnviarVentasAgrupadas, ctx: &mut Context<Self>) {
+        if !self.estoy_conectada {
+            return;
+        }
         let self_addr = ctx.address();
         let ventas = self.ventas_por_informar.clone();
 

@@ -1,0 +1,63 @@
+use crate::actores::estacion::messages::{CambiarConexionListener, LiberarClientesEnCola};
+use crate::actores::estacion::Estacion;
+use crate::actores::estacion_cercana::CerrarConexion;
+use actix::{AsyncContext, Context, Handler};
+use std::sync::atomic::Ordering;
+use util::log_info;
+
+impl Handler<CambiarConexionListener> for Estacion {
+    type Result = ();
+
+    fn handle(&mut self, msg: CambiarConexionListener, ctx: &mut Context<Self>) {
+        log_info!(
+            self.logger,
+            "[{}] Cambiando conexión - deteniendo listener y cerrando todas las conexiones",
+            self.id
+        );
+
+        if self.listener_activo.load(Ordering::Relaxed) {
+            self.listener_activo.store(false, Ordering::Relaxed);
+            self.estoy_conectada = false;
+            self.lider_actual = None;
+            log_info!(self.logger, "[{}] Listener detenido", self.id);
+
+            let estaciones_ids: Vec<usize> = self.estaciones_cercanas.keys().cloned().collect();
+
+            for estacion_id in estaciones_ids {
+                if let Some(estacion_addr) = self.estaciones_cercanas.remove(&estacion_id) {
+                    log_info!(
+                        self.logger,
+                        "[{}] Cerrando conexión con estación {}",
+                        self.id,
+                        estacion_id
+                    );
+
+                    estacion_addr.do_send(CerrarConexion);
+                }
+            }
+
+            ctx.address().do_send(LiberarClientesEnCola);
+
+            log_info!(
+                self.logger,
+                "[{}] Todas las conexiones cerradas. Total de estaciones cercanas: {}",
+                self.id,
+                self.estaciones_cercanas.len()
+            );
+
+            drop(msg.stream);
+            log_info!(
+                self.logger,
+                "[{}] Stream de nueva conexión cerrado",
+                self.id
+            );
+        } else {
+            log_info!(
+                self.logger,
+                "[{}] Vuelvo a empezar a escuchar conexiones",
+                self.id
+            );
+            self.listener_activo.store(true, Ordering::Relaxed);
+        }
+    }
+}

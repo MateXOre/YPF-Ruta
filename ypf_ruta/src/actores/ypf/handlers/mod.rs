@@ -1,0 +1,16 @@
+mod agregar_empresa;
+mod conexion_entrante;
+mod configurar_limite;
+mod configurar_limite_general;
+mod eleccion;
+mod eleccion_ok;
+mod eleccion_timeout;
+mod enviar_bytes_empresa;
+mod gastos_empresa;
+mod iniciar_eleccion;
+mod nuevo_lider;
+mod peer_desconectado;
+mod procesar_mensaje_empresa;
+mod socket_listo;
+mod validar_ventas;
+mod venta_registrada;
